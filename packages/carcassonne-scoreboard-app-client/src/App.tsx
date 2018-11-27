@@ -1,7 +1,10 @@
-import React, { Component, PureComponent } from 'react';
+import React, { Component } from 'react';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import { createBrowserHistory, History } from 'history';
+import { setupCognito } from 'react-cognito';
+
+import config from './config.json';
 
 import { configureStore } from './configureStore';
 import { routes } from './routes';
@@ -11,6 +14,8 @@ import './App.css';
 const initialState = {};
 const store = configureStore(initialState);
 const history: History = createBrowserHistory();
+
+setupCognito(store, config);
 
 export class App extends Component<{}, {}> {
   public render() {

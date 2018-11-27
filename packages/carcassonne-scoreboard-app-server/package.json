@@ -23,6 +23,7 @@
   "dependencies": {
     "amazon-cognito-identity-js": "^3.0.3",
     "aws-sdk": "^2.361.0",
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "express": "^4.16.4",
@@ -36,8 +37,10 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/cors": "^2.8.4",
     "@types/express": "^4.16.0",
+    "@types/jsonwebtoken": "^8.3.0",
     "@types/morgan": "^1.7.35",
     "@types/node-fetch": "^2.1.4",
     "@types/uuid": "^3.4.4",

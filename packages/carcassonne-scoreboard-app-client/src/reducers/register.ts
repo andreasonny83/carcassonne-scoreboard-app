@@ -1,3 +1,3 @@
-// import { Reducer } from "react";
+import { Reducer } from "redux";
 
-// export const registerReducer: Reducer = {}
+export const registerReducer: any = {}

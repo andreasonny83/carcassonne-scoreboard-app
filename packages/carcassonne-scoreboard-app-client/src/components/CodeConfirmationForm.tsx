@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 
 import './CodeConfirmationForm.css';
 
-const API_URL = 'https://andreasonny83.ngrok.io';
+// const API_URL = 'https://andrea/sonny83.ngrok.io';
+const API_URL = 'http://localhost:8888';
 
 interface CodeConfirmationState {
   code: string;
@@ -13,6 +13,7 @@ interface CodeConfirmationState {
 
 interface CodeConfirmationProps {
   email?: string;
+  undo: () => void;
   onConfirmed?: () => void;
 }
 
@@ -28,67 +29,111 @@ export class CodeConfirmationForm extends PureComponent<
   public readonly state: CodeConfirmationState = initialState;
 
   public render() {
-    const { email } = this.props;
+    const { email, undo } = this.props;
 
     return (
-      <form className="CodeConfirmationForm" onSubmit={this.handleSubmit}>
-        <div>
-          <h2>Awaiting Confirmation</h2>
-          <p>
-            We sent an email to {email}(
-            <Link to="/" className="App-link">
-              undo
-            </Link>
-            ).
-          </p>
-          <label>
-            Enter confirmation code
-            <br />
-            <input
-              name="code"
-              type="text"
-              className="inputCode"
-              disabled={this.state.busy}
-              value={this.state.code}
-              onChange={this.handleChange}
-              required={true}
-              min={6}
-              maxLength={6}
-            />
-          </label>
-        </div>
+      <div className="CodeConfirmationForm">
+        <h2>Awaiting Confirmation</h2>
+        <p>
+          We sent an email to {email} (
+          <a className="App-link" href="#" onClick={undo}>
+            undo
+          </a>
+          ).
+        </p>
 
-        <button type="submit" disabled={this.state.busy}>
-          Confirm
-        </button>
-      </form>
+        <form onSubmit={this.handleSubmit(email)}>
+          <div>
+            <label>
+              Enter the confirmation code
+              <br />
+              <input
+                name="code"
+                type="text"
+                className="inputCode"
+                disabled={this.state.busy}
+                value={this.state.code}
+                onChange={this.handleChange}
+                required={true}
+                min={6}
+                maxLength={6}
+              />
+            </label>
+          </div>
+
+          <div>
+            <button type="submit" disabled={this.state.busy}>
+              Confirm
+            </button>
+          </div>
+        </form>
+
+        <p>
+          <a className="App-link" href="#" onClick={this.newCode(email)}>
+            Send me a new confirmation code
+          </a>
+        </p>
+      </div>
     );
   }
 
-  public handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  private handleSubmit = (email: string = '') => (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
     const { code } = this.state;
 
-    const data: Partial<CodeConfirmationState> = {
+    const data: Partial<CodeConfirmationState | { username: string }> = {
+      username: email.toString().trim(),
       code: code.toString().trim(),
     };
 
     this.toggleBusy(true);
 
-    axios(`${API_URL}/confirmation-code`, {
+    axios(`${API_URL}/confirm-code`, {
       method: 'POST',
       data,
     })
-      .then(() => {
+      .then(res => {
         this.toggleBusy(false);
+        console.log('result', res);
+
         // this.props.onConfirmed();
       })
-      .catch(() => {
+      .catch(err => {
         this.toggleBusy(false);
+        console.log('err', err);
       });
   };
 
-  public handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  private newCode = (email: string = '') => (
+    event: React.SyntheticEvent<HTMLAnchorElement>
+  ) => {
+    event.preventDefault();
+
+    const data: { username: string } = {
+      username: email.toString().trim(),
+    };
+
+    this.toggleBusy(true);
+
+    axios(`${API_URL}/new-confirm-code`, {
+      method: 'POST',
+      data,
+    })
+      .then(res => {
+        this.toggleBusy(false);
+        console.log('result', res);
+
+        // this.props.onConfirmed();
+      })
+      .catch(err => {
+        this.toggleBusy(false);
+        console.log('err', err);
+      });
+  };
+
+  private handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const target = event && event.target;
     const name: string = target && target.name;
     const value: string = target && target.value;

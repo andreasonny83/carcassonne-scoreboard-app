@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import axios from 'axios';
-const API_URL = 'https://andreasonny83.ngrok.io';
+// const API_URL = 'https://andreasonny83.ngrok.io';
+const API_URL = 'http://localhost:8888';
 
 interface RegistrationFormState {
   username: string;
@@ -26,41 +27,45 @@ export class RegistrationForm extends PureComponent<
 
   public render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <div>
-          <label>
-            Enter username
-            <input
-              name="username"
-              type="email"
-              disabled={this.state.busy}
-              value={this.state.username}
-              onChange={this.handleChange}
-              required={true}
-              minLength={6}
-            />
-          </label>
-        </div>
+      <div className="RegistrationForm">
+        <h2>Register</h2>
 
-        <div>
-          <label>
-            Enter password
-            <input
-              name="password"
-              type="password"
-              disabled={this.state.busy}
-              value={this.state.password}
-              onChange={this.handleChange}
-              required={true}
-              minLength={6}
-            />
-          </label>
-        </div>
+        <form onSubmit={this.handleSubmit}>
+          <div>
+            <label>
+              Enter username
+              <input
+                name="username"
+                type="email"
+                disabled={this.state.busy}
+                value={this.state.username}
+                onChange={this.handleChange}
+                required={true}
+                minLength={6}
+              />
+            </label>
+          </div>
 
-        <button type="submit" disabled={this.state.busy}>
-          Register
-        </button>
-      </form>
+          <div>
+            <label>
+              Enter password
+              <input
+                name="password"
+                type="password"
+                disabled={this.state.busy}
+                value={this.state.password}
+                onChange={this.handleChange}
+                required={true}
+                minLength={6}
+              />
+            </label>
+          </div>
+
+          <button type="submit" disabled={this.state.busy}>
+            Register
+          </button>
+        </form>
+      </div>
     );
   }
 
@@ -72,6 +77,9 @@ export class RegistrationForm extends PureComponent<
       username: username.toString().trim(),
       password: password.toString().trim(),
     };
+
+    // this.toggleBusy(false);
+    // this.props.onRegistration(username);
 
     this.toggleBusy(true);
 
