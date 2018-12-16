@@ -1,9 +1,15 @@
+// https://github.com/mavi888/web-client-appsync-test/
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { App } from './App';
+import Amplify from 'aws-amplify';
+import { AMPLIFY } from './config';
+
 import * as serviceWorker from './serviceWorker';
+import { App } from './App';
 
 import './index.css';
+
+Amplify.configure(AMPLIFY);
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

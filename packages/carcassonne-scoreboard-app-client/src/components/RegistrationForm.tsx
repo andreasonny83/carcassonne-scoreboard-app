@@ -1,7 +1,5 @@
-import React, { PureComponent } from 'react';
-import axios from 'axios';
-// const API_URL = 'https://andreasonny83.ngrok.io';
-const API_URL = 'http://localhost:8888';
+import React, { Component } from 'react';
+import Auth from '@aws-amplify/auth';
 
 interface RegistrationFormState {
   username: string;
@@ -19,10 +17,7 @@ const initialState: RegistrationFormState = {
   busy: false,
 };
 
-export class RegistrationForm extends PureComponent<
-  RegistrationFormProps,
-  RegistrationFormState
-> {
+export class RegistrationForm extends Component<RegistrationFormProps, RegistrationFormState> {
   public readonly state: RegistrationFormState = initialState;
 
   public render() {
@@ -31,9 +26,9 @@ export class RegistrationForm extends PureComponent<
         <h2>Register</h2>
 
         <form onSubmit={this.handleSubmit}>
-          <div>
+          <div className="form-field">
             <label>
-              Enter username
+              Email
               <input
                 name="username"
                 type="email"
@@ -46,9 +41,9 @@ export class RegistrationForm extends PureComponent<
             </label>
           </div>
 
-          <div>
+          <div className="form-field">
             <label>
-              Enter password
+              Password
               <input
                 name="password"
                 type="password"
@@ -61,39 +56,57 @@ export class RegistrationForm extends PureComponent<
             </label>
           </div>
 
-          <button type="submit" disabled={this.state.busy}>
-            Register
-          </button>
+          <div className="form-field">
+            <button type="submit" disabled={this.state.busy}>
+              Register
+            </button>
+          </div>
         </form>
       </div>
     );
   }
 
-  public handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  public handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const { username, password } = this.state;
 
-    const data: Partial<RegistrationFormState> = {
+    const data = {
       username: username.toString().trim(),
       password: password.toString().trim(),
     };
 
-    // this.toggleBusy(false);
-    // this.props.onRegistration(username);
-
+    let authStatus;
     this.toggleBusy(true);
 
-    axios(`${API_URL}/register`, {
-      method: 'POST',
-      data,
-    })
-      .then(() => {
-        this.toggleBusy(false);
-        this.props.onRegistration(username);
-      })
-      .catch(() => {
-        this.toggleBusy(false);
+    try {
+      authStatus = await Auth.signUp({
+        ...data,
+        attributes: {
+          nickname: data.username,
+        },
       });
+    } catch (err) {
+      this.handleError(err);
+      return;
+    } finally {
+      this.toggleBusy(false);
+    }
+
+    console.log(authStatus);
+
+    this.props.onRegistration(username);
+
+    // axios(`${API_URL}/register`, {
+    //   method: 'POST',
+    //   data,
+    // })
+    //   .then(() => {
+    //     this.toggleBusy(false);
+    //     this.props.onRegistration(username);
+    //   })
+    //   .catch(() => {
+    //     this.toggleBusy(false);
+    //   });
   };
 
   public handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -110,6 +123,10 @@ export class RegistrationForm extends PureComponent<
 
     event.preventDefault();
   };
+
+  private handleError(err: AmplifyErrorResponse) {
+    console.error(err.message);
+  }
 
   private toggleBusy(state: boolean): void {
     this.setState(

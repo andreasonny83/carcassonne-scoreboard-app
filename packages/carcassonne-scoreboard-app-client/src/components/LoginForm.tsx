@@ -1,7 +1,5 @@
-import React, { PureComponent } from 'react';
-import axios from 'axios';
-// const API_URL = 'https://andreasonny83.ngrok.io';
-const API_URL = 'http://localhost:8888';
+import React, { Component } from 'react';
+import Auth from '@aws-amplify/auth';
 
 interface LoginFormState {
   username: string;
@@ -10,7 +8,7 @@ interface LoginFormState {
 }
 
 interface LoginFormProps {
-  onLogin: (email: string) => void;
+  onLogin: () => void;
   onCodeRequired: (email: string) => void;
 }
 
@@ -20,88 +18,79 @@ const initialState: LoginFormState = {
   busy: false,
 };
 
-export class LoginForm extends PureComponent<
-  LoginFormProps,
-  LoginFormState
-> {
+export class LoginForm extends Component<LoginFormProps, LoginFormState> {
   public readonly state: LoginFormState = initialState;
 
   public render() {
     return (
       <div className="LoginForm">
-      <h2>Login</h2>
+        <h2>Login</h2>
 
-      <form onSubmit={this.handleSubmit}>
-        <div>
-          <label>
-            Enter username
-            <input
-              name="username"
-              type="email"
-              disabled={this.state.busy}
-              value={this.state.username}
-              onChange={this.handleChange}
-              required={true}
-              minLength={6}
-            />
-          </label>
-        </div>
+        <form onSubmit={this.handleSubmit}>
+          <div className="form-field">
+            <label>
+              Email
+              <input
+                name="username"
+                type="email"
+                disabled={this.state.busy}
+                value={this.state.username}
+                onChange={this.handleChange}
+                required={true}
+                minLength={6}
+              />
+            </label>
+          </div>
 
-        <div>
-          <label>
-            Enter password
-            <input
-              name="password"
-              type="password"
-              disabled={this.state.busy}
-              value={this.state.password}
-              onChange={this.handleChange}
-              required={true}
-              minLength={6}
-            />
-          </label>
-        </div>
+          <div className="form-field">
+            <label>
+              Password
+              <input
+                name="password"
+                type="password"
+                disabled={this.state.busy}
+                value={this.state.password}
+                onChange={this.handleChange}
+                required={true}
+                minLength={6}
+              />
+            </label>
+          </div>
 
-        <button type="submit" disabled={this.state.busy}>
-          Log In
-        </button>
-      </form>
+          <div className="form-field">
+            <button type="submit" disabled={this.state.busy}>
+              Log In
+            </button>
+          </div>
+        </form>
       </div>
     );
   }
 
-  public handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  public handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     const { username, password } = this.state;
+    event.preventDefault();
 
-    const data: Partial<LoginFormState> = {
+    const data = {
       username: username.toString().trim(),
       password: password.toString().trim(),
     };
 
-    // this.toggleBusy(false);
-    // this.props.onLogin(username);
-
+    let authStatus;
     this.toggleBusy(true);
 
-    axios(`${API_URL}/login`, {
-      method: 'POST',
-      data,
-    })
-      .then((res) => {
-        this.toggleBusy(false);
+    try {
+      authStatus = await Auth.signIn(data.username, data.password);
+    } catch (err) {
+      this.handleError(err, username);
+      return;
+    } finally {
+      this.toggleBusy(false);
+    }
 
-        if (res.status === 223) {
-          return this.props.onCodeRequired(username);
-        }
-
-        this.props.onLogin(username);
-      })
-      .catch((err) => {
-        console.log('request failed', err);
-
-        this.toggleBusy(false);
-      });
+    if (authStatus.username) {
+      return this.props.onLogin();
+    }
   };
 
   public handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -118,6 +107,14 @@ export class LoginForm extends PureComponent<
 
     event.preventDefault();
   };
+
+  private handleError(err: AmplifyErrorResponse, username: string) {
+    if (err.code === 'UserNotConfirmedException') {
+      return this.props.onCodeRequired(username);
+    }
+
+    console.error(err.message || err);
+  }
 
   private toggleBusy(state: boolean): void {
     this.setState(

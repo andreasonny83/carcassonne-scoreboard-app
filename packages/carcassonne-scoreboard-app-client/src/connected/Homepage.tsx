@@ -1,27 +1,29 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { signOut } from '../actions';
 
-class HomePage extends Component {
-  public render() {
+class HomePageComponent extends Component<any, any> {
+  public render(): JSX.Element {
     return (
       <div>
-        <Link to="/login">Logout</Link>
+        <a onClick={this.signOut}>Sign Out</a>
         <h2>Home Page</h2>
       </div>
     );
   }
+
+  private signOut = () => {
+    const { signOutAction } = this.props;
+
+    signOutAction();
+  };
 }
 
-const mapStateToProps = (state: any) => {
-  const { users, authentication } = state;
-  const { user } = authentication;
-
-  return {
-    user,
-    users,
-  };
+const mapDispatchToProps = {
+  signOutAction: signOut,
 };
 
-const connectedHomePage = connect(mapStateToProps)(HomePage);
-export { connectedHomePage as HomePage };
+export const HomePage = connect(
+  null,
+  mapDispatchToProps
+)(HomePageComponent);

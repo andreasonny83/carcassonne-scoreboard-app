@@ -1,25 +1,66 @@
-import React, { PureComponent } from 'react';
-import { Switch, Route, Redirect } from 'react-router';
+import React, { Component } from 'react';
+import { Switch, Route, Redirect, RouteProps } from 'react-router';
+import { Auth } from 'aws-amplify';
+import { AuthPage, HomePage } from '../connected';
 
-import { LogIn, HomePage } from '../connected';
-import { connect } from 'react-redux';
+const NotFoundPage = () => <div className="NotFound">Page not found</div>;
 
-interface PrivateRouterImplProps {
-  childrens: any;
+interface PrivateRouterProps extends RouteProps {
+  target: React.ComponentClass;
 }
 
-class PrivateRouterImpl extends PureComponent<any, PrivateRouterImplProps> {
-  public render() {
-    const { children, ...rest } = this.props;
+interface PrivateRouterState {
+  userAuthenticated: boolean;
+  busy: boolean;
+}
+
+const initialState: PrivateRouterState = {
+  userAuthenticated: false,
+  busy: true,
+};
+
+class PrivateRouter extends Component<PrivateRouterProps, PrivateRouterState> {
+  public readonly state: PrivateRouterState = initialState;
+
+  public async componentDidMount() {
+    await new Promise(res => setTimeout(() => res(), 1000));
+    try {
+      await Auth.currentAuthenticatedUser();
+    } catch (err) {
+      this.setState({
+        userAuthenticated: false,
+        busy: false,
+      });
+      return;
+    }
+
+    this.setState({
+      userAuthenticated: true,
+      busy: false,
+    });
+  }
+
+  public render(): JSX.Element {
+    const { target: TargetComponent, ...rest } = this.props;
+    const { busy, userAuthenticated } = this.state;
+
+    if (busy) {
+      return <div>Loading...</div>;
+    }
 
     return (
       <Route
         {...rest}
         render={props =>
-          localStorage.getItem('user') ? (
-            <children {...props} />
+          userAuthenticated ? (
+            <TargetComponent {...props} />
           ) : (
-            <Redirect to={{ pathname: '/login', state: { from: props.location } }} />
+            <Redirect
+              to={{
+                pathname: '/login',
+                state: { from: props.location },
+              }}
+            />
           )
         }
       />
@@ -27,20 +68,10 @@ class PrivateRouterImpl extends PureComponent<any, PrivateRouterImplProps> {
   }
 }
 
-const mapStateToProps = (state: any) => ({
-  state: state.cognito.state,
-  user: state.cognito.user,
-  attributes: state.cognito.attributes,
-});
-
-export const PrivateRouter = connect(
-  mapStateToProps,
-  null
-)(PrivateRouterImpl);
-
 export const routes = (
   <Switch>
-    <PrivateRouter exact={true} path="/" component={HomePage} />
-    <Route path="/login" component={LogIn} />
+    <PrivateRouter path="/" exact={true} target={HomePage} />
+    <Route path="/login" component={AuthPage} />
+    <Route component={NotFoundPage} />
   </Switch>
 );

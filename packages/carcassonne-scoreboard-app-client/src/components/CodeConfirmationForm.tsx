@@ -1,10 +1,8 @@
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
+import Auth from '@aws-amplify/auth';
 import axios from 'axios';
 
-import './CodeConfirmationForm.css';
-
-// const API_URL = 'https://andrea/sonny83.ngrok.io';
-const API_URL = 'http://localhost:8888';
+import { API_URL } from '../config';
 
 interface CodeConfirmationState {
   code: string;
@@ -14,7 +12,7 @@ interface CodeConfirmationState {
 interface CodeConfirmationProps {
   email?: string;
   undo: () => void;
-  onConfirmed?: () => void;
+  onConfirmed: () => void;
 }
 
 const initialState: CodeConfirmationState = {
@@ -22,93 +20,85 @@ const initialState: CodeConfirmationState = {
   busy: false,
 };
 
-export class CodeConfirmationForm extends PureComponent<
-  CodeConfirmationProps,
-  CodeConfirmationState
-> {
+export class CodeConfirmationForm extends Component<CodeConfirmationProps, CodeConfirmationState> {
   public readonly state: CodeConfirmationState = initialState;
 
   public render() {
     const { email, undo } = this.props;
 
     return (
-      <div className="CodeConfirmationForm">
-        <h2>Awaiting Confirmation</h2>
-        <p>
-          We sent an email to {email} (
-          <a className="App-link" href="#" onClick={undo}>
-            undo
-          </a>
-          ).
-        </p>
+      <div className="Auth">
+        <div className="CodeConfirmationForm">
+          <h2>Awaiting Confirmation</h2>
+          <p>
+            We sent an email to {email} (
+            <a className="App-link" href="#" onClick={undo}>
+              undo
+            </a>
+            ).
+          </p>
 
-        <form onSubmit={this.handleSubmit(email)}>
-          <div>
-            <label>
-              Enter the confirmation code
-              <br />
-              <input
-                name="code"
-                type="text"
-                className="inputCode"
-                disabled={this.state.busy}
-                value={this.state.code}
-                onChange={this.handleChange}
-                required={true}
-                min={6}
-                maxLength={6}
-              />
-            </label>
-          </div>
+          <form onSubmit={this.handleSubmit(email)}>
+            <div className="form-field">
+              <label>
+                Enter the confirmation code
+                <br />
+                <input
+                  name="code"
+                  type="text"
+                  className="inputCode"
+                  disabled={this.state.busy}
+                  value={this.state.code}
+                  onChange={this.handleChange}
+                  required={true}
+                  min={6}
+                  maxLength={6}
+                />
+              </label>
+            </div>
 
-          <div>
-            <button type="submit" disabled={this.state.busy}>
-              Confirm
-            </button>
-          </div>
-        </form>
+            <div className="form-field">
+              <button type="submit" disabled={this.state.busy}>
+                Confirm
+              </button>
+            </div>
+          </form>
 
-        <p>
-          <a className="App-link" href="#" onClick={this.newCode(email)}>
-            Send me a new confirmation code
-          </a>
-        </p>
+          <p>
+            <a className="App-link" href="#" onClick={this.newCode(email)}>
+              Send me a new confirmation code
+            </a>
+          </p>
+        </div>
       </div>
     );
   }
 
-  private handleSubmit = (email: string = '') => (
+  private handleSubmit = (email: string = '') => async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
     const { code } = this.state;
 
-    const data: Partial<CodeConfirmationState | { username: string }> = {
+    const data = {
       username: email.toString().trim(),
       code: code.toString().trim(),
     };
 
     this.toggleBusy(true);
 
-    axios(`${API_URL}/confirm-code`, {
-      method: 'POST',
-      data,
-    })
-      .then(res => {
-        this.toggleBusy(false);
-        console.log('result', res);
+    try {
+      await Auth.confirmSignUp(data.username, data.code);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      this.toggleBusy(false);
+    }
 
-        // this.props.onConfirmed();
-      })
-      .catch(err => {
-        this.toggleBusy(false);
-        console.log('err', err);
-      });
+    return this.props.onConfirmed();
   };
 
-  private newCode = (email: string = '') => (
-    event: React.SyntheticEvent<HTMLAnchorElement>
-  ) => {
+  private newCode = (email: string = '') => (event: React.SyntheticEvent<HTMLAnchorElement>) => {
     event.preventDefault();
 
     const data: { username: string } = {
@@ -124,8 +114,6 @@ export class CodeConfirmationForm extends PureComponent<
       .then(res => {
         this.toggleBusy(false);
         console.log('result', res);
-
-        // this.props.onConfirmed();
       })
       .catch(err => {
         this.toggleBusy(false);
