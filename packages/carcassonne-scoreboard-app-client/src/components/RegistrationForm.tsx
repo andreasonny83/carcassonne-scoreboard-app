@@ -20,7 +20,7 @@ const initialState: RegistrationFormState = {
 export class RegistrationForm extends Component<RegistrationFormProps, RegistrationFormState> {
   public readonly state: RegistrationFormState = initialState;
 
-  public render() {
+  public render(): JSX.Element {
     return (
       <div className="RegistrationForm">
         <h2>Register</h2>

@@ -3,10 +3,15 @@ import { routerMiddleware } from 'connected-react-router';
 import thunk from 'redux-thunk';
 
 import { createRootReducer } from './reducers';
+import { AuthState } from './reducers/auth';
 
-const initialState = {};
+interface AppStore {
+  auth?: AuthState
+}
 
-export const configureStore = (browserHistory: any): Store<any> => {
+const initialState: AppStore = {};
+
+export const configureStore = (browserHistory: any): Store<AppStore> => {
   const middlewares = [thunk, routerMiddleware(browserHistory)];
 
   const enhancers: StoreEnhancer[] = [applyMiddleware(...middlewares)];

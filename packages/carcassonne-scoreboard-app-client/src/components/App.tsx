@@ -3,8 +3,8 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import { createBrowserHistory, History } from 'history';
 
-import { configureStore } from './configureStore';
-import { routes } from './routes';
+import { configureStore } from '../configureStore';
+import { routes } from '../routes';
 
 import './App.css';
 

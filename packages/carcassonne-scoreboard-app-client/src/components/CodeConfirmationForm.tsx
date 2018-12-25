@@ -1,30 +1,34 @@
 import React, { Component } from 'react';
 import Auth from '@aws-amplify/auth';
 import axios from 'axios';
-
 import { API_URL } from '../config';
 
 interface CodeConfirmationState {
   code: string;
-  busy: boolean;
 }
 
 interface CodeConfirmationProps {
-  email?: string;
+  email: string;
+  loading: boolean;
   undo: () => void;
+  toggleLoading: (loadingState: boolean) => void;
   onConfirmed: () => void;
 }
 
 const initialState: CodeConfirmationState = {
   code: '',
-  busy: false,
 };
 
 export class CodeConfirmationForm extends Component<CodeConfirmationProps, CodeConfirmationState> {
   public readonly state: CodeConfirmationState = initialState;
 
-  public render() {
-    const { email, undo } = this.props;
+  public componentDidMount() {
+    const { toggleLoading } = this.props;
+    toggleLoading(false);
+  }
+
+  public render(): JSX.Element {
+    const { email, undo, loading } = this.props;
 
     return (
       <div className="Auth">
@@ -47,7 +51,7 @@ export class CodeConfirmationForm extends Component<CodeConfirmationProps, CodeC
                   name="code"
                   type="text"
                   className="inputCode"
-                  disabled={this.state.busy}
+                  disabled={loading}
                   value={this.state.code}
                   onChange={this.handleChange}
                   required={true}
@@ -58,7 +62,7 @@ export class CodeConfirmationForm extends Component<CodeConfirmationProps, CodeC
             </div>
 
             <div className="form-field">
-              <button type="submit" disabled={this.state.busy}>
+              <button type="submit" disabled={loading}>
                 Confirm
               </button>
             </div>
@@ -74,10 +78,8 @@ export class CodeConfirmationForm extends Component<CodeConfirmationProps, CodeC
     );
   }
 
-  private handleSubmit = (email: string = '') => async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
-    event.preventDefault();
+  private handleSubmit = (email: string) => async (event: React.FormEvent<HTMLFormElement>) => {
+    const { onConfirmed, toggleLoading } = this.props;
     const { code } = this.state;
 
     const data = {
@@ -85,40 +87,40 @@ export class CodeConfirmationForm extends Component<CodeConfirmationProps, CodeC
       code: code.toString().trim(),
     };
 
-    this.toggleBusy(true);
+    event.preventDefault();
+    toggleLoading(true);
 
     try {
       await Auth.confirmSignUp(data.username, data.code);
     } catch (err) {
-      console.log(err);
+      return;
     } finally {
-      this.toggleBusy(false);
+      toggleLoading(false);
     }
 
-    return this.props.onConfirmed();
+    return onConfirmed();
   };
 
-  private newCode = (email: string = '') => (event: React.SyntheticEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
+  private newCode = (email: string) => async (event: React.SyntheticEvent<HTMLAnchorElement>) => {
+    const { toggleLoading } = this.props;
 
     const data: { username: string } = {
       username: email.toString().trim(),
     };
 
-    this.toggleBusy(true);
+    event.preventDefault();
+    toggleLoading(true);
 
-    axios(`${API_URL}/new-confirm-code`, {
-      method: 'POST',
-      data,
-    })
-      .then(res => {
-        this.toggleBusy(false);
-        console.log('result', res);
-      })
-      .catch(err => {
-        this.toggleBusy(false);
-        console.log('err', err);
+    try {
+      await axios(`${API_URL}/new-confirm-code`, {
+        method: 'POST',
+        data,
       });
+    } catch (err) {
+      console.log('err', err);
+    } finally {
+      toggleLoading(false);
+    }
   };
 
   private handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -126,22 +128,11 @@ export class CodeConfirmationForm extends Component<CodeConfirmationProps, CodeC
     const name: string = target && target.name;
     const value: string = target && target.value;
 
-    this.setState(
-      (prevState: CodeConfirmationState): CodeConfirmationState => ({
-        ...prevState,
-        [name]: value,
-      })
-    );
-
     event.preventDefault();
-  };
 
-  private toggleBusy(state: boolean): void {
-    this.setState(
-      (prevState: CodeConfirmationState): CodeConfirmationState => ({
-        ...prevState,
-        busy: state,
-      })
-    );
-  }
+    this.setState((currState: CodeConfirmationState) => ({
+      ...currState,
+      [name]: value,
+    }));
+  };
 }

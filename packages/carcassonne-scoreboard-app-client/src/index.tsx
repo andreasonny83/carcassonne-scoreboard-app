@@ -5,7 +5,7 @@ import Amplify from 'aws-amplify';
 import { AMPLIFY } from './config';
 
 import * as serviceWorker from './serviceWorker';
-import { App } from './App';
+import { App } from './components';
 
 import './index.css';
 

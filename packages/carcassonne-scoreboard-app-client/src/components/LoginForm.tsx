@@ -1,27 +1,30 @@
-import React, { Component } from 'react';
-import Auth from '@aws-amplify/auth';
+import React, { PureComponent } from 'react';
+import { SignInData } from '../actions';
+
+interface LoginFormProps {
+  loading: boolean;
+  toggleLoading(status: boolean): void;
+  onLogin(data: SignInData): void;
+  onCodeRequired(username: string): void;
+}
 
 interface LoginFormState {
   username: string;
   password: string;
-  busy: boolean;
-}
-
-interface LoginFormProps {
-  onLogin: () => void;
-  onCodeRequired: (email: string) => void;
 }
 
 const initialState: LoginFormState = {
   username: '',
   password: '',
-  busy: false,
 };
 
-export class LoginForm extends Component<LoginFormProps, LoginFormState> {
+export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
   public readonly state: LoginFormState = initialState;
 
-  public render() {
+  public render(): JSX.Element {
+    const { loading } = this.props;
+    const { username, password } = this.state;
+
     return (
       <div className="LoginForm">
         <h2>Login</h2>
@@ -33,8 +36,8 @@ export class LoginForm extends Component<LoginFormProps, LoginFormState> {
               <input
                 name="username"
                 type="email"
-                disabled={this.state.busy}
-                value={this.state.username}
+                disabled={loading}
+                value={username}
                 onChange={this.handleChange}
                 required={true}
                 minLength={6}
@@ -48,8 +51,8 @@ export class LoginForm extends Component<LoginFormProps, LoginFormState> {
               <input
                 name="password"
                 type="password"
-                disabled={this.state.busy}
-                value={this.state.password}
+                disabled={loading}
+                value={password}
                 onChange={this.handleChange}
                 required={true}
                 minLength={6}
@@ -58,7 +61,7 @@ export class LoginForm extends Component<LoginFormProps, LoginFormState> {
           </div>
 
           <div className="form-field">
-            <button type="submit" disabled={this.state.busy}>
+            <button type="submit" disabled={loading}>
               Log In
             </button>
           </div>
@@ -69,28 +72,17 @@ export class LoginForm extends Component<LoginFormProps, LoginFormState> {
 
   public handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     const { username, password } = this.state;
-    event.preventDefault();
+    const { onLogin, toggleLoading } = this.props;
 
     const data = {
       username: username.toString().trim(),
       password: password.toString().trim(),
     };
 
-    let authStatus;
-    this.toggleBusy(true);
+    event.preventDefault();
 
-    try {
-      authStatus = await Auth.signIn(data.username, data.password);
-    } catch (err) {
-      this.handleError(err, username);
-      return;
-    } finally {
-      this.toggleBusy(false);
-    }
-
-    if (authStatus.username) {
-      return this.props.onLogin();
-    }
+    toggleLoading(true);
+    onLogin(data);
   };
 
   public handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -98,30 +90,13 @@ export class LoginForm extends Component<LoginFormProps, LoginFormState> {
     const name: string = target && target.name;
     const value: string = target && target.value;
 
+    event.preventDefault();
+
     this.setState(
       (prevState: LoginFormState): LoginFormState => ({
         ...prevState,
         [name]: value,
       })
     );
-
-    event.preventDefault();
   };
-
-  private handleError(err: AmplifyErrorResponse, username: string) {
-    if (err.code === 'UserNotConfirmedException') {
-      return this.props.onCodeRequired(username);
-    }
-
-    console.error(err.message || err);
-  }
-
-  private toggleBusy(state: boolean): void {
-    this.setState(
-      (prevState: LoginFormState): LoginFormState => ({
-        ...prevState,
-        busy: state,
-      })
-    );
-  }
 }
