@@ -204,8 +204,7 @@ class AdminController {
           throw new Error('Invalid Token.');
         } else {
           console.log('Valid Token.');
-          console.log(payload);
-          return res({ status: 200, data: payload.data });
+          return res({ status: 200, data: payload });
         }
       });
     });

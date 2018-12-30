@@ -1,15 +1,20 @@
-import express from 'express';
-import cors from 'cors';
-import * as bodyParser from 'body-parser';
-import { CORSRules } from 'aws-sdk/clients/s3';
-import { router } from './router';
+import express, { Application, Request } from 'express';
+import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 import morgan from 'morgan';
+import cors from 'cors';
+import { typeDefs, resolvers } from './schema';
+import { router } from './router';
+import { adminController } from './controllers/admin';
+import { config } from './config';
+import * as bodyParser from 'body-parser';
 
 class App {
   public app: express.Application;
+  private admin: typeof adminController;
 
   constructor() {
     this.app = express();
+    this.admin = adminController;
     this.config();
   }
 
@@ -25,6 +30,39 @@ class App {
     this.app.use(bodyParser.urlencoded({ extended: false }));
 
     this.app.use('/', router);
+
+    this.applyMiddlewares(this.app);
+  }
+
+  private applyMiddlewares(expressApp: Application) {
+    const apolloServer: ApolloServer = new ApolloServer({
+      context: async ({ req }: { req: Request }) => {
+        const authorization: string = String(req.headers.authorization) || '';
+        const token: string = authorization.replace('Bearer ', '');
+        let userData;
+
+        try {
+          userData = await this.admin.ValidateToken(token);
+        } catch (err) {
+          throw new AuthenticationError('you must be logged in');
+        }
+
+        console.log('userData', userData);
+
+        return { userData };
+      },
+      typeDefs,
+      resolvers,
+      playground: config.isDev(),
+    });
+
+    apolloServer.applyMiddleware({
+      app: expressApp,
+      path: '/graph',
+      // cors: {
+      //   origin: 'http://localhost:3000',
+      // },
+    });
   }
 }
 

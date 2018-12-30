@@ -1,17 +1,19 @@
 import * as express from 'express';
 import uuid from 'uuid';
-import { APP_NAME } from '../appConfig';
+import { config } from '../config';
 
 class MainController {
   public root(req: express.Request, res: express.Response) {
     return res.status(200).send({
-      message: APP_NAME,
+      message: config.get('APP_NAME'),
     });
   }
 
-  public status(req: express.Request, res: express.Response) {
+  public async status(req: express.Request, res: express.Response) {
     return res.status(200).send({
-      appName: APP_NAME,
+      appName: config.get('APP_NAME'),
+      debug: config.isDebug(),
+      environmentName: config.getEnv(),
       status: 'ok',
       message: uuid.v4(),
     });
