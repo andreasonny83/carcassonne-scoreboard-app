@@ -5,16 +5,18 @@ import cors from 'cors';
 import { typeDefs, resolvers } from './schema';
 import { router } from './router';
 import { adminController } from './controllers/admin';
-import { config } from './config';
+import { config, IConfig } from './config';
 import * as bodyParser from 'body-parser';
 
 class App {
   public app: express.Application;
   private admin: typeof adminController;
+  private appConfig: IConfig;
 
-  constructor() {
+  constructor(appConfig: IConfig) {
     this.app = express();
     this.admin = adminController;
+    this.appConfig = appConfig;
     this.config();
   }
 
@@ -37,6 +39,15 @@ class App {
   private applyMiddlewares(expressApp: Application) {
     const apolloServer: ApolloServer = new ApolloServer({
       context: async ({ req }: { req: Request }) => {
+        // Allow GraphQL playground in development mode
+        const originUrl: string = `localhost:${this.appConfig.getPort()}${req.baseUrl}`;
+        const reg: RegExp = new RegExp(`${originUrl}$`, 'gi');
+        const isPlayground: boolean = reg.test(String(req.headers.referer));
+
+        if (this.appConfig.isDev() && isPlayground) {
+          return;
+        }
+
         const authorization: string = String(req.headers.authorization) || '';
         const token: string = authorization.replace('Bearer ', '');
         let userData;
@@ -53,7 +64,7 @@ class App {
       },
       typeDefs,
       resolvers,
-      playground: config.isDev(),
+      playground: this.appConfig.isDev(),
     });
 
     apolloServer.applyMiddleware({
@@ -66,4 +77,4 @@ class App {
   }
 }
 
-export const app = new App().app;
+export const app = new App(config).app;

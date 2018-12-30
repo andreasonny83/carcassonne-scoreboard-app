@@ -1,14 +1,38 @@
 import { config as dotEnvConfig } from 'dotenv';
-dotEnvConfig();
 
-class Config {
-  private envName: string;
+export interface IConfig {
+  get(propName: string): string | undefined;
+  isDebug(): boolean;
+  isDev(): boolean;
+  getEnv(): string;
+  getPort(): string;
+}
 
-  constructor() {
-    this.envName = process.env.NODE_ENV || 'development';
+class Config implements IConfig {
+  public static getInstance() {
+    if (!Config.instance) {
+      Config.instance = new Config();
+    }
+
+    return Config.instance;
   }
+
+  private static instance: Config;
+  private envName: string;
+  private port: string;
+
+  private constructor() {
+    this.envName = process.env.NODE_ENV || 'development';
+    this.port = process.env.PORT || '8888';
+    dotEnvConfig();
+  }
+
   public getEnv() {
     return this.envName;
+  }
+
+  public getPort() {
+    return this.port;
   }
 
   public isDev() {
@@ -24,8 +48,12 @@ class Config {
       return this.getEnv();
     }
 
+    if (propName === 'PORT') {
+      return this.getPort();
+    }
+
     return process.env[propName];
   }
 }
 
-export const config: Config = new Config();
+export const config: IConfig = Config.getInstance();

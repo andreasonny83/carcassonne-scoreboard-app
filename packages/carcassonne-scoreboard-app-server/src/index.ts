@@ -1,14 +1,7 @@
-import fetch from 'node-fetch';
 import { server } from './server';
+import { config } from './config';
+import { app } from './app';
 
-const PORT: number = Number(process.env.PORT) || 8888;
+const port: string = config.getPort();
 
-export interface Global {
-  fetch: any;
-}
-
-global.fetch = fetch;
-
-declare var global: Global;
-
-server.setPort(PORT).start();
+server.start(app, port);
