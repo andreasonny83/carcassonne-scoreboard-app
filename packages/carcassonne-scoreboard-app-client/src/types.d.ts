@@ -6,4 +6,3 @@ interface AmplifyErrorResponse {
   message: string;
   name: string;
 }
-

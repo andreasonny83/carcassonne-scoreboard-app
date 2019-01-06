@@ -1,11 +1,10 @@
 import React, { PureComponent } from 'react';
 import { Redirect } from 'react-router';
+import { SignInData } from '../../actions';
 import { LoginForm } from './LoginForm';
 import { RegistrationForm } from './RegistrationForm';
 import { CodeConfirmationForm } from './CodeConfirmationForm';
-
 import './Auth.css';
-import { SignInData } from '../actions';
 
 interface AuthProps {
   email?: string | null;

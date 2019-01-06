@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { RouteProps, Route, Redirect } from 'react-router';
 import { Auth } from 'aws-amplify';
+import { IUser, UserContextProvider } from './user.context';
 
 interface PrivateRouterProps extends RouteProps {
   target: React.ComponentClass;
@@ -12,12 +13,28 @@ interface PrivateRouterProps extends RouteProps {
   toggleLoading(loadingStatus: boolean): void;
 }
 
-export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
+interface PrivateRouterState {
+  readonly user: IUser;
+}
+
+const defaultUser: IUser = {
+  username: '',
+  email: '',
+  nickname: '',
+};
+
+const initialState: PrivateRouterState = {
+  user: defaultUser,
+};
+
+export class PrivateRouterComponent extends PureComponent<PrivateRouterProps, PrivateRouterState> {
+  public readonly state: PrivateRouterState = initialState;
+
   public async componentDidMount() {
     const { toggleLoading, signedOut, userSignedIn } = this.props;
-    let user;
 
     toggleLoading(true);
+    let user;
 
     try {
       user = await Auth.currentAuthenticatedUser();
@@ -27,10 +44,17 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
       return;
     }
 
+    userSignedIn();
     toggleLoading(false);
 
     if (user.username) {
-      userSignedIn();
+      this.setState({
+        user: {
+          username: user.username,
+          email: user.attributes.email,
+          nickname: user.attributes.nickname,
+        },
+      });
     }
   }
 
@@ -46,7 +70,9 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
         {...rest}
         render={props =>
           isSignedIn ? (
-            <TargetComponent {...props} />
+            <UserContextProvider value={this.state.user}>
+              <TargetComponent {...props} />
+            </UserContextProvider>
           ) : (
             <Redirect
               to={{

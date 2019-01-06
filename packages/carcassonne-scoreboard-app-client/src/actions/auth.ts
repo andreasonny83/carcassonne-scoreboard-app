@@ -44,7 +44,7 @@ export const userSignedIn = () => (disapatch: Dispatch) => {
   disapatch({
     type: SIGNED_IN,
   });
-}
+};
 
 export const signIn = (data: SignInData) => async (disapatch: Dispatch) => {
   try {

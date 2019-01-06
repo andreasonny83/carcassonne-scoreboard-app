@@ -1,6 +1,12 @@
 import { connect } from 'react-redux';
-import { signIn, verifyUser, undoCodeVerification, codeVerified, toggleLoading } from '../actions';
-import { AuthComponent } from '../components/Auth';
+import {
+  signIn,
+  verifyUser,
+  undoCodeVerification,
+  codeVerified,
+  toggleLoading,
+} from '../../actions';
+import { AuthComponent } from './Auth';
 
 const mapStateToProps = (state: any) => {
   return {
@@ -13,10 +19,10 @@ const mapDispatchToProps = {
   verifyUser,
   undoCodeVerification,
   codeVerified,
-  toggleLoading
+  toggleLoading,
 };
 
-export const AuthPage = connect(
+export const Auth = connect(
   mapStateToProps,
   mapDispatchToProps
 )(AuthComponent);

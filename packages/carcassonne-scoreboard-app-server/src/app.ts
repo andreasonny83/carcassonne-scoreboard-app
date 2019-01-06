@@ -2,14 +2,14 @@ import express, { Application, Request } from 'express';
 import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 import morgan from 'morgan';
 import cors from 'cors';
-import { typeDefs, resolvers } from './schema';
-import { router } from './router';
+import * as bodyParser from 'body-parser';
 import { adminController } from './controllers/admin';
 import { config, IConfig } from './config';
-import * as bodyParser from 'body-parser';
+import { typeDefs, resolvers } from './schema';
+import { router } from './router';
 
 class App {
-  public app: express.Application;
+  public app: Application;
   private admin: typeof adminController;
   private appConfig: IConfig;
 
@@ -58,7 +58,7 @@ class App {
           throw new AuthenticationError('you must be logged in');
         }
 
-        console.log('userData', userData);
+        // console.log('userData', userData);
 
         return { userData };
       },

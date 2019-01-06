@@ -216,11 +216,10 @@ class AdminController {
       Pool: this.userPool,
     };
 
-    console.log('userdata', userData);
-
     const cognitoUser: CognitoUser = new CognitoUser(userData);
 
-    console.log(cognitoUser);
+    // console.log('userdata', userData);
+    // console.log(cognitoUser);
 
     return;
 

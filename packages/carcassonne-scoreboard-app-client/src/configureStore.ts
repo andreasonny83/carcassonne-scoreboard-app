@@ -6,16 +6,14 @@ import { createRootReducer } from './reducers';
 import { AuthState } from './reducers/auth';
 
 interface AppStore {
-  auth?: AuthState
+  auth?: AuthState;
 }
 
 const initialState: AppStore = {};
 
 export const configureStore = (browserHistory: any): Store<AppStore> => {
   const middlewares = [thunk, routerMiddleware(browserHistory)];
-
   const enhancers: StoreEnhancer[] = [applyMiddleware(...middlewares)];
-
   const composeEnhancers =
     process.env.NODE_ENV !== 'production' &&
     typeof window === 'object' &&

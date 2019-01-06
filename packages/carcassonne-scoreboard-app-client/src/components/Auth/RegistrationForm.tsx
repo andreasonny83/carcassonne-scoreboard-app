@@ -95,18 +95,6 @@ export class RegistrationForm extends Component<RegistrationFormProps, Registrat
     console.log(authStatus);
 
     this.props.onRegistration(username);
-
-    // axios(`${API_URL}/register`, {
-    //   method: 'POST',
-    //   data,
-    // })
-    //   .then(() => {
-    //     this.toggleBusy(false);
-    //     this.props.onRegistration(username);
-    //   })
-    //   .catch(() => {
-    //     this.toggleBusy(false);
-    //   });
   };
 
   public handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -129,11 +117,8 @@ export class RegistrationForm extends Component<RegistrationFormProps, Registrat
   }
 
   private toggleBusy(state: boolean): void {
-    this.setState(
-      (prevState: RegistrationFormState): RegistrationFormState => ({
-        ...prevState,
-        busy: state,
-      })
-    );
+    this.setState({
+      busy: state,
+    });
   }
 }

@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { SignInData } from '../actions';
+import { SignInData } from '../../actions';
 
 interface LoginFormProps {
   loading: boolean;

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
-import { signedOut, toggleLoading, userSignedIn } from '../actions';
-import { PrivateRouterComponent } from '../components/PrivateRouter';
+import { signedOut, toggleLoading, userSignedIn } from '../../actions';
+import { PrivateRouterComponent } from './PrivateRouter';
 
 const mapDispactToProps = {
   userSignedIn,

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import Auth from '@aws-amplify/auth';
 import axios from 'axios';
-import { API_URL } from '../config';
+import Auth from '@aws-amplify/auth';
+import { API_URL } from '../../config';
 
 interface CodeConfirmationState {
   code: string;

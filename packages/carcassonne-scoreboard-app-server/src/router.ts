@@ -1,8 +1,6 @@
 import * as express from 'express';
 import { mainController, adminController } from './controllers';
 import { check, validationResult } from 'express-validator/check';
-import { sanitizeBody } from 'express-validator/filter';
-import { corsMiddleware } from './corsMiddleware';
 
 class MainRoutes {
   public router: express.Router = express.Router();
@@ -89,7 +87,7 @@ class MainRoutes {
 
       try {
         userStatus = await adminController.ValidateToken(token);
-      } catch(err) {
+      } catch (err) {
         console.log(err);
         return res.sendStatus(401);
       }
@@ -104,7 +102,7 @@ class MainRoutes {
 
       const userData = await adminController.getUser(username);
 
-      console.log('userData', userData);
+      // console.log('userData', userData);
 
       return res.status(200).send(userData);
     });

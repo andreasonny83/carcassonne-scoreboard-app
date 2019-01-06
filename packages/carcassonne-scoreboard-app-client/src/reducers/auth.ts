@@ -20,7 +20,7 @@ export const initialAutState: AuthState = {
   email: null,
   showCodeConfirmation: false,
   loading: true,
-  isSignedIn: false
+  isSignedIn: false,
 };
 
 export const authReducer = (state = initialAutState, action: any) => {
@@ -49,13 +49,13 @@ export const authReducer = (state = initialAutState, action: any) => {
         email: action.payload,
         isSignedIn: false,
         loading: false,
-        showCodeConfirmation: true
+        showCodeConfirmation: true,
       };
     case SIGN_IN_FAILURE:
       return {
         ...state,
         isSignedIn: false,
-        loading: false
+        loading: false,
       };
     case SIGNED_OUT:
       return {
