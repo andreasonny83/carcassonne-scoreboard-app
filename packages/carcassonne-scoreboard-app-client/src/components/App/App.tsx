@@ -11,9 +11,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 
 import { AMPLIFY, API_URL } from '../../config';
 import { configureStore } from '../../configureStore';
-import { routes } from '../../routes';
-
-import './App.css';
+import { AppComponent } from './AppComponent';
 
 Amplify.configure(AMPLIFY);
 
@@ -50,7 +48,7 @@ export class App extends Component {
       <ApolloProvider client={apolloClient}>
         <Provider store={store}>
           <ConnectedRouter history={history}>
-            <div className="App">{routes}</div>
+            <AppComponent />
           </ConnectedRouter>
         </Provider>
       </ApolloProvider>

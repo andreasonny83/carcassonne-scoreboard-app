@@ -4,12 +4,22 @@ import thunk from 'redux-thunk';
 
 import { createRootReducer } from './reducers';
 import { AuthState } from './reducers/auth';
+import { NotificationState } from './reducers/notifications';
 
 interface AppStore {
-  auth?: AuthState;
+  auth: AuthState;
+  notifications: NotificationState
 }
 
-const initialState: AppStore = {};
+const initialState: AppStore = {
+  auth: {
+    showCodeConfirmation: false,
+    isSignedIn: false,
+  },
+  notifications: {
+    open: false
+  }
+};
 
 export const configureStore = (browserHistory: any): Store<AppStore> => {
   const middlewares = [thunk, routerMiddleware(browserHistory)];

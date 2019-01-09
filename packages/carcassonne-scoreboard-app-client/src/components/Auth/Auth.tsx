@@ -25,7 +25,7 @@ export class AuthComponent extends PureComponent<AuthProps> {
   }
 
   public render(): JSX.Element {
-    const { signIn, auth, undoCodeVerification, codeVerified, toggleLoading } = this.props;
+    const { signIn, auth, undoCodeVerification, codeVerified, toggleLoading, verifyUser } = this.props;
     const { showCodeConfirmation, email, isSignedIn, loading } = auth;
 
     return (
@@ -43,7 +43,7 @@ export class AuthComponent extends PureComponent<AuthProps> {
             <>
               <LoginForm
                 onLogin={signIn}
-                onCodeRequired={this.codeRequiredHandler}
+                onCodeRequired={verifyUser}
                 loading={loading}
                 toggleLoading={toggleLoading}
               />
@@ -54,12 +54,6 @@ export class AuthComponent extends PureComponent<AuthProps> {
       )
     );
   }
-
-  private codeRequiredHandler = (email: string) => {
-    const { verifyUser } = this.props;
-
-    verifyUser(email);
-  };
 
   private handleRegistration = () => {
     console.log('user registered');
