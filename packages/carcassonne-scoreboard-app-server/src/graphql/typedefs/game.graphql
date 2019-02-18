@@ -1,0 +1,18 @@
+type Game {
+  id: ID!
+  name: String!
+  players: [Player]
+  # log: Log
+  started: Boolean!
+  finished: Boolean!
+}
+
+type Mutation {
+  newGame: Game
+  game(name: String!): Game
+}
+
+type Query {
+  games: [Game]
+  game(name: String!): Game
+}

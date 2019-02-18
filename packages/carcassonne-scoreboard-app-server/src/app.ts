@@ -1,11 +1,12 @@
 import express, { Application, Request } from 'express';
-import { ApolloServer, AuthenticationError } from 'apollo-server-express';
+import { ApolloServer, AuthenticationError, gql } from 'apollo-server-express';
 import morgan from 'morgan';
 import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import { adminController } from './controllers/admin';
 import { config, IConfig } from './config';
-import { typeDefs, resolvers } from './schema';
+import { typeDefs } from './graphql/typedefs';
+import { resolvers } from './graphql/resolvers';
 import { router } from './router';
 
 class App {
@@ -50,19 +51,28 @@ class App {
 
         const authorization: string = String(req.headers.authorization) || '';
         const token: string = authorization.replace('Bearer ', '');
+
+        if (config.isOfflineMode()) {
+          return {
+            // fakeUserdata?
+          };
+        }
+
         let userData;
 
         try {
           userData = await this.admin.ValidateToken(token);
         } catch (err) {
+          console.log('Error:', err.message);
           throw new AuthenticationError('you must be logged in');
         }
-
         // console.log('userData', userData);
 
         return { userData };
       },
-      typeDefs,
+      typeDefs: gql`
+        ${typeDefs}
+      `,
       resolvers,
       playground: this.appConfig.isDev(),
     });
