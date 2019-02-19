@@ -46,18 +46,17 @@ class App {
         const isPlayground: boolean = reg.test(String(req.headers.referer));
 
         if (this.appConfig.isDev() && isPlayground) {
-          return;
+          return {
+            userData: {
+              data: {
+                username: 'dea9adba-4ef3-4687-ac7b-59a53ffafc5b',
+              },
+            },
+          };
         }
 
         const authorization: string = String(req.headers.authorization) || '';
         const token: string = authorization.replace('Bearer ', '');
-
-        if (config.isOfflineMode()) {
-          return {
-            // fakeUserdata?
-          };
-        }
-
         let userData;
 
         try {

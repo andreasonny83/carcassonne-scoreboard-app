@@ -1,6 +1,8 @@
 export default {
   Query: {
     user(parent: any, args: any, context: any) {
+      console.log('user context', context);
+
       const userId: string = args.id;
 
       return {

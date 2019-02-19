@@ -12,7 +12,7 @@ export default {
       //   throw new AuthenticationError('not admin');
       // }
 
-      const gameId: string = args.name;
+      const { gameId } = args;
       const game = dataSources.gameService.getGame(gameId);
 
       if (game) {
@@ -29,22 +29,70 @@ export default {
   },
 
   Mutation: {
-    newGame(parent: any, args: any) {
-      const game: any = dataSources.gameService.createGame();
+    newGame(parent: any, args: any, context: any) {
+      const userId =
+        context && context.userData && context.userData.data && context.userData.data.username;
 
-      return dataSources.gameService.getGame(game.name);
-    },
+      if (userId) {
+        const game: any = dataSources.gameService.createGame(userId);
 
-    game(parent: any, args: any) {
-      const gameId: string = args.name;
-      const game = dataSources.gameService.getGame(gameId);
-
-      if (game) {
-        return game;
+        return dataSources.gameService.getGame(game.id);
       }
 
-      // throw new ApolloError(`Game ${args.id} does not exist`);
-      throw new ValidationError(`Game ID not found`);
+      throw new ValidationError(`Unauthenticated user request`);
+    },
+
+    joinGame(parent: any, args: any, context: any) {
+      const { gameId } = args;
+      const userId =
+        context && context.userData && context.userData.data && context.userData.data.username;
+      const game = dataSources.gameService.getGame(gameId);
+
+      if (!userId) {
+        throw new ValidationError(`Unauthenticated user request`);
+      }
+      if (!game) {
+        throw new ValidationError(`GameID not found`);
+      }
+
+      const index = game.players.indexOf(userId);
+      const userIdMatches = game.players[index] === userId;
+
+      if (~index && userIdMatches) {
+        const gameUpdated = {
+          ...game,
+          players: [...game.players, userId],
+        };
+
+        dataSources.gameService.updateGame(gameUpdated);
+        return dataSources.gameService.getGame(gameId);
+      }
+
+      throw new ValidationError(`Unauthenticated user request`);
+    },
+
+    startGame(parent: any, args: any, context: any) {
+      const { gameId } = args;
+      const userId =
+        context && context.userData && context.userData.data && context.userData.data.username;
+      const game = dataSources.gameService.getGame(gameId);
+
+      if (!userId) {
+        throw new ValidationError(`Unauthenticated user request`);
+      }
+      if (!game) {
+        throw new ValidationError(`GameID not found`);
+      }
+
+      const index = game.players.indexOf(userId);
+      const userIdMatches = game.players[index] === userId;
+
+      if (~index && userIdMatches) {
+        dataSources.gameService.startGame(gameId);
+        return dataSources.gameService.getGame(gameId);
+      }
+
+      throw new ValidationError(`Unauthenticated user request`);
     },
   },
 };

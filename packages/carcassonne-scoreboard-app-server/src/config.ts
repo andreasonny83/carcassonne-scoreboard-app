@@ -4,7 +4,6 @@ export interface IConfig {
   get(propName: string): string | undefined;
   isDebug(): boolean;
   isDev(): boolean;
-  isOfflineMode(): boolean;
   getEnv(): string;
   getPort(): string;
 }
@@ -38,10 +37,6 @@ class Config implements IConfig {
 
   public isDev() {
     return this.envName === 'development';
-  }
-
-  public isOfflineMode() {
-    return process.env.OFFLINE_MODE === 'true';
   }
 
   public isDebug() {

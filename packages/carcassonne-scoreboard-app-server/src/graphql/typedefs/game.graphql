@@ -1,7 +1,7 @@
 type Game {
   id: ID!
   name: String!
-  players: [Player]
+  players: [String!]
   # log: Log
   started: Boolean!
   finished: Boolean!
@@ -9,10 +9,11 @@ type Game {
 
 type Mutation {
   newGame: Game
-  game(name: String!): Game
+  startGame(gameId: String!): Game
+  joinGame(gameId: String!): Game
 }
 
 type Query {
   games: [Game]
-  game(name: String!): Game
+  game(gameId: String!): Game
 }

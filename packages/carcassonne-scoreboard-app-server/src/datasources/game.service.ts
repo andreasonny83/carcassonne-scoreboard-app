@@ -1,10 +1,10 @@
 import { DataSource } from 'apollo-datasource';
 import { uniqueNamesGenerator } from 'unique-names-generator';
 
-import { Game, GameInput } from './game.data';
+import { Game, IGame } from './game.data';
 
 export class GameService extends DataSource {
-  private games: Map<string, {}>;
+  private games: Map<string, IGame>;
 
   constructor() {
     super();
@@ -16,15 +16,25 @@ export class GameService extends DataSource {
     console.log('...initialize...');
   }
 
-  public createGame() {
+  public createGame(userId: string) {
     const gameId: string = newId();
-    const game = {
+    const game: IGame = {
       id: gameId,
       name: gameId,
+      players: [
+        userId
+      ],
     };
 
     this.games.set(gameId, new Game(game));
     return this.games.get(gameId);
+  }
+
+  public updateGame(gameUpdated: IGame): IGame | undefined {
+    const { id } = gameUpdated;
+    this.games.set(id, gameUpdated);
+
+    return this.games.get(id);
   }
 
   public getGame(gameId: string) {
@@ -35,8 +45,30 @@ export class GameService extends DataSource {
     return this.games.get(gameId);
   }
 
+  public startGame(gameId: string) {
+    if (!gameId) {
+      throw new Error('A game id should be specified.');
+    }
+
+    const game = this.games.get(gameId);
+
+    if (game && game.started) {
+      throw new Error(`Game ${game && game.id} already started.`);
+    }
+
+    if (game && game.id && game.name) {
+      const gameUpdated = {
+        ...game,
+        started: true,
+      };
+
+      return this.games.set(gameId, gameUpdated);
+    }
+
+    throw new Error('Invalid game');
+  }
+
   public getGames() {
-    console.log(this.games);
     return this.games;
   }
 }
@@ -44,5 +76,5 @@ export class GameService extends DataSource {
 // ----- Helper Functions -----
 
 function newId(): string {
-  return uniqueNamesGenerator('_')
+  return uniqueNamesGenerator('_');
 }

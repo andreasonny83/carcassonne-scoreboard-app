@@ -1,9 +1,9 @@
-export interface GameInput {
+export interface IGame {
   name: string;
   id: string;
   started?: boolean;
   finished?: boolean;
-  players?: any[];
+  players: string[];
   log?: any[];
 }
 
@@ -15,12 +15,12 @@ export class Game {
   public players: any[];
   public log: any[];
 
-  constructor({ id, name, started, finished, players, log }: GameInput) {
+  constructor({ id, name, started, finished, players, log }: IGame) {
     this.id = id;
     this.name = name;
     this.started = started || false;
     this.finished = finished || false;
-    this.players = players || [];
+    this.players = players;
     this.log = log || [];
   }
 }
