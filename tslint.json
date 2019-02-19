@@ -14,7 +14,8 @@
     "no-var-keyword": true,
     "jsdoc-format": true,
     "jsx-boolean-value": false,
-    "no-console": false
+    "no-console": false,
+    "no-bitwise": false
   },
   "rulesDirectory": []
 }
