@@ -7,14 +7,14 @@ interface PrivateRouterProps extends RouteProps {
   target: React.ComponentClass;
   redirectTo: string;
   isSignedIn: boolean;
-  loading: boolean;
+  exact?: boolean;
   userSignedIn(): void;
   signedOut(): void;
-  toggleLoading(loadingStatus: boolean): void;
 }
 
 interface PrivateRouterState {
-  readonly user: IUser;
+  user: IUser;
+  loading: boolean;
 }
 
 const defaultUser: IUser = {
@@ -25,41 +25,44 @@ const defaultUser: IUser = {
 
 const initialState: PrivateRouterState = {
   user: defaultUser,
+  loading: true,
 };
 
 export class PrivateRouterComponent extends PureComponent<PrivateRouterProps, PrivateRouterState> {
   public readonly state: PrivateRouterState = initialState;
 
   public async componentDidMount() {
-    const { toggleLoading, signedOut, userSignedIn } = this.props;
-
-    toggleLoading(true);
+    const { signedOut, userSignedIn } = this.props;
     let user;
 
     try {
       user = await Auth.currentAuthenticatedUser();
     } catch (err) {
-      toggleLoading(false);
+      this.setState({
+        loading: false,
+      });
+
       signedOut();
       return;
     }
 
     userSignedIn();
-    toggleLoading(false);
 
-    if (user.username) {
+    if (user && user.username) {
       this.setState({
         user: {
           username: user.username,
           email: user.attributes.email,
           nickname: user.attributes.nickname,
         },
+        loading: false,
       });
     }
   }
 
   public render(): JSX.Element {
-    const { target: TargetComponent, redirectTo, isSignedIn, loading, ...rest } = this.props;
+    const { target, redirectTo, location, isSignedIn, ...rest } = this.props;
+    const { loading } = this.state;
 
     if (loading) {
       return <div>Loading...</div>;
@@ -68,20 +71,30 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps, Pr
     return (
       <Route
         {...rest}
-        render={props =>
-          isSignedIn ? (
-            <UserContextProvider value={this.state.user}>
-              <TargetComponent {...props} />
-            </UserContextProvider>
-          ) : (
-            <Redirect
-              to={{
-                pathname: redirectTo,
-                state: { from: props.location },
-              }}
-            />
-          )
-        }
+        render={props => this.renderRoute(target, isSignedIn, redirectTo, location, props)}
+      />
+    );
+  }
+
+  private renderRoute(
+    TargetComponent: any,
+    isSignedIn: boolean,
+    redirectTo: string,
+    location: any,
+    props: any
+  ): JSX.Element {
+    console.log(props);
+
+    return isSignedIn ? (
+      <UserContextProvider value={this.state.user}>
+        <TargetComponent {...props} />
+      </UserContextProvider>
+    ) : (
+      <Redirect
+        to={{
+          pathname: redirectTo,
+          state: { from: location },
+        }}
       />
     );
   }

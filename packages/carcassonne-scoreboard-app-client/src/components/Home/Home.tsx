@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
-import { Route } from 'react-router';
+import { Switch, Route, Redirect } from 'react-router';
 import { Welcome } from '../Welcome';
 import { QueryResult } from 'react-apollo';
 import { UserData } from './Home.container';
+import { NewGame } from '../NewGame';
 
 interface UserQueryResult {
   user: UserData;
@@ -22,7 +23,12 @@ export class HomeComponent extends PureComponent<HomeComponentProps, {}> {
 
         {loading && <div>Loading...</div>}
         {(error && <div>Something went wrong. Please try again later.</div>) || (
-          <Route path={`/`} render={_ => <Welcome user={user} />} />
+          <Switch>
+            <Route path={`/app`} exact={true} render={_ => <Welcome user={user} />} />
+            <Route path={`/app/game/:gameId/new`} component={NewGame} />
+            <Route path={`/app/game/:gameId`} component={NewGame} />
+            <Redirect to={'404'} />
+          </Switch>
         )}
       </div>
     );

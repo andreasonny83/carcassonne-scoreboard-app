@@ -1,5 +1,5 @@
 import Amplify, { Auth } from 'aws-amplify';
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import { createBrowserHistory, History } from 'history';
@@ -42,7 +42,7 @@ const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-export class App extends Component {
+export class App extends PureComponent {
   public render(): JSX.Element {
     return (
       <ApolloProvider client={apolloClient}>

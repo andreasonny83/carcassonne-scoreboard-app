@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route } from 'react-router';
+import { Switch, Route, Redirect } from 'react-router';
 
 import { Auth } from '../components/Auth';
 import { PrivateRouter } from '../components/PrivateRouter';
@@ -8,8 +8,9 @@ import { NotFound } from '../components/NotFound';
 
 export const routes = (
   <Switch>
-    <PrivateRouter path="/" exact={true} target={Main} redirectTo="/login" />
+    <PrivateRouter path="/app" target={Main} redirectTo="/login" />
+    <Route path="/404" component={NotFound} />
     <Route path="/login" component={Auth} />
-    <Route component={NotFound} />
+    <Redirect to={'/app'} />
   </Switch>
 );

@@ -7,3 +7,4 @@ export * from './Main';
 export * from './NotFound';
 export * from './PrivateRouter';
 export * from './Welcome';
+export * from './NewGame';

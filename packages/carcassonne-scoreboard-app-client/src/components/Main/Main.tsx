@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react';
-import { Route } from 'react-router';
 import { Home } from '../Home';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
@@ -20,7 +19,7 @@ export class MainComponent extends PureComponent<MainComponentProps> {
     return (
       <div className="MainComponent">
         <Header onSignOut={signOut} appName={appName} />
-        <Route path="/" exact={true} render={_ => <Home userId={username} />} />
+        <Home userId={username} />
         <Footer />
       </div>
     );

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import axios from 'axios';
 import Auth from '@aws-amplify/auth';
 import { API_URL } from '../../config';
@@ -19,7 +19,7 @@ const initialState: CodeConfirmationState = {
   code: '',
 };
 
-export class CodeConfirmationForm extends Component<CodeConfirmationProps, CodeConfirmationState> {
+export class CodeConfirmationForm extends PureComponent<CodeConfirmationProps, CodeConfirmationState> {
   public readonly state: CodeConfirmationState = initialState;
 
   public componentDidMount() {

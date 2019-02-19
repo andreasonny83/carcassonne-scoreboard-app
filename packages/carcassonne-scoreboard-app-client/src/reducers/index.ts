@@ -6,7 +6,7 @@ import { authReducer } from './auth';
 
 export const createRootReducer = (history: History) =>
   combineReducers({
+    router: connectRouter(history),
     auth: authReducer,
     notifications: notificationsReducer,
-    router: connectRouter(history),
   });

@@ -14,7 +14,7 @@ const newGameMutation = gql`
 
 const joinGameMutation = gql`
   mutation JoinGameQuery($gameId: String!) {
-    game(id: $gameId) {
+    joinGame(gameId: $gameId) {
       id
     }
   }
@@ -36,15 +36,6 @@ const withGame = compose(
   }),
   graphql<WelcomeProps, NewGameResponse, any, any>(joinGameMutation, {
     name: 'joinGameMutation',
-    // options: (props: any) => {
-    //   console.log('props', props);
-
-    //   return {
-    //     variables: {
-    //       gameId: 'determined_purple_bobcat',
-    //     },
-    //   };
-    // },
   })
 );
 

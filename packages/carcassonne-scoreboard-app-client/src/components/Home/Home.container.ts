@@ -3,6 +3,7 @@ import { graphql } from 'react-apollo';
 import { HomeComponent } from './Home';
 
 export interface UserData {
+  id: string,
   name: string;
   email: string;
   games: any;
@@ -11,6 +12,7 @@ export interface UserData {
 const gamesStatQuery = gql`
   query userQuery($userId: String!) {
     user(id: $userId) {
+      id
       name
       email
       games

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import Auth from '@aws-amplify/auth';
 
 interface RegistrationFormState {
@@ -17,7 +17,7 @@ const initialState: RegistrationFormState = {
   busy: false,
 };
 
-export class RegistrationForm extends Component<RegistrationFormProps, RegistrationFormState> {
+export class RegistrationForm extends PureComponent<RegistrationFormProps, RegistrationFormState> {
   public readonly state: RegistrationFormState = initialState;
 
   public render(): JSX.Element {
