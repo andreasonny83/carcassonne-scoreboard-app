@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import { graphql, compose } from 'react-apollo';
 import { connect } from 'react-redux';
-import { newGame, joinGame } from '../../actions';
+import { newGame, joinGame, showNotification } from '../../actions';
 import { WelcomeComponent, WelcomeProps } from './Welcome';
 
 const newGameMutation = gql`
@@ -39,9 +39,15 @@ const withGame = compose(
   })
 );
 
+const mapDispatchToProps = {
+  newGame,
+  joinGame,
+  showNotification,
+};
+
 export const Welcome = withGame(
   connect(
     null,
-    { newGame, joinGame }
+    mapDispatchToProps
   )(WelcomeComponent)
 );

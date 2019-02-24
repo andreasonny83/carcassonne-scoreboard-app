@@ -1,0 +1,10 @@
+.MainComponent {
+  display: grid;
+  grid-template-rows: 50px repeat(1, 1fr) auto;
+  min-height: 100vh;
+  justify-items: center;
+  grid-template-areas:
+    'header'
+    'main'
+    'footer';
+}

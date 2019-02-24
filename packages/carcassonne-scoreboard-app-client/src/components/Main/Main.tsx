@@ -4,12 +4,25 @@ import { Header } from '../Header';
 import { Footer } from '../Footer';
 import { IUser, UserContext } from '../PrivateRouter/user.context';
 
+import './Main.css';
+
 interface MainComponentProps {
   signOut(): void;
+  showNotification(message: string, timeout?: number): void;
 }
 
 export class MainComponent extends PureComponent<MainComponentProps> {
   public static contextType: React.Context<IUser> = UserContext;
+
+  public componentDidMount(): void {
+    const { showNotification } = this.props;
+    const user = this.context as IUser;
+    const { nickname } = this.context as IUser;
+
+    console.log('userContext', user);
+
+    showNotification(`Welcome back ${nickname}`);
+  }
 
   public render(): JSX.Element {
     const { signOut } = this.props;

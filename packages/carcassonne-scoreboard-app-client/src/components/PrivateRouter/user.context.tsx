@@ -4,6 +4,7 @@ export interface IUser {
   username: string;
   email: string;
   nickname: string;
+  avatar?: string;
 }
 
 export const UserContext = React.createContext<IUser>({} as IUser);

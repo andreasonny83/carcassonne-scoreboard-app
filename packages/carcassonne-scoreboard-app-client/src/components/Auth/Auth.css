@@ -1,8 +1,17 @@
 .Auth {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+
   & form {
     display: flex;
     flex-flow: column;
     align-items: flex-end;
+  }
+
+  & .CodeConfirmationForm form {
+    align-items: center;
   }
 
   & .form-field {
@@ -11,6 +20,12 @@
 
   & label {
     display: block;
+  }
+
+  & label span {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
   }
 
   & label input {

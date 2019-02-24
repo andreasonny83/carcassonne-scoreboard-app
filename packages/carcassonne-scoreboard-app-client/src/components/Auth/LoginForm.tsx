@@ -32,7 +32,7 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
         <form onSubmit={this.handleSubmit}>
           <div className="form-field">
             <label>
-              Email
+              <span>Email</span>
               <input
                 name="username"
                 type="email"
@@ -47,7 +47,7 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
 
           <div className="form-field">
             <label>
-              Password
+              <span>Password</span>
               <input
                 name="password"
                 type="password"

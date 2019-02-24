@@ -13,7 +13,7 @@ export const showNotification = (message: string, timeout?: number) => async (
     type: NOTIFICATION_SHOW,
     payload: {
       message,
-      timeout,
+      timeout: timeout || 4000,
     },
   });
 };

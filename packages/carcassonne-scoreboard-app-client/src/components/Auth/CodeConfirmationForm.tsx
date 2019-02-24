@@ -19,7 +19,10 @@ const initialState: CodeConfirmationState = {
   code: '',
 };
 
-export class CodeConfirmationForm extends PureComponent<CodeConfirmationProps, CodeConfirmationState> {
+export class CodeConfirmationForm extends PureComponent<
+  CodeConfirmationProps,
+  CodeConfirmationState
+> {
   public readonly state: CodeConfirmationState = initialState;
 
   public componentDidMount() {

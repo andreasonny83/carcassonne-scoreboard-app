@@ -1,0 +1,70 @@
+.Header {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+
+  & .Header__userMenu {
+    position: relative;
+    height: 100%;
+  }
+
+  & .Header__userMenu__menu {
+    height: 100%;
+    cursor: pointer;
+  }
+
+  & .Header__dropdown ul,
+  & .Header__dropdown li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  & .Header__userMenu__menu,
+  & .Header__dropdown li {
+    padding: 0.25em 1.2em;
+  }
+
+  & .Header__dropdown {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+    top: 100%;
+    right: 0;
+    margin: 0;
+    width: 200px;
+  }
+
+  & .Header__userMenu:hover .Header__userMenu__menu {
+    color: #333;
+    background: hsl(216, 80%, 75%);
+  }
+
+  & .Header__userMenu:hover .Header__dropdown {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  & .Header__dropdown li {
+    display: block;
+    background: #445165;
+  }
+
+  & .Header__dropdown li:hover {
+    cursor: pointer;
+    color: #333;
+    background: hsl(216, 80%, 75%);
+  }
+
+  & .Header__dropdown li a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  & .appName {
+    text-decoration: none;
+  }
+}

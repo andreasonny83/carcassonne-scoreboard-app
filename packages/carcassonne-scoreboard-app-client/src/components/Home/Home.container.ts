@@ -3,7 +3,7 @@ import { graphql } from 'react-apollo';
 import { HomeComponent } from './Home';
 
 export interface UserData {
-  id: string,
+  id: string;
   name: string;
   email: string;
   games: any;

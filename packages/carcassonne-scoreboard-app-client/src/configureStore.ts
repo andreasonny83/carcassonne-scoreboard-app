@@ -8,7 +8,7 @@ import { NotificationState } from './reducers/notifications';
 
 interface AppStore {
   auth: AuthState;
-  notifications: NotificationState
+  notifications: NotificationState;
 }
 
 const initialState: AppStore = {
@@ -17,8 +17,8 @@ const initialState: AppStore = {
     isSignedIn: false,
   },
   notifications: {
-    open: false
-  }
+    open: false,
+  },
 };
 
 export const configureStore = (browserHistory: any): Store<AppStore> => {

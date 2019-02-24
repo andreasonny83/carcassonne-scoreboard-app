@@ -36,7 +36,10 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps, Pr
     let user;
 
     try {
-      user = await Auth.currentAuthenticatedUser();
+      user = await Auth.currentAuthenticatedUser({
+        bypassCache: true,
+      });
+      console.log('user', user);
     } catch (err) {
       this.setState({
         loading: false,
@@ -54,6 +57,7 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps, Pr
           username: user.username,
           email: user.attributes.email,
           nickname: user.attributes.nickname,
+          avatar: user.attributes['custom:avatar'],
         },
         loading: false,
       });
@@ -65,7 +69,7 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps, Pr
     const { loading } = this.state;
 
     if (loading) {
-      return <div>Loading...</div>;
+      return <p>Loading...</p>;
     }
 
     return (
@@ -83,8 +87,6 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps, Pr
     location: any,
     props: any
   ): JSX.Element {
-    console.log(props);
-
     return isSignedIn ? (
       <UserContextProvider value={this.state.user}>
         <TargetComponent {...props} />

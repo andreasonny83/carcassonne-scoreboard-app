@@ -11,13 +11,9 @@ interface AppWrapperComponentProps {
   showNotification(message: string, timeout?: number): void;
 }
 
-export class AppWrapperComponent extends PureComponent<AppWrapperComponentProps & RouteComponentProps> {
-  public componentDidMount() {
-    const { showNotification } = this.props;
-
-    showNotification('Welcome', 5000);
-  }
-
+export class AppWrapperComponent extends PureComponent<
+  AppWrapperComponentProps & RouteComponentProps
+> {
   public render(): JSX.Element {
     return (
       <div className="App">
@@ -32,7 +28,9 @@ const mapDispatchToProps = {
   showNotification: showNotificationAction,
 };
 
-export const AppComponent = withRouter(connect(
-  null,
-  mapDispatchToProps
-)(AppWrapperComponent));
+export const AppComponent = withRouter(
+  connect(
+    null,
+    mapDispatchToProps
+  )(AppWrapperComponent)
+);

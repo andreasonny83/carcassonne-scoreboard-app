@@ -14,9 +14,9 @@ const gamesStatQuery = gql`
 
 const withNewGame = graphql(gamesStatQuery, {
   options: (props: any) => ({
-      variables: {
-        gameId: props.match && props.match.params && props.match.params.gameId,
-      },
+    variables: {
+      gameId: props.match && props.match.params && props.match.params.gameId,
+    },
   }),
   props: ({ data }: any) => ({
     data,

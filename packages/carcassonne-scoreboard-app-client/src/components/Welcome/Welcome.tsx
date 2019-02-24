@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+
 import { UserData } from '../Home';
 import { ChildProps } from 'react-apollo';
 import { NewGameResponse } from './Welcome.container';
@@ -9,6 +10,7 @@ export interface WelcomeProps {
   joinGameMutation(options: any): Promise<any>;
   newGame(gameId: string): void;
   joinGame(gameId: string): void;
+  showNotification(message: string, timeout?: number): void;
 }
 
 interface WelcomeState {
@@ -67,9 +69,7 @@ export class WelcomeComponent extends PureComponent<
               min={10}
             />
           </label>
-          {joinGameError && (
-            <div className="joinGameError">The game you entered is not valid</div>
-          )}
+          {joinGameError && <div className="joinGameError">The game you entered is not valid</div>}
         </div>
         <div className="row">
           <button className="joinGame" onClick={this.joinGame(joinGameId)}>
@@ -102,7 +102,7 @@ export class WelcomeComponent extends PureComponent<
   };
 
   private joinGame = (id: string) => () => {
-    const { joinGameMutation, joinGame } = this.props;
+    const { joinGameMutation, joinGame, showNotification } = this.props;
 
     this.setState({
       loading: true,
@@ -117,14 +117,17 @@ export class WelcomeComponent extends PureComponent<
         });
       })
       .then(({ data }: any) => {
-        const gameId = data && data.game && data.game.id;
+        const gameId = data && data.joinGame && data.joinGame.id;
+
         joinGame(gameId);
       })
       .catch(() => {
         this.setState({
           joinGameError: true,
+          joinGameId: '',
         });
-        console.log(`Error. No game named ${id} has been found.`);
+
+        showNotification(`Error. No game named ${id} has been found.`);
       });
   };
 }

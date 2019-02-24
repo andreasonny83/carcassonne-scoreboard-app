@@ -25,12 +25,19 @@ export class AuthComponent extends PureComponent<AuthProps> {
   }
 
   public render(): JSX.Element {
-    const { signIn, auth, undoCodeVerification, codeVerified, toggleLoading, verifyUser } = this.props;
+    const {
+      signIn,
+      auth,
+      undoCodeVerification,
+      codeVerified,
+      toggleLoading,
+      verifyUser,
+    } = this.props;
     const { showCodeConfirmation, email, isSignedIn, loading } = auth;
 
     return (
       (isSignedIn && <Redirect to="/" />) || (
-        <div className="Auth">
+        <div className="Auth container">
           {(showCodeConfirmation && email && (
             <CodeConfirmationForm
               email={email}
