@@ -17,71 +17,67 @@ export interface SignInData {
   password: string;
 }
 
-export const signedOut = () => async (disapatch: Dispatch) => {
-  disapatch(push('/login'));
+export const signedOut = () => async (dispatch: Dispatch) => {
+  dispatch(push('/login'));
 };
 
-export const signedIn = () => async (disapatch: Dispatch) => {
-  disapatch(push('/'));
-};
-
-export const signOut = () => async (disapatch: Dispatch) => {
+export const signOut = () => async (dispatch: Dispatch) => {
   await Auth.signOut();
 
-  disapatch({
+  dispatch({
     type: SIGNED_OUT,
   });
 };
 
-export const toggleLoading = (isLoading: boolean) => (disapatch: Dispatch) => {
-  disapatch({
+export const toggleLoading = (isLoading: boolean) => (dispatch: Dispatch) => {
+  dispatch({
     type: LOADING,
     payload: isLoading,
   });
 };
 
-export const userSignedIn = () => (disapatch: Dispatch) => {
-  disapatch({
+export const userSignedIn = () => (dispatch: Dispatch) => {
+  dispatch({
     type: SIGNED_IN,
   });
 };
 
-export const signIn = (data: SignInData) => async (disapatch: Dispatch) => {
+export const signIn = (data: SignInData) => async (dispatch: Dispatch) => {
   try {
     await Auth.signIn(data.username, data.password);
   } catch (err) {
     if (err.code === 'UserNotConfirmedException') {
-      return disapatch({
+      return dispatch({
         type: SIGN_IN_CODE_CONFIRMATION,
         payload: data.username,
       });
     }
 
-    return disapatch({
+    return dispatch({
       type: SIGN_IN_FAILURE,
     });
   }
 
-  disapatch({
+  dispatch({
     type: SIGNED_IN,
   });
 };
 
-export const verifyUser = (email: string) => (disapatch: Dispatch) => {
-  disapatch({
+export const verifyUser = (email: string) => (dispatch: Dispatch) => {
+  dispatch({
     type: VERIFY_USER,
     payload: email,
   });
 };
 
-export const codeVerified = () => (disapatch: Dispatch) => {
-  disapatch({
+export const codeVerified = () => (dispatch: Dispatch) => {
+  dispatch({
     type: CODE_VERIFIED,
   });
 };
 
-export const undoCodeVerification = () => (disapatch: Dispatch) => {
-  disapatch({
+export const undoCodeVerification = () => (dispatch: Dispatch) => {
+  dispatch({
     type: UNDO_VERIFICATION_CODE,
   });
 };

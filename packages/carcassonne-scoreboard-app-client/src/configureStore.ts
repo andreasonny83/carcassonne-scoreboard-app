@@ -11,15 +11,7 @@ interface AppStore {
   notifications: NotificationState;
 }
 
-const initialState: AppStore = {
-  auth: {
-    showCodeConfirmation: false,
-    isSignedIn: false,
-  },
-  notifications: {
-    open: false,
-  },
-};
+const initialState = {};
 
 export const configureStore = (browserHistory: any): Store<AppStore> => {
   const middlewares = [thunk, routerMiddleware(browserHistory)];

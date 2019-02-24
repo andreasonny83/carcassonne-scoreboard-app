@@ -11,15 +11,16 @@ interface HeaderProps {
 
 export class Header extends PureComponent<HeaderProps> {
   public static contextType: React.Context<IUser> = UserContext;
+  public context!: React.ContextType<typeof UserContext>;
 
   public render(): JSX.Element {
     const { appName, onSignOut } = this.props;
-    const { nickname } = this.context as IUser;
+    const { nickname } = this.context;
 
     return (
       <div className="Header container">
         <h1>
-          <Link to="/" className="appName">
+          <Link to="/app" className="appName">
             {appName}
           </Link>
         </h1>

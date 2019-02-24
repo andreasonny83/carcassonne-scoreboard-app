@@ -13,13 +13,11 @@ interface MainComponentProps {
 
 export class MainComponent extends PureComponent<MainComponentProps> {
   public static contextType: React.Context<IUser> = UserContext;
+  public context!: React.ContextType<typeof UserContext>;
 
   public componentDidMount(): void {
     const { showNotification } = this.props;
-    const user = this.context as IUser;
-    const { nickname } = this.context as IUser;
-
-    console.log('userContext', user);
+    const { nickname } = this.context;
 
     showNotification(`Welcome back ${nickname}`);
   }
