@@ -1,21 +1,10 @@
-*,
-*:before,
-*:after {
-  box-sizing: inherit;
-  margin: 0;
-  padding: 0;
-}
 html {
-  box-sizing: border-box;
   height: 100%;
   width: 100%;
   font-size: 100%;
-  font-size: 1.18rem;
+  font-size: 16px;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--body-background);
 }
 html,
 body {
@@ -24,12 +13,8 @@ body {
   overflow-x: hidden;
 }
 body {
-  margin: 0;
-  padding: 0;
   min-height: 100%;
   font-family: 'Raleway', Lucida Grande, sans-serif;
-  color: var(--black);
-  background-color: var(--white-light);
   font-size: 1rem;
   line-height: 1.75;
   font-weight: normal;

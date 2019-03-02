@@ -1,18 +1,35 @@
 import React, { PureComponent } from 'react';
-import axios from 'axios';
-import Auth from '@aws-amplify/auth';
-import { API_URL } from '../../config';
+
+import {
+  Typography,
+  Avatar,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  Link,
+  Button,
+  CardContent,
+  Card,
+  CardActions,
+} from '@material-ui/core';
+import { Lock } from '@material-ui/icons';
+
+import { VerifyCodeData } from '../../actions';
 
 interface CodeConfirmationState {
   code: string;
+  formCode?: any;
 }
 
 interface CodeConfirmationProps {
+  classes: any;
   email: string;
   loading: boolean;
-  undo: () => void;
   toggleLoading: (loadingState: boolean) => void;
-  onConfirmed: () => void;
+  verifyCode: (data: VerifyCodeData) => void;
+  sendNewCode: (data: { username: string }) => void;
+  onUndo: () => void;
+  onLoaded: () => void;
 }
 
 const initialState: CodeConfirmationState = {
@@ -26,63 +43,79 @@ export class CodeConfirmationForm extends PureComponent<
   public readonly state: CodeConfirmationState = initialState;
 
   public componentDidMount() {
-    const { toggleLoading } = this.props;
+    const { toggleLoading, onLoaded } = this.props;
     toggleLoading(false);
+    onLoaded();
   }
 
   public render(): JSX.Element {
-    const { email, undo, loading } = this.props;
+    const { email, loading, onUndo, classes } = this.props;
+    const { code } = this.state;
 
     return (
-      <div className="Auth">
-        <div className="CodeConfirmationForm">
-          <h2>Awaiting Confirmation</h2>
-          <p>
-            We sent an email to {email} (
-            <a className="App-link" href="#" onClick={undo}>
-              undo
-            </a>
-            ).
-          </p>
+      <Card className={classes.card}>
+        <CardContent className={classes.card}>
+          <Avatar className={classes.avatar}>
+            <Lock />
+          </Avatar>
 
-          <form onSubmit={this.handleSubmit(email)}>
-            <div className="form-field">
-              <label>
-                Enter the confirmation code
-                <br />
-                <input
-                  name="code"
-                  type="text"
-                  className="inputCode"
-                  disabled={loading}
-                  value={this.state.code}
-                  onChange={this.handleChange}
-                  required={true}
-                  min={6}
-                  maxLength={6}
-                />
-              </label>
-            </div>
+          <Typography component="h1" variant="h5">
+            Awaiting Confirmation
+          </Typography>
 
-            <div className="form-field">
-              <button type="submit" disabled={loading}>
-                Confirm
-              </button>
-            </div>
+          <Typography variant="caption">We sent an email to {email}</Typography>
+
+          <form onSubmit={this.handleSubmit(email)} className={classes.form}>
+            <FormControl margin="normal" variant="outlined" required fullWidth>
+              <InputLabel htmlFor="password">Enter the confirmation code</InputLabel>
+              <OutlinedInput
+                inputRef={el => {
+                  this.setState({ formCode: el });
+                }}
+                id="code"
+                name="code"
+                autoComplete="current-password"
+                type="text"
+                value={code}
+                disabled={loading}
+                onChange={this.handleChange}
+                labelWidth={240}
+                fullWidth
+                required
+                autoFocus
+              />
+            </FormControl>
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="outlined"
+              color="primary"
+              className={classes.submit}
+              disabled={loading}
+            >
+              Verify
+            </Button>
           </form>
 
-          <p>
-            <a className="App-link" href="#" onClick={this.newCode(email)}>
+          <Typography>
+            <Link component="button" onClick={this.newCode(email)}>
               Send me a new confirmation code
-            </a>
-          </p>
-        </div>
-      </div>
+            </Link>
+          </Typography>
+        </CardContent>
+
+        <CardActions>
+          <Link component="button" onClick={onUndo}>
+            undo
+          </Link>
+        </CardActions>
+      </Card>
     );
   }
 
   private handleSubmit = (email: string) => async (event: React.FormEvent<HTMLFormElement>) => {
-    const { onConfirmed, toggleLoading } = this.props;
+    const { toggleLoading, verifyCode } = this.props;
     const { code } = this.state;
 
     const data = {
@@ -93,19 +126,14 @@ export class CodeConfirmationForm extends PureComponent<
     event.preventDefault();
     toggleLoading(true);
 
-    try {
-      await Auth.confirmSignUp(data.username, data.code);
-    } catch (err) {
-      return;
-    } finally {
-      toggleLoading(false);
-    }
-
-    return onConfirmed();
+    verifyCode({
+      username: data.username,
+      code: data.code,
+    });
   };
 
-  private newCode = (email: string) => async (event: React.SyntheticEvent<HTMLAnchorElement>) => {
-    const { toggleLoading } = this.props;
+  private newCode = (email: string) => async (event: React.MouseEvent) => {
+    const { toggleLoading, sendNewCode } = this.props;
 
     const data: { username: string } = {
       username: email.toString().trim(),
@@ -114,16 +142,7 @@ export class CodeConfirmationForm extends PureComponent<
     event.preventDefault();
     toggleLoading(true);
 
-    try {
-      await axios(`${API_URL}/new-confirm-code`, {
-        method: 'POST',
-        data,
-      });
-    } catch (err) {
-      console.log('err', err);
-    } finally {
-      toggleLoading(false);
-    }
+    sendNewCode(data);
   };
 
   private handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {

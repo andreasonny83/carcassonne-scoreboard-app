@@ -1,12 +1,15 @@
 import { connect } from 'react-redux';
 import {
   signIn,
+  signUp,
   verifyUser,
   undoCodeVerification,
-  codeVerified,
+  verifyCode,
+  sendNewCode,
   toggleLoading,
+  showNotification,
 } from '../../actions';
-import { AuthComponent } from './Auth';
+import { AuthWithStyles } from './AuthWithStyles';
 
 const mapStateToProps = (state: any) => {
   return {
@@ -16,13 +19,16 @@ const mapStateToProps = (state: any) => {
 
 const mapDispatchToProps = {
   signIn,
+  signUp,
   verifyUser,
   undoCodeVerification,
-  codeVerified,
+  verifyCode,
+  sendNewCode,
   toggleLoading,
+  showNotification,
 };
 
 export const Auth = connect(
   mapStateToProps,
   mapDispatchToProps
-)(AuthComponent);
+)(AuthWithStyles);

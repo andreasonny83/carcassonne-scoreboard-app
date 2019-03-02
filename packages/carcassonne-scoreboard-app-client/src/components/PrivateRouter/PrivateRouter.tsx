@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { RouteProps, Route, Redirect } from 'react-router';
 
-import { IUser, UserContextProvider } from './user.context';
+import { IUser, AppContextProvider, IAppContext } from './app.context';
 
 interface PrivateRouterProps extends RouteProps {
   target: React.ComponentClass;
@@ -10,6 +10,7 @@ interface PrivateRouterProps extends RouteProps {
   loading: boolean;
   exact?: boolean;
   user: IUser;
+  appName: string;
   userSignedIn(): void;
   getUserData(): any;
   signedOut(): void;
@@ -23,13 +24,22 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
     getUserData()
       .then(() => {
         userSignedIn();
-        push(location && location.pathname || '/app');
+        push((location && location.pathname) || '/app');
       })
       .catch(() => signedOut());
   }
 
   public render(): JSX.Element {
-    const { target, redirectTo, location, loading, isSignedIn, user, ...rest } = this.props;
+    const {
+      target,
+      redirectTo,
+      location,
+      loading,
+      isSignedIn,
+      user,
+      appName,
+      ...rest
+    } = this.props;
 
     if (loading || !Object.keys(user).length) {
       return <p>Loading...</p>;
@@ -38,7 +48,9 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
     return (
       <Route
         {...rest}
-        render={props => this.renderRoute(target, isSignedIn, redirectTo, location, user, props)}
+        render={props =>
+          this.renderRoute(target, isSignedIn, redirectTo, location, user, appName, props)
+        }
       />
     );
   }
@@ -49,12 +61,18 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
     redirectTo: string,
     location: any,
     user: any,
+    appName: string,
     props: any
   ): JSX.Element {
+    const app: IAppContext = {
+      app: { appName },
+      user,
+    };
+
     return isSignedIn ? (
-      <UserContextProvider value={user}>
+      <AppContextProvider value={app}>
         <TargetComponent {...props} />
-      </UserContextProvider>
+      </AppContextProvider>
     ) : (
       <Redirect
         to={{

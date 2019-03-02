@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
-import { NewGameComponent } from './NewGame';
+import { GameComponent } from './Game';
 
 const gamesStatQuery = gql`
   query NewGameQuery($gameId: String!) {
@@ -12,7 +12,7 @@ const gamesStatQuery = gql`
   }
 `;
 
-const withNewGame = graphql(gamesStatQuery, {
+const withGame = graphql(gamesStatQuery, {
   options: (props: any) => ({
     variables: {
       gameId: props.match && props.match.params && props.match.params.gameId,
@@ -23,5 +23,4 @@ const withNewGame = graphql(gamesStatQuery, {
   }),
 });
 
-// export const NewGame = withNewGame(NewGameComponent);
-export const NewGame = NewGameComponent;
+export const Game = withGame(GameComponent);

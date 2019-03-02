@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import { Home } from '../Home';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
-import { IUser, UserContext } from '../PrivateRouter/user.context';
+import { AppContext, IAppContext } from '../PrivateRouter/app.context';
 
 import './Main.css';
 
@@ -12,25 +12,23 @@ interface MainComponentProps {
 }
 
 export class MainComponent extends PureComponent<MainComponentProps> {
-  public static contextType: React.Context<IUser> = UserContext;
-  public context!: React.ContextType<typeof UserContext>;
+  public static contextType: React.Context<IAppContext> = AppContext;
+  public context!: React.ContextType<typeof AppContext>;
 
   public componentDidMount(): void {
     const { showNotification } = this.props;
-    const { nickname } = this.context;
+    const { user } = this.context;
 
-    showNotification(`Welcome back ${nickname}`);
+    showNotification(`Welcome back ${user.nickname}`);
   }
 
   public render(): JSX.Element {
     const { signOut } = this.props;
-    const { username } = this.context as IUser;
-    const appName: string = 'App name';
 
     return (
       <div className="MainComponent">
-        <Header onSignOut={signOut} appName={appName} />
-        <Home userId={username} />
+        <Header onSignOut={signOut} />
+        <Home />
         <Footer />
       </div>
     );

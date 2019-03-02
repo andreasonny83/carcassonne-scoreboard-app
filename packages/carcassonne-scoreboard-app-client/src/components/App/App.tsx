@@ -8,8 +8,10 @@ import { ApolloClient } from 'apollo-client';
 import { createHttpLink } from 'apollo-link-http';
 import { setContext } from 'apollo-link-context';
 import { InMemoryCache } from 'apollo-cache-inmemory';
+import { MuiThemeProvider, CssBaseline } from '@material-ui/core';
 
-import { AMPLIFY, API_URL } from '../../config';
+import { theme } from '../../theme';
+import { AMPLIFY, API_URL, APP_NAME } from '../../config';
 import { configureStore } from '../../configureStore';
 import { AppComponent } from './AppComponent';
 
@@ -48,7 +50,10 @@ export class App extends PureComponent {
       <ApolloProvider client={apolloClient}>
         <Provider store={store}>
           <ConnectedRouter history={history}>
-            <AppComponent />
+            <MuiThemeProvider theme={theme}>
+              <CssBaseline />
+              <AppComponent appName={APP_NAME} />
+            </MuiThemeProvider>
           </ConnectedRouter>
         </Provider>
       </ApolloProvider>

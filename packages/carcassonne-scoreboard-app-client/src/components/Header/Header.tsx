@@ -1,41 +1,86 @@
 import React, { PureComponent } from 'react';
-import { UserContext, IUser } from '../PrivateRouter/user.context';
-import { Link } from 'react-router-dom';
+import { AppContext, IAppContext } from '../PrivateRouter/app.context';
+import { Link as RouterLink } from 'react-router-dom';
 
-import './Header.css';
+import { styled } from '@material-ui/styles';
+import { AppBar, Toolbar, Typography, Link, Menu, MenuItem, IconButton } from '@material-ui/core';
+import { AccountCircle } from '@material-ui/icons';
 
-interface HeaderProps {
-  appName: string;
+import { WithStylesProps } from './HeaderWithStyles';
+
+const StyledLink = styled(RouterLink)({
+  textDecoration: 'none',
+});
+
+interface HeaderProps extends WithStylesProps {
   onSignOut(): void;
 }
 
-export class Header extends PureComponent<HeaderProps> {
-  public static contextType: React.Context<IUser> = UserContext;
-  public context!: React.ContextType<typeof UserContext>;
+interface HeaderState {
+  anchorEl: any;
+}
+
+const initialState: HeaderState = {
+  anchorEl: null,
+};
+
+export class HeaderComponent extends PureComponent<HeaderProps, HeaderState> {
+  public static contextType: React.Context<IAppContext> = AppContext;
+  public readonly state: HeaderState = initialState;
+  public context!: React.ContextType<typeof AppContext>;
 
   public render(): JSX.Element {
-    const { appName, onSignOut } = this.props;
-    const { nickname } = this.context;
+    const { onSignOut, classes } = this.props;
+    const { anchorEl } = this.state;
+    const { app } = this.context;
 
     return (
-      <div className="Header container">
-        <h1>
-          <Link to="/app" className="appName">
-            {appName}
-          </Link>
-        </h1>
-        <nav role="navigation" className="Header__userMenu">
-          <div className="Header__userMenu__menu">{nickname}</div>
-          <ul className="Header__dropdown">
-            <li>
-              <Link to="/app/user/profile">Profile</Link>
-            </li>
-            <li>
-              <a onClick={onSignOut}>Sign Out</a>
-            </li>
-          </ul>
-        </nav>
+      <div className={`Header ${classes.root}`}>
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="h6" color="inherit" style={{ flexGrow: 1 }}>
+              <StyledLink to="/app">{app.appName}</StyledLink>
+            </Typography>
+
+            <div>
+              <IconButton
+                aria-owns={anchorEl ? 'user-menu' : undefined}
+                aria-haspopup="true"
+                onClick={this.handleMenuOpen}
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                id="user-menu"
+                anchorEl={anchorEl}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                open={Boolean(anchorEl)}
+                onClose={this.handleMenuClose}
+              >
+                <MenuItem onClick={this.handleMenuClose}>
+                  <StyledLink className={classes.menuItem} to={`/app/user/profile`}>
+                    Profile
+                  </StyledLink>
+                </MenuItem>
+                <MenuItem onClick={this.handleMenuClose}>
+                  <Link underline="none" onClick={onSignOut}>
+                    Sign Out
+                  </Link>
+                </MenuItem>
+              </Menu>
+            </div>
+          </Toolbar>
+        </AppBar>
       </div>
     );
   }
+
+  private handleMenuClose = () => {
+    this.setState({ anchorEl: null });
+  };
+
+  private handleMenuOpen = (event: React.MouseEvent) => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
 }

@@ -4,6 +4,11 @@ import { connect } from 'react-redux';
 import { newGame, joinGame, showNotification } from '../../actions';
 import { WelcomeComponent, WelcomeProps } from './Welcome';
 
+export interface UserData {
+  id: string;
+  games: string[];
+}
+
 const newGameMutation = gql`
   mutation NewGameMutation {
     newGame {
@@ -20,6 +25,15 @@ const joinGameMutation = gql`
   }
 `;
 
+const playerQuery = gql`
+  query PlayerQuery {
+    user {
+      id
+      games
+    }
+  }
+`;
+
 interface NewGameProps {
   newGame(): any;
 }
@@ -31,11 +45,18 @@ export interface NewGameResponse {
 }
 
 const withGame = compose(
+  graphql(playerQuery),
   graphql<WelcomeProps, NewGameResponse, null, NewGameProps>(newGameMutation, {
     name: 'newGameMutation',
+    options: {
+      refetchQueries: [{ query: playerQuery }],
+    },
   }),
   graphql<WelcomeProps, NewGameResponse, any, any>(joinGameMutation, {
     name: 'joinGameMutation',
+    options: {
+      refetchQueries: [{ query: playerQuery }],
+    },
   })
 );
 

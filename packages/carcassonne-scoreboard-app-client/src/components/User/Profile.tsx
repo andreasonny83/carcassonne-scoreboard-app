@@ -1,11 +1,9 @@
 import React, { PureComponent } from 'react';
-import Auth from '@aws-amplify/auth';
 
-import { UserContext, IUser } from '../PrivateRouter/user.context';
+import { AppContext, IAppContext } from '../PrivateRouter/app.context';
 import { Link } from 'react-router-dom';
 
 interface UserProfileProps {
-  data?: any; // Temp
   updateUserData(data: any): any;
 }
 
@@ -20,26 +18,26 @@ const initialState: UserProfileState = {
 };
 
 export class UserProfileComponent extends PureComponent<UserProfileProps, UserProfileState> {
-  public static contextType: React.Context<IUser> = UserContext;
-  public context!: React.ContextType<typeof UserContext>;
+  public static contextType: React.Context<IAppContext> = AppContext;
+  public context!: React.ContextType<typeof AppContext>;
   public readonly state: UserProfileState = initialState;
 
   public componentDidMount() {
-    const { nickname } = this.context;
+    const { user } = this.context;
 
     this.setState({
-      username: nickname,
+      username: user.nickname,
     });
   }
 
   public render(): JSX.Element | null {
-    const { nickname } = this.context as IUser;
+    const { user } = this.context;
     const { loading, username } = this.state;
 
     return (
       <div className="UserProfile container">
         <h2>User Profile</h2>
-        <p>{nickname}</p>
+        <p>{user.nickname}</p>
         <div className="row">Update username</div>
         <div className="row">
           <label>

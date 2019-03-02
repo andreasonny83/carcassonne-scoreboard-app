@@ -1,11 +1,31 @@
 import React, { PureComponent } from 'react';
+import { QueryResult } from 'react-apollo';
+import { Link as RouterLink } from 'react-router-dom';
 
-import { UserData } from '../Home';
+import { styled } from '@material-ui/styles';
+import { Link, Button, TextField } from '@material-ui/core';
+
+import { AppContext, IAppContext } from '../PrivateRouter/app.context';
+import { UserData } from './Welcome.container';
 import { ChildProps } from 'react-apollo';
 import { NewGameResponse } from './Welcome.container';
 
-export interface WelcomeProps {
+const StyledLink = styled(RouterLink)({
+  color: 'inherit',
+});
+
+const ButtonLink = (props: any) => (
+  <Button variant="outlined" color="primary" {...props}>
+    <StyledLink to={'/app/game/new'} {...props} />
+  </Button>
+);
+
+interface UserQueryResult {
   user: UserData;
+}
+
+export interface WelcomeProps {
+  data: QueryResult & UserQueryResult;
   newGameMutation(): Promise<any>;
   joinGameMutation(options: any): Promise<any>;
   newGame(gameId: string): void;
@@ -15,13 +35,13 @@ export interface WelcomeProps {
 
 interface WelcomeState {
   joinGameId: string;
-  loading: boolean;
+  busy: boolean;
   joinGameError: boolean;
 }
 
 const initialState: WelcomeState = {
   joinGameId: '',
-  loading: false,
+  busy: false,
   joinGameError: false,
 };
 
@@ -29,53 +49,64 @@ export class WelcomeComponent extends PureComponent<
   ChildProps<WelcomeProps, NewGameResponse>,
   WelcomeState
 > {
+  public static contextType: React.Context<IAppContext> = AppContext;
+  public context!: React.ContextType<typeof AppContext>;
   public readonly state: WelcomeState = initialState;
 
   public render(): JSX.Element | null {
-    const { user } = this.props;
-    const { joinGameId, loading, joinGameError } = this.state;
+    const { user: userContext } = this.context;
+    const { loading, error, user } = this.props.data;
+    const { joinGameId, busy, joinGameError } = this.state;
+    const userGames = (user && user.games && user.games.length) || 0;
 
     if (!user) {
-      return null;
+      console.warn('no user found');
     }
-
-    const { name, games = 0 } = user;
 
     return (
       <div className="Welcome">
-        <h2>Welcome back {name}</h2>
-        <span>
-          You have played {games} {games === 1 ? 'game' : 'games'} so far
-        </span>
-        <div className="row">
-          <div className="row">Start a new Game</div>
-          <button className="newGame" onClick={this.newGame}>
-            New Game
-          </button>
-        </div>
+        {error ? (
+          <div>
+            <h2>Something went wrong</h2>
+            <p>Please check your Internet connection and try again later</p>
+          </div>
+        ) : loading ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+            <h2>Welcome back {userContext.nickname}</h2>
+            <span>
+              You have played {userGames} {userGames === 1 ? 'game' : 'games'} so far
+            </span>
+            <div className="row">
+              <Link component={ButtonLink} underline="none">
+                Start a new game
+              </Link>
+            </div>
 
-        <div className="row">Join a Game</div>
-        <div className="row">
-          <label>
-            Game name
-            <input
-              name="joinGameId"
-              type="text"
-              className="joinGameId"
-              disabled={loading}
-              value={joinGameId}
-              onChange={this.updateJoinGameName}
-              required={true}
-              min={10}
-            />
-          </label>
-          {joinGameError && <div className="joinGameError">The game you entered is not valid</div>}
-        </div>
-        <div className="row">
-          <button className="joinGame" onClick={this.joinGame(joinGameId)}>
-            Join
-          </button>
-        </div>
+            <div className="row">Join a Game</div>
+            <div className="row">
+              <TextField
+                name="joinGameId"
+                type="text"
+                variant="outlined"
+                className="joinGameId"
+                disabled={busy}
+                value={joinGameId}
+                onChange={this.updateJoinGameName}
+                label="Game name"
+              />
+              {joinGameError && (
+                <div className="joinGameError">The game you entered is not valid</div>
+              )}
+            </div>
+            <div className="row">
+              <Button variant="outlined" color="primary" onClick={this.joinGame(joinGameId)}>
+                Join game
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     );
   }
@@ -92,20 +123,20 @@ export class WelcomeComponent extends PureComponent<
     });
   };
 
-  private newGame = () => {
-    const { newGameMutation, newGame } = this.props;
+  // private newGame = () => {
+  //   const { newGameMutation, newGame } = this.props;
 
-    newGameMutation().then(({ data }: any) => {
-      const id = data && data.newGame && data.newGame.id;
-      newGame(id);
-    });
-  };
+  //   newGameMutation().then(({ data }: any) => {
+  //     const id = data && data.newGame && data.newGame.id;
+  //     newGame(id);
+  //   });
+  // };
 
   private joinGame = (id: string) => () => {
     const { joinGameMutation, joinGame, showNotification } = this.props;
 
     this.setState({
-      loading: true,
+      busy: true,
     });
 
     joinGameMutation({
@@ -113,7 +144,7 @@ export class WelcomeComponent extends PureComponent<
     })
       .finally(() => {
         this.setState({
-          loading: false,
+          busy: false,
         });
       })
       .then(({ data }: any) => {

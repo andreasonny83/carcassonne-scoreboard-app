@@ -1,12 +1,17 @@
 import {
-  VERIFY_USER,
-  CODE_VERIFIED,
-  UNDO_VERIFICATION_CODE,
   LOADING,
   SIGNED_IN,
   SIGNED_OUT,
+  VERIFY_USER,
   SIGN_IN_FAILURE,
   SIGN_IN_CODE_CONFIRMATION,
+  SIGNED_UP,
+  SIGN_UP_FAILURE,
+  UNDO_VERIFICATION_CODE,
+  CODE_CONFIRMED,
+  CODE_CONFIRM_FAILURE,
+  SEND_NEW_CONFIRM_FAILURE,
+  SEND_NEW_CONFIRM_SUCCESS,
 } from '../constants';
 
 export interface AuthState {
@@ -37,11 +42,15 @@ export const authReducer = (state = initialAutState, action: any) => {
         email: null,
         showCodeConfirmation: false,
       };
-    case CODE_VERIFIED:
+    case SEND_NEW_CONFIRM_FAILURE:
       return {
         ...state,
-        email: null,
-        showCodeConfirmation: false,
+        loading: false,
+      };
+    case SEND_NEW_CONFIRM_SUCCESS:
+      return {
+        ...state,
+        loading: false,
       };
     case SIGN_IN_CODE_CONFIRMATION:
       return {
@@ -55,6 +64,30 @@ export const authReducer = (state = initialAutState, action: any) => {
       return {
         ...state,
         isSignedIn: false,
+        loading: false,
+      };
+    case SIGNED_UP:
+      return {
+        ...state,
+        email: action.payload,
+        loading: false,
+        showCodeConfirmation: true,
+      };
+    case SIGN_UP_FAILURE:
+      return {
+        ...state,
+        loading: false,
+      };
+    case CODE_CONFIRMED:
+      return {
+        ...state,
+        loading: false,
+        email: null,
+        showCodeConfirmation: false,
+      };
+    case CODE_CONFIRM_FAILURE:
+      return {
+        ...state,
         loading: false,
       };
     case SIGNED_OUT:

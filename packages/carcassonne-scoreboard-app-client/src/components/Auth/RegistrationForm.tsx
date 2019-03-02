@@ -1,73 +1,80 @@
 import React, { PureComponent } from 'react';
-import Auth from '@aws-amplify/auth';
+
+import { FormControl, InputLabel, OutlinedInput, Button } from '@material-ui/core';
+import { IAuthWithStyles } from './AuthWithStyles';
 
 interface RegistrationFormState {
   username: string;
   password: string;
-  busy: boolean;
 }
 
-interface RegistrationFormProps {
-  onRegistration: (email: string) => void;
+interface RegistrationFormProps extends IAuthWithStyles {
+  loading: boolean;
+  onRegister: (data: any) => void;
+  toggleLoading(status: boolean): void;
 }
 
 const initialState: RegistrationFormState = {
   username: '',
   password: '',
-  busy: false,
 };
 
 export class RegistrationForm extends PureComponent<RegistrationFormProps, RegistrationFormState> {
   public readonly state: RegistrationFormState = initialState;
 
   public render(): JSX.Element {
+    const { loading, classes } = this.props;
+    const { username, password } = this.state;
+
     return (
-      <div className="RegistrationForm">
-        <h2>Register</h2>
+      <form onSubmit={this.handleSubmit} className={classes.form}>
+        <FormControl margin="normal" variant="outlined" required fullWidth>
+          <InputLabel htmlFor="email" variant="outlined">
+            Email Address
+          </InputLabel>
+          <OutlinedInput
+            id="email"
+            name="username"
+            autoComplete="email"
+            type="email"
+            value={username}
+            disabled={loading}
+            onChange={this.handleChange}
+            labelWidth={130}
+            autoFocus
+          />
+        </FormControl>
 
-        <form onSubmit={this.handleSubmit}>
-          <div className="form-field">
-            <label>
-              <span>Email</span>
-              <input
-                name="username"
-                type="email"
-                disabled={this.state.busy}
-                value={this.state.username}
-                onChange={this.handleChange}
-                required={true}
-                minLength={6}
-              />
-            </label>
-          </div>
+        <FormControl margin="normal" variant="outlined" required fullWidth>
+          <InputLabel htmlFor="password">Password</InputLabel>
+          <OutlinedInput
+            id="password"
+            name="password"
+            autoComplete="current-password"
+            type="password"
+            value={password}
+            disabled={loading}
+            onChange={this.handleChange}
+            labelWidth={90}
+          />
+        </FormControl>
 
-          <div className="form-field">
-            <label>
-              <span>Password</span>
-              <input
-                name="password"
-                type="password"
-                disabled={this.state.busy}
-                value={this.state.password}
-                onChange={this.handleChange}
-                required={true}
-                minLength={6}
-              />
-            </label>
-          </div>
-
-          <div className="form-field">
-            <button type="submit" disabled={this.state.busy}>
-              Register
-            </button>
-          </div>
-        </form>
-      </div>
+        <Button
+          type="submit"
+          fullWidth
+          variant="outlined"
+          color="primary"
+          disabled={loading}
+          className={classes.submit}
+        >
+          Register
+        </Button>
+      </form>
     );
   }
 
   public handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    const { toggleLoading, onRegister } = this.props;
     const { username, password } = this.state;
 
     const data = {
@@ -75,26 +82,15 @@ export class RegistrationForm extends PureComponent<RegistrationFormProps, Regis
       password: password.toString().trim(),
     };
 
-    let authStatus;
-    this.toggleBusy(true);
+    event.preventDefault();
+    toggleLoading(true);
 
-    try {
-      authStatus = await Auth.signUp({
-        ...data,
-        attributes: {
-          nickname: data.username,
-        },
-      });
-    } catch (err) {
-      this.handleError(err);
-      return;
-    } finally {
-      this.toggleBusy(false);
-    }
-
-    console.log(authStatus);
-
-    this.props.onRegistration(username);
+    onRegister({
+      ...data,
+      attributes: {
+        nickname: data.username,
+      },
+    });
   };
 
   public handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -111,14 +107,4 @@ export class RegistrationForm extends PureComponent<RegistrationFormProps, Regis
 
     event.preventDefault();
   };
-
-  private handleError(err: AmplifyErrorResponse) {
-    console.error(err.message);
-  }
-
-  private toggleBusy(state: boolean): void {
-    this.setState({
-      busy: state,
-    });
-  }
 }

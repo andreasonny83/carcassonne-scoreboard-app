@@ -1,11 +1,14 @@
 import React, { PureComponent } from 'react';
-import { SignInData } from '../../actions';
 
-interface LoginFormProps {
+import { SignInData } from '../../actions';
+import { FormControl, InputLabel, OutlinedInput, Button } from '@material-ui/core';
+import { IAuthWithStyles } from './AuthWithStyles';
+
+interface LoginFormProps extends IAuthWithStyles {
   loading: boolean;
-  toggleLoading(status: boolean): void;
   onLogin(data: SignInData): void;
   onCodeRequired(username: string): void;
+  toggleLoading(status: boolean): void;
 }
 
 interface LoginFormState {
@@ -22,55 +25,57 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
   public readonly state: LoginFormState = initialState;
 
   public render(): JSX.Element {
-    const { loading } = this.props;
+    const { loading, classes } = this.props;
     const { username, password } = this.state;
 
     return (
-      <div className="LoginForm">
-        <h2>Login</h2>
+      <form onSubmit={this.handleSubmit} className={classes.form}>
+        <FormControl margin="normal" variant="outlined" required fullWidth>
+          <InputLabel htmlFor="email" variant="outlined">
+            Email Address
+          </InputLabel>
+          <OutlinedInput
+            id="email"
+            name="username"
+            autoComplete="email"
+            type="email"
+            value={username}
+            disabled={loading}
+            onChange={this.handleChange}
+            labelWidth={130}
+            autoFocus
+          />
+        </FormControl>
 
-        <form onSubmit={this.handleSubmit}>
-          <div className="form-field">
-            <label>
-              <span>Email</span>
-              <input
-                name="username"
-                type="email"
-                disabled={loading}
-                value={username}
-                onChange={this.handleChange}
-                required={true}
-                minLength={6}
-              />
-            </label>
-          </div>
+        <FormControl margin="normal" variant="outlined" required fullWidth>
+          <InputLabel htmlFor="password">Password</InputLabel>
+          <OutlinedInput
+            id="password"
+            name="password"
+            autoComplete="current-password"
+            type="password"
+            value={password}
+            disabled={loading}
+            onChange={this.handleChange}
+            labelWidth={90}
+          />
+        </FormControl>
 
-          <div className="form-field">
-            <label>
-              <span>Password</span>
-              <input
-                name="password"
-                type="password"
-                disabled={loading}
-                value={password}
-                onChange={this.handleChange}
-                required={true}
-                minLength={6}
-              />
-            </label>
-          </div>
-
-          <div className="form-field">
-            <button type="submit" disabled={loading}>
-              Log In
-            </button>
-          </div>
-        </form>
-      </div>
+        <Button
+          type="submit"
+          fullWidth
+          variant="outlined"
+          color="primary"
+          className={classes.submit}
+          disabled={loading}
+        >
+          Sign in
+        </Button>
+      </form>
     );
   }
 
-  public handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  public handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const { username, password } = this.state;
     const { onLogin, toggleLoading } = this.props;
 
@@ -80,8 +85,8 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
     };
 
     event.preventDefault();
-
     toggleLoading(true);
+
     onLogin(data);
   };
 
