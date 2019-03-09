@@ -22,12 +22,12 @@ class AdminController {
   private poolRegion: string;
 
   constructor() {
-    this.poolRegion = 'us-east-1';
-    const poolId = 'y3twftbCG'; // Your user pool id here
-    const ClientId = '7r7crlece3luan294es99dkk3d'; // Your client id here
+    this.poolRegion = process.env.APP_REGION || '';
+    const UserPoolId: string = process.env.APP_USER_POOL_ID || ''; // Your user pool id here
+    const ClientId: string = process.env.APP_APP_CLIENT_ID || ''; // Your client id here
 
     const poolData = {
-      UserPoolId: `${this.poolRegion}_${poolId}`,
+      UserPoolId,
       ClientId,
     };
 

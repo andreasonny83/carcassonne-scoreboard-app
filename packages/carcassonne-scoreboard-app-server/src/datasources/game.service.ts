@@ -11,22 +11,15 @@ export class GameService extends DataSource {
     this.games = new Map();
   }
 
-  public initialize() {
-    //
-    console.log('...initialize...');
+  public getGames() {
+    return this.games;
   }
 
-  public createGame(userId: string) {
-    const gameId: string = newId();
-    const game: IGame = {
-      id: gameId,
-      name: gameId,
-      players: [
-        userId
-      ],
-    };
+  public getGame(gameId: string) {
+    if (!gameId) {
+      throw new Error('A game id should be specified.');
+    }
 
-    this.games.set(gameId, new Game(game));
     return this.games.get(gameId);
   }
 
@@ -37,11 +30,15 @@ export class GameService extends DataSource {
     return this.games.get(id);
   }
 
-  public getGame(gameId: string) {
-    if (!gameId) {
-      throw new Error('A game id should be specified.');
-    }
+  public createGame(userId: string) {
+    const gameId: string = newId();
+    const game: IGame = {
+      id: gameId,
+      name: gameId,
+      players: [userId],
+    };
 
+    this.games.set(gameId, new Game(game));
     return this.games.get(gameId);
   }
 
@@ -68,8 +65,14 @@ export class GameService extends DataSource {
     throw new Error('Invalid game');
   }
 
-  public getGames() {
-    return this.games;
+  public isStarted(gameId: string) {
+    if (!gameId) {
+      throw new Error('A game id should be specified.');
+    }
+
+    const game = this.games.get(gameId);
+
+    return !!game && game.started;
   }
 }
 

@@ -20,7 +20,8 @@ class Server {
             : addressInfo.address
           : '';
 
-      console.log(`Server listening on ${address}${port}`);
+      console.log(`🚀  Server listening on ${address}${port}`);
+      console.log(`🚀  Subscriptions listening on ${address}${port}/graphql`);
       console.log(`GraphQL playground listening on ${address}${port}/graph`);
     });
   }

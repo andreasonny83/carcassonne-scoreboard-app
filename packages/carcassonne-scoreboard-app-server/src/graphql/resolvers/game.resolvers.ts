@@ -4,23 +4,26 @@ import { dataSources } from '../../datasources';
 export default {
   Query: {
     game(parent: any, args: any, context: any) {
-      console.log('parent', parent);
-      console.log('args', args);
-      console.log('context', context);
-
-      // if (context.authScope !== 'ADMIN') {
-      //   throw new AuthenticationError('not admin');
-      // }
-
       const { gameId } = args;
+      const { userData } = context;
+      const userId = userData && userData.data && userData.data.username;
       const game = dataSources.gameService.getGame(gameId);
 
-      if (game) {
+      if (!userId) {
+        throw new ValidationError(`Unauthenticated user request`);
+      }
+      if (!game) {
+        throw new ValidationError(`Game ID not found`);
+      }
+
+      const index = game.players.indexOf(userId);
+      const userIdMatches = game.players[index] === userId;
+
+      if (!!~index && userIdMatches) {
         return game;
       }
 
-      // throw new ApolloError(`Game ${args.id} does not exist`);
-      throw new ValidationError(`Game ID not found`);
+      throw new ValidationError(`Cannot access this game. Make sure you are the creator.`);
     },
 
     games() {
@@ -30,12 +33,13 @@ export default {
 
   Mutation: {
     newGame(parent: any, args: any, context: any) {
-      const userId =
-        context && context.userData && context.userData.data && context.userData.data.username;
+      const { userData } = context;
+      const userId = userData && userData.data && userData.data.username;
 
       if (userId) {
         const game: any = dataSources.gameService.createGame(userId);
 
+        dataSources.userService.addUserGame(userId, game.id);
         return dataSources.gameService.getGame(game.id);
       }
 
@@ -44,8 +48,8 @@ export default {
 
     joinGame(parent: any, args: any, context: any) {
       const { gameId } = args;
-      const userId =
-        context && context.userData && context.userData.data && context.userData.data.username;
+      const { userData } = context;
+      const userId = userData && userData.data && userData.data.username;
       const game = dataSources.gameService.getGame(gameId);
 
       if (!userId) {
@@ -55,26 +59,34 @@ export default {
         throw new ValidationError(`GameID not found`);
       }
 
-      const index = game.players.indexOf(userId);
-      const userIdMatches = game.players[index] === userId;
+      const isStarted = dataSources.gameService.isStarted(gameId);
 
-      if (~index && userIdMatches) {
-        const gameUpdated = {
-          ...game,
-          players: [...game.players, userId],
-        };
+      if (!isStarted) {
+        const index = game.players.indexOf(userId);
+        const userIdMatches = game.players[index] === userId;
 
-        dataSources.gameService.updateGame(gameUpdated);
-        return dataSources.gameService.getGame(gameId);
+        if (!!~index && userIdMatches) {
+          return dataSources.gameService.getGame(gameId);
+        }
+
+        throw new ValidationError(`Game not yet started`);
       }
 
-      throw new ValidationError(`Unauthenticated user request`);
+      const gameUpdated = {
+        ...game,
+        players: [...game.players, userId],
+      };
+
+      dataSources.gameService.updateGame(gameUpdated);
+      dataSources.userService.addUserGame(userId, gameId);
+
+      return dataSources.gameService.getGame(gameId);
     },
 
     startGame(parent: any, args: any, context: any) {
       const { gameId } = args;
-      const userId =
-        context && context.userData && context.userData.data && context.userData.data.username;
+      const { userData } = context;
+      const userId = userData && userData.data && userData.data.username;
       const game = dataSources.gameService.getGame(gameId);
 
       if (!userId) {
@@ -87,7 +99,7 @@ export default {
       const index = game.players.indexOf(userId);
       const userIdMatches = game.players[index] === userId;
 
-      if (~index && userIdMatches) {
+      if (!!~index && userIdMatches) {
         dataSources.gameService.startGame(gameId);
         return dataSources.gameService.getGame(gameId);
       }

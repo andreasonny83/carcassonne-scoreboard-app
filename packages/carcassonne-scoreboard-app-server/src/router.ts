@@ -92,17 +92,13 @@ class MainRoutes {
         return res.sendStatus(401);
       }
 
-      console.log(userStatus);
       return res.sendStatus(200);
       // return res.status(userStatus.status).send(userStatus);
     });
 
     this.router.get('/user', async (req: express.Request, res: express.Response) => {
       const { username } = req.body;
-
       const userData = await adminController.getUser(username);
-
-      // console.log('userData', userData);
 
       return res.status(200).send(userData);
     });

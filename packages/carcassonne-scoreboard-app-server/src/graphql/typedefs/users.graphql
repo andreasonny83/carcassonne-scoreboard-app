@@ -1,10 +1,9 @@
 type User {
   id: ID!
-  name: String!
-  email: String!
-  games: Int!
+  games: [String]
 }
 
 type Query {
-  user(id: String!): User
+  user: User
+  users: [User]
 }

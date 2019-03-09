@@ -1,16 +1,17 @@
+import { ValidationError } from 'apollo-server';
+import { dataSources } from '../../datasources';
+
 export default {
   Query: {
     user(parent: any, args: any, context: any) {
-      console.log('user context', context);
+      const { userData } = context;
+      const userId = userData && userData.data && userData.data.username;
 
-      const userId: string = args.id;
-
-      return {
-        id: '123',
-        name: 'test',
-        email: 'test@test.com',
-        games: 1,
-      };
+      return dataSources.userService.getUser(userId);
     },
+
+    users(parent: any, args: any, context: any) {
+      return dataSources.userService.getUsers();
+    }
   },
 };

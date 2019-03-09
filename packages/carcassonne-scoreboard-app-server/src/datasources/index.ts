@@ -1,4 +1,5 @@
 import { GameService } from './game.service';
+import { UserService } from './user.service';
 
 // TODO: We will not pass dataSources via context because this does not work with subscriptions
 // See https://github.com/apollographql/apollo-server/issues/1526
@@ -9,5 +10,6 @@ import { GameService } from './game.service';
 // });
 
 export const dataSources = {
-    gameService: new GameService()
+  gameService: new GameService(),
+  userService: new UserService(),
 };

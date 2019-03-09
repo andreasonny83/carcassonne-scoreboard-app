@@ -11,6 +11,7 @@ import { router } from './router';
 
 class App {
   public app: Application;
+
   private admin: typeof adminController;
   private appConfig: IConfig;
 
@@ -39,7 +40,7 @@ class App {
 
   private applyMiddlewares(expressApp: Application) {
     const apolloServer: ApolloServer = new ApolloServer({
-      context: async ({ req }: { req: Request }) => {
+      context: async ({ req, connection }: { req: Request; connection: any }) => {
         // Allow GraphQL playground in development mode
         const originUrl: string = `localhost:${this.appConfig.getPort()}${req.baseUrl}`;
         const reg: RegExp = new RegExp(`${originUrl}$`, 'gi');
@@ -49,10 +50,15 @@ class App {
           return {
             userData: {
               data: {
-                username: 'dea9adba-4ef3-4687-ac7b-59a53ffafc5b',
+                username: '01486737-c04d-4191-9184-fc6cdc089313',
               },
             },
           };
+        }
+
+        if (connection) {
+          // check connection for metadata
+          return connection.context;
         }
 
         const authorization: string = String(req.headers.authorization) || '';
@@ -74,6 +80,11 @@ class App {
       `,
       resolvers,
       playground: this.appConfig.isDev(),
+      subscriptions: {
+        onConnect: (connectionParams, webSocket) => {
+          console.log('connectionParams', connectionParams);
+        },
+      },
     });
 
     apolloServer.applyMiddleware({
