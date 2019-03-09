@@ -15,9 +15,11 @@
     "index.js"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "nodemon",
-    "start": "node ./lib/index.js",
+    "webpack:build": "webpack --config webpack.$NODE_ENV.js",
+    "webpack:dev": "NODE_ENV=development npm run webpack:build",
+    "build": "NODE_ENV=production npm run webpack:build",
+    "start": "npm-run-all --parallel webpack:dev nodemon",
+    "nodemon": "nodemon",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
@@ -50,6 +52,16 @@
     "@types/jsonwebtoken": "^8.3.0",
     "@types/morgan": "^1.7.35",
     "@types/uuid": "^3.4.4",
-    "nodemon": "^1.18.6"
+    "@types/webpack-env": "^1.13.9",
+    "clean-webpack-plugin": "^2.0.0",
+    "nodemon": "^1.18.10",
+    "npm-run-all": "^4.1.5",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.1",
+    "webpack-merge": "^4.2.1",
+    "webpack-node-externals": "^1.7.2"
   }
 }

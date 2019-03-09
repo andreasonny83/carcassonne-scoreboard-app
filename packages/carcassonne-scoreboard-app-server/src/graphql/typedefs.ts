@@ -1,6 +1,12 @@
-import { fileLoader, mergeTypes } from 'merge-graphql-schemas';
-import * as path from 'path';
+import { mergeTypes } from 'merge-graphql-schemas';
+import gameType from './typedefs/game';
+import logType from './typedefs/log';
+import playerType from './typedefs/player';
+import usersType from './typedefs/users';
 
-const typesArray = fileLoader(path.join(__dirname, './typedefs'));
+const types = [gameType, logType, playerType, usersType];
 
-export const typeDefs = mergeTypes(typesArray, { all: true });
+// NOTE: 2nd param is optional, and defaults to false
+// Only use if you have defined the same type multiple times in
+// different files and wish to attempt merging them together.
+export const typeDefs = mergeTypes(types, { all: true });

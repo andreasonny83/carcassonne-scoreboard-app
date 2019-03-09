@@ -1,0 +1,65 @@
+{
+  "version": 2,
+  "name": "carcassonne-scoreboard-app",
+  "alias": "carcassonne-scoreboard",
+  "builds": [
+    {
+      "src": "packages/carcassonne-scoreboard-app-client/package.json",
+      "use": "@now/static-build",
+      "config": { "distDir": "build" }
+    }
+  ],
+  "build": {
+    "env": {
+      "REACT_APP_API_URL": "http://localhost:8888",
+      "REACT_APP_APP_NAME": "Carcassonne Scoreboard App",
+      "REACT_APP_REGION": "@carcassonne_scoreboard_app_client_react_app_region",
+      "REACT_APP_USER_POOL_ID": "@carcassonne_scoreboard_app_client_react_app_user_pool_id",
+      "REACT_APP_APP_CLIENT_ID": "@carcassonne_scoreboard_app_client_react_app_app_client_id"
+    }
+  },
+  "env": {
+    "APP_API_URL": "http://localhost:8888",
+    "APP_NAME": "Carcassonne Scoreboard App",
+    "APP_REGION": "@carcassonne_scoreboard_app_client_react_app_region",
+    "APP_USER_POOL_ID": "@carcassonne_scoreboard_app_client_react_app_user_pool_id",
+    "APP_APP_CLIENT_ID": "@carcassonne_scoreboard_app_client_react_app_app_client_id",
+    "OFFLINE_MODE": "false",
+    "DEBUG": "false"
+  },
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "headers": { "cache-control": "s-maxage=31536000,immutable" },
+      "dest": "/packages/carcassonne-scoreboard-app-client/static/$1"
+    },
+    {
+      "src": "/fonts/(.*)",
+      "headers": { "cache-control": "s-maxage=31536000,immutable" },
+      "dest": "/packages/carcassonne-scoreboard-app-client/fonts/$1"
+    },
+    { "src": "/favicon.ico", "dest": "/packages/carcassonne-scoreboard-app-client/favicon.ico" },
+    {
+      "src": "/asset-manifest.json",
+      "dest": "/packages/carcassonne-scoreboard-app-client/asset-manifest.json"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/packages/carcassonne-scoreboard-app-client/manifest.json"
+    },
+    {
+      "src": "/precache-manifest.(.*)",
+      "dest": "/packages/carcassonne-scoreboard-app-client/precache-manifest.$1"
+    },
+    {
+      "src": "/service-worker.js",
+      "headers": { "cache-control": "s-maxage=0" },
+      "dest": "/packages/carcassonne-scoreboard-app-client/service-worker.js"
+    },
+    {
+      "src": "/(.*)",
+      "headers": { "cache-control": "s-maxage=0" },
+      "dest": "/packages/carcassonne-scoreboard-app-client/index.html"
+    }
+  ]
+}

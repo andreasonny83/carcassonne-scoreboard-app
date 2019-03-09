@@ -11,6 +11,8 @@ import jwkToPem from 'jwk-to-pem';
 import jwt from 'jsonwebtoken';
 import AWS from 'aws-sdk';
 
+import { config, IConfig } from '../config';
+
 interface IErrorCode {
   code?: string;
   name?: string;
@@ -21,13 +23,13 @@ class AdminController {
   private userPool: CognitoUserPool;
   private poolRegion: string;
 
-  constructor() {
-    this.poolRegion = 'us-east-1';
-    const poolId = 'y3twftbCG'; // Your user pool id here
-    const ClientId = '7r7crlece3luan294es99dkk3d'; // Your client id here
+  constructor(appConfig: IConfig) {
+    this.poolRegion = appConfig.get('APP_REGION') || '';
+    const poolId = appConfig.get('APP_USER_POOL_ID') || '';
+    const ClientId = appConfig.get('APP_APP_CLIENT_ID') || '';
 
     const poolData = {
-      UserPoolId: `${this.poolRegion}_${poolId}`,
+      UserPoolId: poolId,
       ClientId,
     };
 
@@ -151,10 +153,10 @@ class AdminController {
   }
 
   public async ValidateToken(token: string) {
-    let response: AxiosResponse;
     const url = `https://cognito-idp.${
       this.poolRegion
     }.amazonaws.com/${this.userPool.getUserPoolId()}/.well-known/jwks.json`;
+    let response: AxiosResponse;
 
     try {
       response = await Axios.get(url);
@@ -249,4 +251,4 @@ class AdminController {
   }
 }
 
-export const adminController = new AdminController();
+export const adminController = new AdminController(config);

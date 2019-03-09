@@ -11,7 +11,7 @@ class Server {
     }
 
     this.serverInstance = expressApp.listen(portNumber, () => {
-      const addressInfo: any = this.serverInstance!.address();
+      const addressInfo: any = this.serverInstance && this.serverInstance.address();
       const port: number = 'port' in addressInfo ? addressInfo.port : null;
       const address: string =
         'address' in addressInfo

@@ -1,12 +1,11 @@
 {
-  "ext": "ts js json graphql",
+  "ext": "js json",
   "ignore": [
     "src/**/*.spec.ts",
     "src/**/*.test.ts"
   ],
   "watch": [
-    "src/**/*.ts",
-    "src/**/*.graphql"
+    "dist/**/*.js"
   ],
-  "exec": "ts-node --files ./src/index.ts"
+  "exec": "ts-node --files ./dist/index.js"
 }

@@ -65,6 +65,7 @@ class App {
           console.log('Error:', err.message);
           throw new AuthenticationError('you must be logged in');
         }
+
         // console.log('userData', userData);
 
         return { userData };
