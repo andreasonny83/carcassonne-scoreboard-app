@@ -1,12 +1,7 @@
 import React, { PureComponent } from 'react';
 
-import { FormControl, InputLabel, OutlinedInput, Button } from '@material-ui/core';
+import { FormControl, InputLabel, OutlinedInput, Button, FormHelperText } from '@material-ui/core';
 import { IAuthWithStyles } from './AuthWithStyles';
-
-interface RegistrationFormState {
-  username: string;
-  password: string;
-}
 
 interface RegistrationFormProps extends IAuthWithStyles {
   loading: boolean;
@@ -14,9 +9,20 @@ interface RegistrationFormProps extends IAuthWithStyles {
   toggleLoading(status: boolean): void;
 }
 
+interface RegistrationFormState {
+  username: string;
+  password: string;
+  usernameValid: boolean;
+  passwordValid: boolean;
+  pristine: boolean;
+}
+
 const initialState: RegistrationFormState = {
   username: '',
   password: '',
+  usernameValid: false,
+  passwordValid: false,
+  pristine: true,
 };
 
 export class RegistrationForm extends PureComponent<RegistrationFormProps, RegistrationFormState> {
@@ -24,18 +30,24 @@ export class RegistrationForm extends PureComponent<RegistrationFormProps, Regis
 
   public render(): JSX.Element {
     const { loading, classes } = this.props;
-    const { username, password } = this.state;
+    const { username, password, usernameValid, passwordValid, pristine } = this.state;
 
     return (
       <form onSubmit={this.handleSubmit} className={classes.form}>
-        <FormControl margin="normal" variant="outlined" required fullWidth>
-          <InputLabel htmlFor="email" variant="outlined">
+        <FormControl
+          margin="normal"
+          variant="outlined"
+          required
+          fullWidth
+          error={!pristine && !usernameValid}
+        >
+          <InputLabel htmlFor="username" variant="outlined">
             Email Address
           </InputLabel>
           <OutlinedInput
-            id="email"
+            id="username"
             name="username"
-            autoComplete="email"
+            autoComplete="username"
             type="email"
             value={username}
             disabled={loading}
@@ -43,20 +55,32 @@ export class RegistrationForm extends PureComponent<RegistrationFormProps, Regis
             labelWidth={130}
             autoFocus
           />
+          <FormHelperText hidden={pristine || usernameValid}>
+            Enter a valid email address
+          </FormHelperText>
         </FormControl>
 
-        <FormControl margin="normal" variant="outlined" required fullWidth>
+        <FormControl
+          margin="normal"
+          variant="outlined"
+          required
+          fullWidth
+          error={!pristine && !passwordValid}
+        >
           <InputLabel htmlFor="password">Password</InputLabel>
           <OutlinedInput
             id="password"
             name="password"
-            autoComplete="current-password"
             type="password"
             value={password}
             disabled={loading}
             onChange={this.handleChange}
             labelWidth={90}
           />
+          <FormHelperText hidden={pristine || passwordValid}>
+            Password should be at least 8 characters long, with at least 1 uppercase, 1 lowercase
+            character amd 1 number
+          </FormHelperText>
         </FormControl>
 
         <Button
@@ -64,8 +88,8 @@ export class RegistrationForm extends PureComponent<RegistrationFormProps, Regis
           fullWidth
           variant="outlined"
           color="primary"
-          disabled={loading}
           className={classes.submit}
+          disabled={loading || !passwordValid || !usernameValid}
         >
           Register
         </Button>
@@ -97,14 +121,29 @@ export class RegistrationForm extends PureComponent<RegistrationFormProps, Regis
     const target = event && event.target;
     const name: string = target && target.name;
     const value: string = target && target.value;
+    let isUsernameValid: boolean;
+    let isPasswordValid: boolean;
+
+    event.preventDefault();
+
+    if (name === 'username') {
+      const re: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      isUsernameValid = re.test(String(value).toLowerCase());
+    }
+
+    if (name === 'password') {
+      const re: RegExp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+      isPasswordValid = re.test(String(value));
+    }
 
     this.setState(
       (prevState: RegistrationFormState): RegistrationFormState => ({
         ...prevState,
         [name]: value,
+        ...(name === 'username' && { usernameValid: isUsernameValid }),
+        ...(name === 'password' && { passwordValid: isPasswordValid }),
+        pristine: false,
       })
     );
-
-    event.preventDefault();
   };
 }

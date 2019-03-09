@@ -18,7 +18,6 @@ import { VerifyCodeData } from '../../actions';
 
 interface CodeConfirmationState {
   code: string;
-  formCode?: any;
 }
 
 interface CodeConfirmationProps {
@@ -69,9 +68,6 @@ export class CodeConfirmationForm extends PureComponent<
             <FormControl margin="normal" variant="outlined" required fullWidth>
               <InputLabel htmlFor="password">Enter the confirmation code</InputLabel>
               <OutlinedInput
-                inputRef={el => {
-                  this.setState({ formCode: el });
-                }}
                 id="code"
                 name="code"
                 autoComplete="current-password"

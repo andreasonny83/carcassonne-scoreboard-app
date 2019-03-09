@@ -1,24 +1,39 @@
 import React, { PureComponent } from 'react';
 
 import { SignInData } from '../../actions';
-import { FormControl, InputLabel, OutlinedInput, Button } from '@material-ui/core';
+import {
+  FormControl,
+  InputLabel,
+  FormHelperText,
+  OutlinedInput,
+  Button,
+  Link,
+} from '@material-ui/core';
 import { IAuthWithStyles } from './AuthWithStyles';
 
 interface LoginFormProps extends IAuthWithStyles {
   loading: boolean;
   onLogin(data: SignInData): void;
+  onForgotPassword(username: string): void;
   onCodeRequired(username: string): void;
   toggleLoading(status: boolean): void;
+  showNotification(message: string, timeout?: number): void;
 }
 
 interface LoginFormState {
   username: string;
   password: string;
+  usernameValid: boolean;
+  passwordValid: boolean;
+  pristine: boolean;
 }
 
 const initialState: LoginFormState = {
   username: '',
   password: '',
+  usernameValid: false,
+  passwordValid: false,
+  pristine: true,
 };
 
 export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
@@ -26,16 +41,22 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
 
   public render(): JSX.Element {
     const { loading, classes } = this.props;
-    const { username, password } = this.state;
+    const { username, password, usernameValid, passwordValid, pristine } = this.state;
 
     return (
       <form onSubmit={this.handleSubmit} className={classes.form}>
-        <FormControl margin="normal" variant="outlined" required fullWidth>
-          <InputLabel htmlFor="email" variant="outlined">
+        <FormControl
+          margin="normal"
+          variant="outlined"
+          required
+          fullWidth
+          error={!pristine && !usernameValid}
+        >
+          <InputLabel htmlFor="username" variant="outlined">
             Email Address
           </InputLabel>
           <OutlinedInput
-            id="email"
+            id="username"
             name="username"
             autoComplete="email"
             type="email"
@@ -45,20 +66,37 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
             labelWidth={130}
             autoFocus
           />
+          <FormHelperText hidden={pristine || usernameValid}>
+            Enter a valid email address
+          </FormHelperText>
+          <FormHelperText>
+            <Link color="primary" tabIndex={-1} href="" onClick={this.resetPasswordHandler}>
+              Forgot your password?
+            </Link>
+          </FormHelperText>
         </FormControl>
 
-        <FormControl margin="normal" variant="outlined" required fullWidth>
+        <FormControl
+          margin="normal"
+          variant="outlined"
+          required
+          fullWidth
+          error={!pristine && !passwordValid}
+        >
           <InputLabel htmlFor="password">Password</InputLabel>
           <OutlinedInput
             id="password"
             name="password"
-            autoComplete="current-password"
+            autoComplete="password"
             type="password"
             value={password}
             disabled={loading}
             onChange={this.handleChange}
             labelWidth={90}
           />
+          <FormHelperText hidden={pristine || passwordValid}>
+            Password should be at least 8 characters long
+          </FormHelperText>
         </FormControl>
 
         <Button
@@ -67,7 +105,7 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
           variant="outlined"
           color="primary"
           className={classes.submit}
-          disabled={loading}
+          disabled={loading || !passwordValid || !usernameValid}
         >
           Sign in
         </Button>
@@ -75,7 +113,7 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
     );
   }
 
-  public handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  private handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     const { username, password } = this.state;
     const { onLogin, toggleLoading } = this.props;
 
@@ -90,17 +128,48 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
     onLogin(data);
   };
 
-  public handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+  private resetPasswordHandler = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>): void => {
+    const { onForgotPassword, showNotification } = this.props;
+    const { username } = this.state;
+
+    event.preventDefault();
+
+    if (username) {
+      return onForgotPassword(username);
+    }
+
+    this.setState({
+      pristine: false,
+    });
+
+    showNotification('Please, enter a valid email address first');
+  };
+
+  private handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const target = event && event.target;
     const name: string = target && target.name;
     const value: string = target && target.value;
+    let isUsernameValid: boolean;
+    let isPasswordValid: boolean;
 
     event.preventDefault();
+
+    if (name === 'username') {
+      const re: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      isUsernameValid = re.test(String(value).toLowerCase());
+    }
+
+    if (name === 'password') {
+      isPasswordValid = !!value.length && value.length >= 8;
+    }
 
     this.setState(
       (prevState: LoginFormState): LoginFormState => ({
         ...prevState,
         [name]: value,
+        ...(name === 'username' && { usernameValid: isUsernameValid }),
+        ...(name === 'password' && { passwordValid: isPasswordValid }),
+        pristine: false,
       })
     );
   };

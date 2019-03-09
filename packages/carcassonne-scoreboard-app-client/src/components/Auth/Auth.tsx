@@ -17,6 +17,7 @@ import { SignInData, VerifyCodeData } from '../../actions';
 import { LoginForm } from './LoginForm';
 import { RegistrationForm } from './RegistrationForm';
 import { CodeConfirmationForm } from './CodeConfirmationForm';
+import { ResetPasswordFormForm } from './ResetPasswordForm';
 import { IAuthWithStyles } from './AuthWithStyles';
 
 interface AuthProps extends IAuthWithStyles {
@@ -29,6 +30,8 @@ interface AuthProps extends IAuthWithStyles {
   toggleLoading(status: boolean): void;
   verifyUser(email: string): void;
   verifyCode(data: VerifyCodeData): void;
+  forgotPassword(username: string): void;
+  resetPassword(username: string, code: string, newPassword: string): void;
   undoCodeVerification(): void;
   showNotification(message: string, timeout?: number): void;
 }
@@ -58,12 +61,15 @@ export class AuthComponent extends PureComponent<AuthProps, AuthState> {
       signUp,
       auth,
       verifyCode,
+      forgotPassword,
+      resetPassword,
       sendNewCode,
       toggleLoading,
       verifyUser,
+      showNotification,
       classes,
     } = this.props;
-    const { showCodeConfirmation, email, isSignedIn, loading } = auth;
+    const { showCodeConfirmation, email, isSignedIn, showForgotPassword, loading } = auth;
 
     if (isSignedIn) {
       return <Redirect to="/" />;
@@ -93,7 +99,19 @@ export class AuthComponent extends PureComponent<AuthProps, AuthState> {
             />
           )}
 
-          {!showCodeConfirmation && !showRegister && (
+          {showForgotPassword && email && (
+            <ResetPasswordFormForm
+              classes={classes}
+              email={email}
+              toggleLoading={toggleLoading}
+              loading={loading}
+              onUndo={this.undo}
+              onResetPassword={resetPassword}
+              showNotification={showNotification}
+            />
+          )}
+
+          {!showForgotPassword && !showCodeConfirmation && !showRegister && (
             <Card className={classes.card}>
               <CardContent className={classes.card}>
                 <Avatar className={classes.avatar}>
@@ -108,6 +126,8 @@ export class AuthComponent extends PureComponent<AuthProps, AuthState> {
                   classes={classes}
                   onLogin={signIn}
                   onCodeRequired={verifyUser}
+                  showNotification={showNotification}
+                  onForgotPassword={forgotPassword}
                   loading={loading}
                   toggleLoading={toggleLoading}
                 />

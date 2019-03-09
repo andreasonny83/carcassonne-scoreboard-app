@@ -19,6 +19,9 @@ import {
   SEND_NEW_CONFIRM_SUCCESS,
   CODE_CONFIRM_FAILURE,
   CODE_CONFIRMED,
+  FORGOT_PASSWORD,
+  PASSWORD_RESET,
+  PASSWORD_RESET_FAILED,
 } from '../constants';
 
 export interface SignInData {
@@ -41,6 +44,52 @@ export const signOut = () => async (dispatch: Dispatch) => {
   dispatch({
     type: SIGNED_OUT,
   });
+};
+
+export const forgotPassword = (username: string) => async (dispatch: Dispatch) => {
+  try {
+    await Auth.forgotPassword(username);
+  } catch (err) {
+    if (err && err.message) {
+      showNotification(err.message)(dispatch);
+    } else {
+      showNotification('Something went wrong. Please try again later.')(dispatch);
+    }
+    return;
+  }
+
+  dispatch({
+    type: FORGOT_PASSWORD,
+    payload: username,
+  });
+
+  showNotification('Confirmation code correctly sent.')(dispatch);
+};
+
+export const resetPassword = (username: string, code: string, newPassword: string) => async (
+  dispatch: Dispatch
+) => {
+  try {
+    await Auth.forgotPasswordSubmit(username, code, newPassword);
+  } catch (err) {
+    if (err && err.message) {
+      showNotification(err.message)(dispatch);
+    } else {
+      showNotification('Something went wrong. Please try again later.')(dispatch);
+    }
+
+    dispatch({
+      type: PASSWORD_RESET_FAILED,
+    });
+
+    return;
+  }
+
+  dispatch({
+    type: PASSWORD_RESET,
+  });
+
+  showNotification('Password correctly updated')(dispatch);
 };
 
 export const toggleLoading = (isLoading: boolean) => (dispatch: Dispatch) => {
@@ -105,7 +154,7 @@ export const signUp = (data: SignInData) => async (dispatch: Dispatch) => {
 
   dispatch({
     type: SIGNED_UP,
-    payload: data.username
+    payload: data.username,
   });
 };
 

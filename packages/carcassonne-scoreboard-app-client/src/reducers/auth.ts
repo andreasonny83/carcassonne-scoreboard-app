@@ -12,6 +12,9 @@ import {
   CODE_CONFIRM_FAILURE,
   SEND_NEW_CONFIRM_FAILURE,
   SEND_NEW_CONFIRM_SUCCESS,
+  FORGOT_PASSWORD,
+  PASSWORD_RESET,
+  PASSWORD_RESET_FAILED,
 } from '../constants';
 
 export interface AuthState {
@@ -41,6 +44,7 @@ export const authReducer = (state = initialAutState, action: any) => {
         ...state,
         email: null,
         showCodeConfirmation: false,
+        showForgotPassword: true,
       };
     case SEND_NEW_CONFIRM_FAILURE:
       return {
@@ -99,6 +103,25 @@ export const authReducer = (state = initialAutState, action: any) => {
       return {
         ...state,
         isSignedIn: true,
+        loading: false,
+      };
+    case FORGOT_PASSWORD:
+      return {
+        ...state,
+        loading: false,
+        showForgotPassword: true,
+        email: action.payload,
+      };
+    case PASSWORD_RESET:
+      return {
+        ...state,
+        loading: false,
+        showForgotPassword: false,
+        email: null,
+      };
+    case PASSWORD_RESET_FAILED:
+      return {
+        ...state,
         loading: false,
       };
     case LOADING:
