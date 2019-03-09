@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "carcassonne-scoreboard-app",
-  "alias": "carcassonne-scoreboard-app",
+  "alias": "carcassonne-scoreboard",
   "builds": [
     {
       "src": "packages/carcassonne-scoreboard-app-client/package.json",
@@ -38,5 +38,12 @@
       "headers": { "cache-control": "s-maxage=0" },
       "dest": "/packages/carcassonne-scoreboard-app-client/index.html"
     }
-  ]
+  ],
+  "env": {
+    "REACT_APP_API_URL": "http://localhost:8888",
+    "REACT_APP_APP_NAME": "Carcassonne Scoreboard App",
+    "REACT_APP_REGION": "@carcassonne_scoreboard_app_client_react_app_region",
+    "REACT_APP_USER_POOL_ID": "@carcassonne_scoreboard_app_client_react_app_user_pool_id",
+    "REACT_APP_APP_CLIENT_ID": "@carcassonne_scoreboard_app_client_react_app_app_client_id"
+  }
 }
