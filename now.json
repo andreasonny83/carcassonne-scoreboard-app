@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "name": "carcassonne-scoreboard-app",
+  "alias": "carcassonne-scoreboard-app",
+  "builds": [
+    {
+      "src": "packages/carcassonne-scoreboard-app-client/package.json",
+      "use": "@now/static-build",
+      "config": { "distDir": "build" }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "headers": { "cache-control": "s-maxage=31536000,immutable" },
+      "dest": "/packages/carcassonne-scoreboard-app-client/static/$1"
+    },
+    { "src": "/favicon.ico", "dest": "/packages/carcassonne-scoreboard-app-client/favicon.ico" },
+    {
+      "src": "/asset-manifest.json",
+      "dest": "/packages/carcassonne-scoreboard-app-client/asset-manifest.json"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/packages/carcassonne-scoreboard-app-client/manifest.json"
+    },
+    {
+      "src": "/precache-manifest.(.*)",
+      "dest": "/packages/carcassonne-scoreboard-app-client/precache-manifest.$1"
+    },
+    {
+      "src": "/service-worker.js",
+      "headers": { "cache-control": "s-maxage=0" },
+      "dest": "/packages/carcassonne-scoreboard-app-client/service-worker.js"
+    },
+    {
+      "src": "/(.*)",
+      "headers": { "cache-control": "s-maxage=0" },
+      "dest": "/packages/carcassonne-scoreboard-app-client/index.html"
+    }
+  ]
+}
