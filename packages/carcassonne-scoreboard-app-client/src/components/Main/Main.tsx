@@ -1,13 +1,14 @@
 import React, { PureComponent } from 'react';
-import { Home } from '../Home';
-import { Header } from '../Header';
-import { Footer } from '../Footer';
+import { Switch, Route, Redirect, RouteComponentProps } from 'react-router';
+
+import { Welcome } from '../Welcome';
+import { NewGame } from '../NewGame';
+import { Game } from '../Game';
+import { UserProfile } from '../User';
+
 import { AppContext, IAppContext } from '../PrivateRouter/app.context';
 
-import './Main.css';
-
-interface MainComponentProps {
-  signOut(): void;
+interface MainComponentProps extends RouteComponentProps {
   showNotification(message: string, timeout?: number): void;
 }
 
@@ -23,14 +24,14 @@ export class MainComponent extends PureComponent<MainComponentProps> {
   }
 
   public render(): JSX.Element {
-    const { signOut } = this.props;
-
     return (
-      <div className="MainComponent">
-        <Header onSignOut={signOut} />
-        <Home />
-        <Footer />
-      </div>
+      <Switch>
+        <Route path={`/app`} exact={true} component={Welcome} />
+        <Route path={`/app/game/new`} component={NewGame} />
+        <Route path={`/app/game/:gameId`} component={Game} />
+        <Route path={`/app/user/profile`} component={UserProfile} />
+        <Redirect to={'/404'} />
+      </Switch>
     );
   }
 }

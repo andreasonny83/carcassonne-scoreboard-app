@@ -1,19 +1,50 @@
 import React, { PureComponent } from 'react';
-import { AppContext, IAppContext } from '../PrivateRouter/app.context';
 import { Link as RouterLink } from 'react-router-dom';
-
 import { styled } from '@material-ui/styles';
-import { AppBar, Toolbar, Typography, Link, Menu, MenuItem, IconButton } from '@material-ui/core';
-import { AccountCircle } from '@material-ui/icons';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Link,
+  Menu,
+  MenuItem,
+  IconButton,
+  Avatar,
+} from '@material-ui/core';
 
 import { WithStylesProps } from './HeaderWithStyles';
 
-const StyledLink = styled(RouterLink)({
+const TitleLink = styled(RouterLink)({
   textDecoration: 'none',
 });
 
+const StyledRouterLink = styled(RouterLink)({
+  textDecoration: 'none',
+  display: 'block',
+  paddingLeft: '1rem',
+  paddingRight: '1rem',
+});
+
+const StyledLink = styled(Link)({
+  textDecoration: 'none',
+  display: 'block',
+  paddingLeft: '1rem',
+  paddingRight: '1rem',
+});
+
+const StyledIconButton = styled(IconButton)({
+  padding: '4px',
+});
+
+const StyledAvatar = styled(Avatar)({
+  width: '36px',
+  height: '36px',
+});
+
 interface HeaderProps extends WithStylesProps {
-  onSignOut(): void;
+  appName: string;
+  isSignedIn: boolean;
+  signOut(): void;
 }
 
 interface HeaderState {
@@ -25,51 +56,53 @@ const initialState: HeaderState = {
 };
 
 export class HeaderComponent extends PureComponent<HeaderProps, HeaderState> {
-  public static contextType: React.Context<IAppContext> = AppContext;
   public readonly state: HeaderState = initialState;
-  public context!: React.ContextType<typeof AppContext>;
 
   public render(): JSX.Element {
-    const { onSignOut, classes } = this.props;
+    const { appName, signOut, isSignedIn, classes } = this.props;
     const { anchorEl } = this.state;
-    const { app } = this.context;
 
     return (
       <div className={`Header ${classes.root}`}>
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" color="inherit" style={{ flexGrow: 1 }}>
-              <StyledLink to="/app">{app.appName}</StyledLink>
+              <TitleLink to="/app">{appName}</TitleLink>
             </Typography>
 
-            <div>
-              <IconButton
-                aria-owns={anchorEl ? 'user-menu' : undefined}
-                aria-haspopup="true"
-                onClick={this.handleMenuOpen}
-              >
-                <AccountCircle />
-              </IconButton>
-              <Menu
-                id="user-menu"
-                anchorEl={anchorEl}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                open={Boolean(anchorEl)}
-                onClose={this.handleMenuClose}
-              >
-                <MenuItem onClick={this.handleMenuClose}>
-                  <StyledLink className={classes.menuItem} to={`/app/user/profile`}>
-                    Profile
-                  </StyledLink>
-                </MenuItem>
-                <MenuItem onClick={this.handleMenuClose}>
-                  <Link underline="none" onClick={onSignOut}>
-                    Sign Out
-                  </Link>
-                </MenuItem>
-              </Menu>
-            </div>
+            {isSignedIn && (
+              <div>
+                <StyledIconButton
+                  aria-owns={anchorEl ? 'user-menu' : undefined}
+                  aria-haspopup="true"
+                  onClick={this.handleMenuOpen}
+                >
+                  <StyledAvatar
+                    alt="User avatar"
+                    src="https://avatars1.githubusercontent.com/u/8806300?s=460&v=4"
+                  />
+                </StyledIconButton>
+                <Menu
+                  id="user-menu"
+                  anchorEl={anchorEl}
+                  anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  open={Boolean(anchorEl)}
+                  onClose={this.handleMenuClose}
+                >
+                  <MenuItem disableGutters onClick={this.handleMenuClose}>
+                    <StyledRouterLink className={classes.menuItem} to={`/app/user/profile`}>
+                      Profile
+                    </StyledRouterLink>
+                  </MenuItem>
+                  <MenuItem disableGutters onClick={this.handleMenuClose}>
+                    <StyledLink underline="none" onClick={signOut}>
+                      Sign Out
+                    </StyledLink>
+                  </MenuItem>
+                </Menu>
+              </div>
+            )}
           </Toolbar>
         </AppBar>
       </div>

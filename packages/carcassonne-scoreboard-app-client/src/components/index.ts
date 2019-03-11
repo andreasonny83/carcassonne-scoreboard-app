@@ -2,7 +2,6 @@ export * from './App';
 export * from './Auth';
 export * from './Footer';
 export * from './Header';
-export * from './Home';
 export * from './Main';
 export * from './NotFound';
 export * from './PrivateRouter';

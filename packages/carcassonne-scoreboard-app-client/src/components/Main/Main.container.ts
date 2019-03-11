@@ -1,13 +1,16 @@
 import { connect } from 'react-redux';
-import { signOut, showNotification } from '../../actions';
+import { withRouter } from 'react-router';
+
+import { showNotification } from '../../actions';
 import { MainComponent } from './Main';
 
 const mapDispatchToProps = {
-  signOut,
   showNotification,
 };
 
-export const Main = connect(
-  null,
-  mapDispatchToProps
-)(MainComponent);
+export const Main = withRouter(
+  connect(
+    null,
+    mapDispatchToProps
+  )(MainComponent)
+);

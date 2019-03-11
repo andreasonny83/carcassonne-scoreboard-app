@@ -7,12 +7,8 @@ export interface IUser {
   avatar?: string;
 }
 
-export interface IApp {
-  appName: string;
-}
 export interface IAppContext {
   user: IUser;
-  app: IApp;
 }
 
 export const AppContext = React.createContext<IAppContext>({} as IAppContext);

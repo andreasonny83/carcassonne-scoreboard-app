@@ -1,7 +1,23 @@
 import React, { PureComponent } from 'react';
+import { Typography } from '@material-ui/core';
 
-export class Footer extends PureComponent {
+import { FooterWithStyles } from './FooterWithStyles';
+
+type FooterProps = FooterWithStyles;
+
+export class FooterComponent extends PureComponent<FooterProps> {
   public render(): JSX.Element {
-    return <div className="Footer container">Copyright &copy; 2019</div>;
+    const { classes } = this.props;
+
+    return (
+      <footer className={classes.footer}>
+        <Typography variant="h6" align="center" gutterBottom>
+          Footer
+        </Typography>
+        <Typography variant="subtitle1" align="center" color="textSecondary" component="p">
+          Copyright &copy; 2019
+        </Typography>
+      </footer>
+    );
   }
 }

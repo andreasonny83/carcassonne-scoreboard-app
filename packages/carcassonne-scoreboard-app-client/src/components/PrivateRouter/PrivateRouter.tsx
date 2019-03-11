@@ -10,7 +10,6 @@ interface PrivateRouterProps extends RouteProps {
   loading: boolean;
   exact?: boolean;
   user: IUser;
-  appName: string;
   userSignedIn(): void;
   getUserData(): any;
   signedOut(): void;
@@ -37,7 +36,6 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
       loading,
       isSignedIn,
       user,
-      appName,
       ...rest
     } = this.props;
 
@@ -49,7 +47,7 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
       <Route
         {...rest}
         render={props =>
-          this.renderRoute(target, isSignedIn, redirectTo, location, user, appName, props)
+          this.renderRoute(target, isSignedIn, redirectTo, location, user, props)
         }
       />
     );
@@ -61,11 +59,9 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
     redirectTo: string,
     location: any,
     user: any,
-    appName: string,
     props: any
   ): JSX.Element {
     const app: IAppContext = {
-      app: { appName },
       user,
     };
 
