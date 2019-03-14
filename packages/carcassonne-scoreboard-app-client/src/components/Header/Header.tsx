@@ -66,8 +66,8 @@ export class HeaderComponent extends PureComponent<HeaderProps, HeaderState> {
       <div className={`Header ${classes.root}`}>
         <AppBar position="static">
           <Toolbar>
-            <Typography variant="h6" color="inherit" style={{ flexGrow: 1 }}>
-              <TitleLink to="/app">{appName}</TitleLink>
+            <Typography variant="h6" color="secondary" className={classes.title}>
+              <TitleLink className={classes.titleLink} to="/app">{appName}</TitleLink>
             </Typography>
 
             {isSignedIn && (

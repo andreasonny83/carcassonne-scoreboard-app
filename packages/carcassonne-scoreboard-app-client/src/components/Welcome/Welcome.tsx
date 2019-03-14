@@ -3,12 +3,37 @@ import { QueryResult } from 'react-apollo';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { styled } from '@material-ui/styles';
-import { Link, Button, TextField } from '@material-ui/core';
+import { Link, Button, TextField, Paper, FormControl } from '@material-ui/core';
+import { withStyles, WithStyles, Theme, Grid, Typography } from '@material-ui/core';
+import withWidth, { isWidthUp, WithWidth } from '@material-ui/core/withWidth';
 
 import { AppContext, IAppContext } from '../PrivateRouter/app.context';
 import { UserData } from './Welcome.container';
 import { ChildProps } from 'react-apollo';
 import { NewGameResponse } from './Welcome.container';
+
+const styles = ({ spacing }: Theme) => ({
+  mainFeaturedPost: {
+    marginBottom: spacing.unit * 4,
+  },
+  mainFeaturedPostContent: {
+    padding: `${spacing.unit * 6}px`,
+  },
+  row: {
+    marginBottom: '1rem',
+  },
+  form: {
+    maxWidth: '500px',
+    marginTop: '2em',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    padding: '1em 0.5em',
+  },
+  joinGame: {
+    marginTop: '3em',
+    marginBottom: '0.75em',
+  },
+});
 
 const StyledLink = styled(RouterLink)({
   color: 'inherit',
@@ -24,7 +49,7 @@ interface UserQueryResult {
   user: UserData;
 }
 
-export interface WelcomeProps {
+export interface WelcomeProps extends WithStyles<typeof styles>, WithWidth {
   data: QueryResult & UserQueryResult;
   newGameMutation(): Promise<any>;
   joinGameMutation(options: any): Promise<any>;
@@ -37,26 +62,34 @@ interface WelcomeState {
   joinGameId: string;
   busy: boolean;
   joinGameError: boolean;
+  joinGameFieldError: boolean;
+  joinGameFieldPristine: boolean;
 }
 
 const initialState: WelcomeState = {
   joinGameId: '',
   busy: false,
   joinGameError: false,
+  joinGameFieldError: false,
+  joinGameFieldPristine: true,
 };
 
-export class WelcomeComponent extends PureComponent<
-  ChildProps<WelcomeProps, NewGameResponse>,
-  WelcomeState
-> {
+class Welcome extends PureComponent<ChildProps<WelcomeProps, NewGameResponse>, WelcomeState> {
   public static contextType: React.Context<IAppContext> = AppContext;
   public context!: React.ContextType<typeof AppContext>;
   public readonly state: WelcomeState = initialState;
 
   public render(): JSX.Element | null {
+    const {
+      joinGameId,
+      busy,
+      joinGameError,
+      joinGameFieldError,
+      joinGameFieldPristine,
+    } = this.state;
+    const { classes, width } = this.props;
     const { user: userContext } = this.context;
     const { loading, error, user } = this.props.data;
-    const { joinGameId, busy, joinGameError } = this.state;
     const userGames = (user && user.games && user.games.length) || 0;
 
     if (!user) {
@@ -64,50 +97,99 @@ export class WelcomeComponent extends PureComponent<
     }
 
     return (
-      <div className="Welcome">
-        {error ? (
-          <div>
-            <h2>Something went wrong</h2>
-            <p>Please check your Internet connection and try again later</p>
-          </div>
-        ) : loading ? (
-          <p>Loading...</p>
-        ) : (
-          <>
-            <h2>Welcome back {userContext.nickname}</h2>
-            <span>
-              You have played {userGames} {userGames === 1 ? 'game' : 'games'} so far
-            </span>
-            <div className="row">
-              <Link component={ButtonLink} underline="none">
-                Start a new game
-              </Link>
-            </div>
+      <Paper className={classes.mainFeaturedPost} elevation={1}>
+        <Grid container>
+          <Grid item md={12}>
+            <div className={classes.mainFeaturedPostContent}>
+              {error ? (
+                <div>
+                  <Typography
+                    component="h1"
+                    variant="h2"
+                    color="inherit"
+                    align="center"
+                    gutterBottom
+                  >
+                    Something went wrong
+                  </Typography>
+                  <Typography variant="h5" color="inherit" align="center" paragraph>
+                    Please check your Internet connection and try again later
+                  </Typography>
+                </div>
+              ) : loading ? (
+                <Typography variant="h5" color="inherit" align="center" paragraph>
+                  Loading...
+                </Typography>
+              ) : (
+                <Grid container>
+                  <Grid item xs={12}>
+                    <Typography
+                      component="h1"
+                      variant="h3"
+                      color="inherit"
+                      align="center"
+                      gutterBottom
+                    >
+                      Welcome back {userContext.nickname}
+                    </Typography>
 
-            <div className="row">Join a Game</div>
-            <div className="row">
-              <TextField
-                name="joinGameId"
-                type="text"
-                variant="outlined"
-                className="joinGameId"
-                disabled={busy}
-                value={joinGameId}
-                onChange={this.updateJoinGameName}
-                label="Game name"
-              />
-              {joinGameError && (
-                <div className="joinGameError">The game you entered is not valid</div>
+                    <Typography align="center" gutterBottom>
+                      You have played {userGames} {userGames === 1 ? 'game' : 'games'} so far
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <form className={classes.form}>
+                      <Grid container justify="center">
+                        <FormControl>
+                          <Link gutterBottom component={ButtonLink} underline="none">
+                            Start a new game
+                          </Link>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid container className={classes.joinGame}>
+                        <FormControl fullWidth={true} error={joinGameFieldError}>
+                          <Typography align="center" gutterBottom>
+                            Join a Game
+                          </Typography>
+                          <TextField
+                            name="joinGameId"
+                            type="text"
+                            variant="outlined"
+                            className="joinGameId"
+                            disabled={busy}
+                            error={joinGameFieldError}
+                            value={joinGameId}
+                            onChange={this.updateJoinGameName}
+                            label="Game name"
+                          />
+                          {joinGameError && (
+                            <Typography>The game you entered is not valid</Typography>
+                          )}
+                        </FormControl>
+                      </Grid>
+
+                      <Grid container justify="center">
+                        <FormControl>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={this.joinGame(joinGameId)}
+                            disabled={joinGameFieldError || joinGameFieldPristine}
+                          >
+                            Join
+                          </Button>
+                        </FormControl>
+                      </Grid>
+                    </form>
+                  </Grid>
+                </Grid>
               )}
             </div>
-            <div className="row">
-              <Button variant="outlined" color="primary" onClick={this.joinGame(joinGameId)}>
-                Join game
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
+          </Grid>
+        </Grid>
+      </Paper>
     );
   }
 
@@ -117,9 +199,13 @@ export class WelcomeComponent extends PureComponent<
 
     event.preventDefault();
 
+    const joinGameFieldError = !(value && value.length > 8);
+
     this.setState({
+      joinGameFieldError,
       joinGameId: value,
       joinGameError: false,
+      joinGameFieldPristine: false,
     });
   };
 
@@ -134,6 +220,13 @@ export class WelcomeComponent extends PureComponent<
 
   private joinGame = (id: string) => () => {
     const { joinGameMutation, joinGame, showNotification } = this.props;
+
+    if (!id) {
+      this.setState({
+        joinGameFieldError: true,
+      });
+      return;
+    }
 
     this.setState({
       busy: true,
@@ -162,3 +255,5 @@ export class WelcomeComponent extends PureComponent<
       });
   };
 }
+
+export const WelcomeComponent = withStyles(styles)(withWidth()(Welcome));

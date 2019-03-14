@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { Redirect } from 'react-router';
-import { Typography, Link, Card, CardContent, CardActions, Avatar } from '@material-ui/core';
+import { Typography, Link, Card, CardContent, CardActions, Avatar, Grid } from '@material-ui/core';
 import { Lock } from '@material-ui/icons';
 
 import { SignInData, VerifyCodeData } from '../../actions';
@@ -64,88 +64,90 @@ export class AuthComponent extends PureComponent<AuthProps, AuthState> {
     }
 
     return (
-      <div className={classes.root}>
-        {showCodeConfirmation && email && (
-          <CodeConfirmationForm
-            classes={classes}
-            email={email}
-            onLoaded={this.showLogin}
-            toggleLoading={toggleLoading}
-            loading={loading}
-            onUndo={this.undo}
-            verifyCode={verifyCode}
-            sendNewCode={sendNewCode}
-          />
-        )}
+      <Grid container justify="center" className={classes.container}>
+        <Grid item xs={12}>
+          {showCodeConfirmation && email && (
+            <CodeConfirmationForm
+              classes={classes}
+              email={email}
+              onLoaded={this.showLogin}
+              toggleLoading={toggleLoading}
+              loading={loading}
+              onUndo={this.undo}
+              verifyCode={verifyCode}
+              sendNewCode={sendNewCode}
+            />
+          )}
 
-        {showForgotPassword && email && (
-          <ResetPasswordFormForm
-            classes={classes}
-            email={email}
-            toggleLoading={toggleLoading}
-            loading={loading}
-            onUndo={this.undo}
-            onResetPassword={resetPassword}
-            showNotification={showNotification}
-          />
-        )}
+          {showForgotPassword && email && (
+            <ResetPasswordFormForm
+              classes={classes}
+              email={email}
+              toggleLoading={toggleLoading}
+              loading={loading}
+              onUndo={this.undo}
+              onResetPassword={resetPassword}
+              showNotification={showNotification}
+            />
+          )}
 
-        {!showForgotPassword && !showCodeConfirmation && !showRegister && (
-          <Card className={classes.card}>
-            <CardContent className={classes.card}>
-              <Avatar className={classes.avatar}>
-                <Lock />
-              </Avatar>
+          {!showForgotPassword && !showCodeConfirmation && !showRegister && (
+            <Card className={classes.card}>
+              <CardContent className={classes.card}>
+                <Avatar className={classes.avatar}>
+                  <Lock />
+                </Avatar>
 
-              <Typography component="h1" variant="h5">
-                Sign in
-              </Typography>
+                <Typography component="h1" variant="h5">
+                  Sign in
+                </Typography>
 
-              <LoginForm
-                classes={classes}
-                onLogin={signIn}
-                onCodeRequired={verifyUser}
-                showNotification={showNotification}
-                onForgotPassword={forgotPassword}
-                loading={loading}
-                toggleLoading={toggleLoading}
-              />
-            </CardContent>
+                <LoginForm
+                  classes={classes}
+                  onLogin={signIn}
+                  onCodeRequired={verifyUser}
+                  showNotification={showNotification}
+                  onForgotPassword={forgotPassword}
+                  loading={loading}
+                  toggleLoading={toggleLoading}
+                />
+              </CardContent>
 
-            <CardActions>
-              <Link component="button" onClick={this.showRegister}>
-                Register
-              </Link>
-            </CardActions>
-          </Card>
-        )}
-        {!showCodeConfirmation && showRegister && (
-          <Card className={classes.card}>
-            <CardContent className={classes.card}>
-              <Avatar className={classes.avatar}>
-                <Lock />
-              </Avatar>
+              <CardActions>
+                <Link component="button" onClick={this.showRegister}>
+                  Register
+                </Link>
+              </CardActions>
+            </Card>
+          )}
+          {!showCodeConfirmation && showRegister && (
+            <Card className={classes.card}>
+              <CardContent className={classes.card}>
+                <Avatar className={classes.avatar}>
+                  <Lock />
+                </Avatar>
 
-              <Typography component="h1" variant="h5">
-                Register
-              </Typography>
+                <Typography component="h1" variant="h5">
+                  Register
+                </Typography>
 
-              <RegistrationForm
-                classes={classes}
-                onRegister={signUp}
-                toggleLoading={toggleLoading}
-                loading={loading}
-              />
-            </CardContent>
+                <RegistrationForm
+                  classes={classes}
+                  onRegister={signUp}
+                  toggleLoading={toggleLoading}
+                  loading={loading}
+                />
+              </CardContent>
 
-            <CardActions>
-              <Link component="button" onClick={this.showLogin}>
-                Back to Login
-              </Link>
-            </CardActions>
-          </Card>
-        )}
-      </div>
+              <CardActions>
+                <Link component="button" onClick={this.showLogin}>
+                  Back to Login
+                </Link>
+              </CardActions>
+            </Card>
+          )}
+        </Grid>
+      </Grid>
     );
   }
 

@@ -12,12 +12,17 @@ const styles = ({ breakpoints, spacing, palette }: Theme) => ({
     width: 'auto',
     margin: 0,
   },
+  grid: {
+    minHeight: '100vh',
+    marginBottom: 0,
+  },
   main: {
+    flex: '1 1 auto',
     width: 'auto',
-    marginLeft: spacing.unit,
-    marginRight: spacing.unit,
-    [breakpoints.up(500 + spacing.unit * 3 * 2)]: {
-      width: 500,
+    marginLeft: spacing.unit * 2,
+    marginRight: spacing.unit * 2,
+    [breakpoints.up(1100 + spacing.unit * 3 * 2)]: {
+      width: 1100,
       marginLeft: 'auto',
       marginRight: 'auto',
     },
@@ -26,6 +31,9 @@ const styles = ({ breakpoints, spacing, palette }: Theme) => ({
     backgroundColor: palette.grey[100],
     color: palette.common.white,
     marginBottom: spacing.unit * 4,
+  },
+  footer: {
+    paddingBottom: 0,
   },
 });
 
@@ -41,15 +49,20 @@ export class AppWrapperComponent extends PureComponent<
 
     return (
       <div className={classes.layout}>
-        <Header appName={appName} />
-        <main className={classes.main}>
-          <Grid container justify="center">
-            <Grid item xs={12}>
-              {routes()}
-            </Grid>
+        <Grid
+          className={classes.grid}
+          container
+          direction="column"
+          justify="space-between"
+          alignItems="stretch"
+          wrap="nowrap"
+        >
+          <Header appName={appName} />
+          <main className={classes.main}>{routes()}</main>
+          <Grid item className={classes.footer}>
+            <Footer />
           </Grid>
-        </main>
-        <Footer />
+        </Grid>
         <Snackbar />
       </div>
     );

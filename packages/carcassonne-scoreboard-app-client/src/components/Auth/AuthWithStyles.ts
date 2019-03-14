@@ -1,20 +1,18 @@
 import { withStyles, createStyles, WithStyles, Theme } from '@material-ui/core/styles';
 import { AuthComponent } from './Auth';
 
-const styles = ({ spacing, breakpoints, palette }: Theme) =>
+const styles = ({ spacing, palette }: Theme) =>
   createStyles({
-    root: {
-      display: 'flex',
-      flexFlow: 'column',
+    container: {
+      maxWidth: '500px',
+      marginLeft: 'auto',
+      marginRight: 'auto',
     },
     avatar: {
       margin: spacing.unit,
       backgroundColor: palette.secondary.main,
     },
     card: {
-      [breakpoints.up(500 + spacing.unit * 3 * 2)]: {
-        marginTop: spacing.unit * 4,
-      },
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
