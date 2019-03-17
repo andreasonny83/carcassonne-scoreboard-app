@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { Redirect } from 'react-router';
-import { Typography, Link, Card, CardContent, CardActions, Avatar, Grid } from '@material-ui/core';
+import { Typography, Card, CardContent, Avatar, Grid, CardHeader } from '@material-ui/core';
 import { Lock } from '@material-ui/icons';
 
 import { SignInData, VerifyCodeData } from '../../actions';
@@ -67,41 +67,74 @@ export class AuthComponent extends PureComponent<AuthProps, AuthState> {
       <Grid container justify="center" className={classes.container}>
         <Grid item xs={12}>
           {showCodeConfirmation && email && (
-            <CodeConfirmationForm
-              classes={classes}
-              email={email}
-              onLoaded={this.showLogin}
-              toggleLoading={toggleLoading}
-              loading={loading}
-              onUndo={this.undo}
-              verifyCode={verifyCode}
-              sendNewCode={sendNewCode}
-            />
+            <Card className={classes.card}>
+              <CardHeader
+                disableTypography={true}
+                title={
+                  <Typography component="h2" variant="h5" className={classes.header}>
+                    <Avatar className={classes.avatar}>
+                      <Lock />
+                    </Avatar>
+                    Awaiting Confirmation
+                  </Typography>
+                }
+              />
+              <CardContent className={classes.card}>
+                <CodeConfirmationForm
+                  classes={classes}
+                  email={email}
+                  onLoaded={this.showLogin}
+                  toggleLoading={toggleLoading}
+                  loading={loading}
+                  onUndo={this.undo}
+                  verifyCode={verifyCode}
+                  sendNewCode={sendNewCode}
+                />
+              </CardContent>
+            </Card>
           )}
 
           {showForgotPassword && email && (
-            <ResetPasswordFormForm
-              classes={classes}
-              email={email}
-              toggleLoading={toggleLoading}
-              loading={loading}
-              onUndo={this.undo}
-              onResetPassword={resetPassword}
-              showNotification={showNotification}
-            />
+            <Card className={classes.card}>
+              <CardHeader
+                disableTypography={true}
+                title={
+                  <Typography component="h2" variant="h5" className={classes.header}>
+                    <Avatar className={classes.avatar}>
+                      <Lock />
+                    </Avatar>
+                    Did you forget your password?
+                  </Typography>
+                }
+              />
+              <CardContent className={classes.card}>
+                <ResetPasswordFormForm
+                  classes={classes}
+                  email={email}
+                  toggleLoading={toggleLoading}
+                  loading={loading}
+                  onUndo={this.undo}
+                  onResetPassword={resetPassword}
+                  showNotification={showNotification}
+                />
+              </CardContent>
+            </Card>
           )}
 
           {!showForgotPassword && !showCodeConfirmation && !showRegister && (
             <Card className={classes.card}>
+              <CardHeader
+                disableTypography={true}
+                title={
+                  <Typography component="h2" variant="h5" className={classes.header}>
+                    <Avatar className={classes.avatar}>
+                      <Lock />
+                    </Avatar>
+                    Sign in
+                  </Typography>
+                }
+              />
               <CardContent className={classes.card}>
-                <Avatar className={classes.avatar}>
-                  <Lock />
-                </Avatar>
-
-                <Typography component="h1" variant="h5">
-                  Sign in
-                </Typography>
-
                 <LoginForm
                   classes={classes}
                   onLogin={signIn}
@@ -110,40 +143,34 @@ export class AuthComponent extends PureComponent<AuthProps, AuthState> {
                   onForgotPassword={forgotPassword}
                   loading={loading}
                   toggleLoading={toggleLoading}
+                  onShowRegister={this.showRegister}
                 />
               </CardContent>
-
-              <CardActions>
-                <Link component="button" onClick={this.showRegister}>
-                  Register
-                </Link>
-              </CardActions>
             </Card>
           )}
           {!showCodeConfirmation && showRegister && (
             <Card className={classes.card}>
+              <CardHeader
+                disableTypography={true}
+                title={
+                  <Typography component="h2" variant="h5" className={classes.header}>
+                    <Avatar className={classes.avatar}>
+                      <Lock />
+                    </Avatar>
+                    Register
+                  </Typography>
+                }
+              />
+
               <CardContent className={classes.card}>
-                <Avatar className={classes.avatar}>
-                  <Lock />
-                </Avatar>
-
-                <Typography component="h1" variant="h5">
-                  Register
-                </Typography>
-
                 <RegistrationForm
                   classes={classes}
                   onRegister={signUp}
                   toggleLoading={toggleLoading}
                   loading={loading}
+                  onBackToLogin={this.showLogin}
                 />
               </CardContent>
-
-              <CardActions>
-                <Link component="button" onClick={this.showLogin}>
-                  Back to Login
-                </Link>
-              </CardActions>
             </Card>
           )}
         </Grid>

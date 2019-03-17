@@ -1,18 +1,5 @@
 import React, { PureComponent } from 'react';
-
-import {
-  Typography,
-  Avatar,
-  FormControl,
-  InputLabel,
-  OutlinedInput,
-  Link,
-  Button,
-  CardContent,
-  Card,
-  CardActions,
-} from '@material-ui/core';
-import { Lock } from '@material-ui/icons';
+import { Typography, FormControl, InputLabel, OutlinedInput, Button } from '@material-ui/core';
 
 import { VerifyCodeData } from '../../actions';
 
@@ -52,61 +39,50 @@ export class CodeConfirmationForm extends PureComponent<
     const { code } = this.state;
 
     return (
-      <Card className={classes.card}>
-        <CardContent className={classes.card}>
-          <Avatar className={classes.avatar}>
-            <Lock />
-          </Avatar>
+      <form onSubmit={this.handleSubmit(email)} className={classes.form}>
+        <Typography variant="caption">We sent an email to {email}</Typography>
 
-          <Typography component="h1" variant="h5">
-            Awaiting Confirmation
-          </Typography>
+        <FormControl margin="normal" variant="outlined" required fullWidth>
+          <InputLabel htmlFor="password">Enter the confirmation code</InputLabel>
+          <OutlinedInput
+            id="code"
+            name="code"
+            autoComplete="current-password"
+            type="text"
+            value={code}
+            disabled={loading}
+            onChange={this.handleChange}
+            labelWidth={240}
+            fullWidth
+            required
+            autoFocus
+          />
+        </FormControl>
 
-          <Typography variant="caption">We sent an email to {email}</Typography>
+        <Button
+          type="submit"
+          fullWidth
+          variant="outlined"
+          color="primary"
+          className={classes.submit}
+          disabled={loading}
+        >
+          Verify
+        </Button>
 
-          <form onSubmit={this.handleSubmit(email)} className={classes.form}>
-            <FormControl margin="normal" variant="outlined" required fullWidth>
-              <InputLabel htmlFor="password">Enter the confirmation code</InputLabel>
-              <OutlinedInput
-                id="code"
-                name="code"
-                autoComplete="current-password"
-                type="text"
-                value={code}
-                disabled={loading}
-                onChange={this.handleChange}
-                labelWidth={240}
-                fullWidth
-                required
-                autoFocus
-              />
-            </FormControl>
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="outlined"
-              color="primary"
-              className={classes.submit}
-              disabled={loading}
-            >
-              Verify
-            </Button>
-          </form>
-
-          <Typography>
-            <Link component="button" onClick={this.newCode(email)}>
-              Send me a new confirmation code
-            </Link>
-          </Typography>
-        </CardContent>
-
-        <CardActions>
-          <Link component="button" onClick={onUndo}>
-            undo
-          </Link>
-        </CardActions>
-      </Card>
+        <Button
+          onClick={this.newCode(email)}
+          variant="text"
+          color="primary"
+          className={classes.actionButton}
+          fullWidth
+        >
+          Send me a new confirmation code
+        </Button>
+        <Button color="secondary" onClick={onUndo} variant="text" fullWidth>
+          Undo
+        </Button>
+      </form>
     );
   }
 

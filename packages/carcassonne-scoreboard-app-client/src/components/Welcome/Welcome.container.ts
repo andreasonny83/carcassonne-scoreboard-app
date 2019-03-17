@@ -2,7 +2,8 @@ import gql from 'graphql-tag';
 import { graphql, compose } from 'react-apollo';
 import { connect } from 'react-redux';
 import { newGame, joinGame, showNotification } from '../../actions';
-import { WelcomeComponent, WelcomeProps } from './Welcome';
+import { WelcomeProps } from './Welcome';
+import { WelcomeWithStyles } from './WelcomeWithStyles';
 
 export interface UserData {
   id: string;
@@ -70,5 +71,5 @@ export const Welcome = withGame(
   connect(
     null,
     mapDispatchToProps
-  )(WelcomeComponent)
+  )(WelcomeWithStyles)
 );

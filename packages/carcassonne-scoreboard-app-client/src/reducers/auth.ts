@@ -44,7 +44,7 @@ export const authReducer = (state = initialAutState, action: any) => {
         ...state,
         email: null,
         showCodeConfirmation: false,
-        showForgotPassword: true,
+        showForgotPassword: false,
       };
     case SEND_NEW_CONFIRM_FAILURE:
       return {

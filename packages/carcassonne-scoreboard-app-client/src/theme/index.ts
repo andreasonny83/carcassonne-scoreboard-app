@@ -1,7 +1,6 @@
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme, Theme } from '@material-ui/core/styles';
 
 const defaultTheme = createMuiTheme({
-  direction: 'ltr',
   palette: {
     primary: {
       main: '#0D47A1',
@@ -10,33 +9,51 @@ const defaultTheme = createMuiTheme({
       contrastText: '#FFEB3B',
     },
     secondary: {
-      main: '#FBC02D',
+      main: '#FAB505',
       light: 'rgb(251, 204, 87)',
       dark: 'rgb(175, 134, 31)',
-      contrastText: '#000000',
+      contrastText: '#111111',
     },
     type: 'light',
   },
+
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 480,
+      md: 600,
+      lg: 1100,
+      xl: 1280,
+    },
+  },
+
+  direction: 'ltr',
+
   typography: {
     useNextVariants: true,
     fontSize: 16,
     fontWeightMedium: 500,
     fontFamily: "'Raleway', Lucida Grande, sans-serif",
-
-    h3: {
-      fontSize: '2rem',
-    },
   },
 });
 
-export const theme = {
+export const theme: Theme = {
   ...defaultTheme,
+
   typography: {
     ...defaultTheme.typography,
-    h3: {
-      ...defaultTheme.typography.h3,
-      [defaultTheme.breakpoints.up('sm')]: {
-        fontSize: '2.75rem',
+
+    h5: {
+      ...defaultTheme.typography.h5,
+      [defaultTheme.breakpoints.down('sm')]: {
+        fontSize: '1.5rem'
+      }
+    },
+
+    h6: {
+      ...defaultTheme.typography.h6,
+      [defaultTheme.breakpoints.down('xs')]: {
+        fontSize: '1rem',
       },
     },
   },

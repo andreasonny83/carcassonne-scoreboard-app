@@ -1,6 +1,4 @@
 import React, { PureComponent } from 'react';
-
-import { SignInData } from '../../actions';
 import {
   FormControl,
   InputLabel,
@@ -9,6 +7,8 @@ import {
   Button,
   Link,
 } from '@material-ui/core';
+
+import { SignInData } from '../../actions';
 import { IAuthWithStyles } from './AuthWithStyles';
 
 interface LoginFormProps extends IAuthWithStyles {
@@ -18,6 +18,7 @@ interface LoginFormProps extends IAuthWithStyles {
   onCodeRequired(username: string): void;
   toggleLoading(status: boolean): void;
   showNotification(message: string, timeout?: number): void;
+  onShowRegister(): void;
 }
 
 interface LoginFormState {
@@ -40,7 +41,7 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
   public readonly state: LoginFormState = initialState;
 
   public render(): JSX.Element {
-    const { loading, classes } = this.props;
+    const { loading, onShowRegister, classes } = this.props;
     const { username, password, usernameValid, passwordValid, pristine } = this.state;
 
     return (
@@ -101,13 +102,23 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
 
         <Button
           type="submit"
-          fullWidth
           variant="outlined"
           color="primary"
           className={classes.submit}
           disabled={loading || !passwordValid || !usernameValid}
+          fullWidth
         >
           Sign in
+        </Button>
+
+        <Button
+          onClick={onShowRegister}
+          variant="text"
+          color="primary"
+          className={classes.actionButton}
+          fullWidth
+        >
+          Register
         </Button>
       </form>
     );

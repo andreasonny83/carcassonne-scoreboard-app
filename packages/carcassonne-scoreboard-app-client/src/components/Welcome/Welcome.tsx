@@ -1,55 +1,18 @@
 import React, { PureComponent } from 'react';
-import { QueryResult } from 'react-apollo';
-import { Link as RouterLink } from 'react-router-dom';
+import { QueryResult, ChildProps } from 'react-apollo';
 
-import { styled } from '@material-ui/styles';
 import { Link, Button, TextField, Paper, FormControl } from '@material-ui/core';
-import { withStyles, WithStyles, Theme, Grid, Typography } from '@material-ui/core';
-import withWidth, { isWidthUp, WithWidth } from '@material-ui/core/withWidth';
+import { Grid, Typography } from '@material-ui/core';
 
 import { AppContext, IAppContext } from '../PrivateRouter/app.context';
-import { UserData } from './Welcome.container';
-import { ChildProps } from 'react-apollo';
-import { NewGameResponse } from './Welcome.container';
-
-const styles = ({ spacing }: Theme) => ({
-  mainFeaturedPost: {
-    marginBottom: spacing.unit * 4,
-  },
-  mainFeaturedPostContent: {
-    padding: `${spacing.unit * 6}px`,
-  },
-  row: {
-    marginBottom: '1rem',
-  },
-  form: {
-    maxWidth: '500px',
-    marginTop: '2em',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    padding: '1em 0.5em',
-  },
-  joinGame: {
-    marginTop: '3em',
-    marginBottom: '0.75em',
-  },
-});
-
-const StyledLink = styled(RouterLink)({
-  color: 'inherit',
-});
-
-const ButtonLink = (props: any) => (
-  <Button variant="outlined" color="primary" {...props}>
-    <StyledLink to={'/app/game/new'} {...props} />
-  </Button>
-);
+import { UserData, NewGameResponse } from './Welcome.container';
+import { WelcomeStylesProps, ButtonLink } from './WelcomeWithStyles';
 
 interface UserQueryResult {
   user: UserData;
 }
 
-export interface WelcomeProps extends WithStyles<typeof styles>, WithWidth {
+export interface WelcomeProps extends WelcomeStylesProps {
   data: QueryResult & UserQueryResult;
   newGameMutation(): Promise<any>;
   joinGameMutation(options: any): Promise<any>;
@@ -74,7 +37,10 @@ const initialState: WelcomeState = {
   joinGameFieldPristine: true,
 };
 
-class Welcome extends PureComponent<ChildProps<WelcomeProps, NewGameResponse>, WelcomeState> {
+export class WelcomeComponent extends PureComponent<
+  ChildProps<WelcomeProps, NewGameResponse>,
+  WelcomeState
+> {
   public static contextType: React.Context<IAppContext> = AppContext;
   public context!: React.ContextType<typeof AppContext>;
   public readonly state: WelcomeState = initialState;
@@ -87,7 +53,7 @@ class Welcome extends PureComponent<ChildProps<WelcomeProps, NewGameResponse>, W
       joinGameFieldError,
       joinGameFieldPristine,
     } = this.state;
-    const { classes, width } = this.props;
+    const { classes } = this.props;
     const { user: userContext } = this.context;
     const { loading, error, user } = this.props.data;
     const userGames = (user && user.games && user.games.length) || 0;
@@ -124,8 +90,8 @@ class Welcome extends PureComponent<ChildProps<WelcomeProps, NewGameResponse>, W
                 <Grid container>
                   <Grid item xs={12}>
                     <Typography
-                      component="h1"
-                      variant="h3"
+                      component="h2"
+                      variant="h5"
                       color="inherit"
                       align="center"
                       gutterBottom
@@ -255,5 +221,3 @@ class Welcome extends PureComponent<ChildProps<WelcomeProps, NewGameResponse>, W
       });
   };
 }
-
-export const WelcomeComponent = withStyles(styles)(withWidth()(Welcome));

@@ -7,6 +7,7 @@ interface RegistrationFormProps extends IAuthWithStyles {
   loading: boolean;
   onRegister: (data: any) => void;
   toggleLoading(status: boolean): void;
+  onBackToLogin(): void;
 }
 
 interface RegistrationFormState {
@@ -29,7 +30,7 @@ export class RegistrationForm extends PureComponent<RegistrationFormProps, Regis
   public readonly state: RegistrationFormState = initialState;
 
   public render(): JSX.Element {
-    const { loading, classes } = this.props;
+    const { loading, onBackToLogin, classes } = this.props;
     const { username, password, usernameValid, passwordValid, pristine } = this.state;
 
     return (
@@ -92,6 +93,15 @@ export class RegistrationForm extends PureComponent<RegistrationFormProps, Regis
           disabled={loading || !passwordValid || !usernameValid}
         >
           Register
+        </Button>
+
+        <Button
+          onClick={onBackToLogin}
+          color="secondary"
+          className={classes.actionButton}
+          fullWidth
+        >
+          Back To Login
         </Button>
       </form>
     );

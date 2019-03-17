@@ -2,18 +2,12 @@ import React, { PureComponent } from 'react';
 
 import {
   Typography,
-  Avatar,
   FormControl,
   InputLabel,
   OutlinedInput,
-  Link,
   Button,
-  CardContent,
-  Card,
-  CardActions,
   FormHelperText,
 } from '@material-ui/core';
-import { Lock } from '@material-ui/icons';
 
 interface ResetPasswordFormProps {
   classes: any;
@@ -57,86 +51,78 @@ export class ResetPasswordFormForm extends PureComponent<
     const { code, password, codeValid, passwordValid, pristine } = this.state;
 
     return (
-      <Card className={classes.card}>
-        <CardContent className={classes.card}>
-          <Avatar className={classes.avatar}>
-            <Lock />
-          </Avatar>
+      <form onSubmit={this.handleSubmit(email)} className={classes.form}>
+        <Typography variant="caption">We sent an email to {email}</Typography>
 
-          <Typography component="h1" variant="h5">
-            Did you forget your password?
-          </Typography>
+        <FormControl
+          margin="normal"
+          variant="outlined"
+          required
+          fullWidth
+          error={!pristine && !passwordValid}
+        >
+          <InputLabel htmlFor="password">New Password</InputLabel>
+          <OutlinedInput
+            id="password"
+            name="password"
+            type="password"
+            value={password}
+            disabled={loading}
+            onChange={this.handleChange}
+            labelWidth={130}
+            autoFocus
+          />
+          <FormHelperText>
+            Password should be at least 8 characters long, with at least 1 uppercase, 1 lowercase
+            character amd 1 number
+          </FormHelperText>
+        </FormControl>
 
-          <Typography variant="caption">We sent an email to {email}</Typography>
+        <FormControl
+          margin="normal"
+          variant="outlined"
+          required
+          fullWidth
+          error={!pristine && !codeValid}
+        >
+          <InputLabel htmlFor="code">Enter the confirmation code</InputLabel>
+          <OutlinedInput
+            id="code"
+            name="code"
+            type="text"
+            value={code}
+            disabled={loading}
+            onChange={this.handleChange}
+            labelWidth={240}
+            fullWidth
+            required
+          />
+        </FormControl>
+        <FormHelperText hidden={pristine || codeValid}>
+          A valid code should be 6 digit long
+        </FormHelperText>
 
-          <form onSubmit={this.handleSubmit(email)} className={classes.form}>
-            <FormControl
-              margin="normal"
-              variant="outlined"
-              required
-              fullWidth
-              error={!pristine && !passwordValid}
-            >
-              <InputLabel htmlFor="password">New Password</InputLabel>
-              <OutlinedInput
-                id="password"
-                name="password"
-                type="password"
-                value={password}
-                disabled={loading}
-                onChange={this.handleChange}
-                labelWidth={130}
-                autoFocus
-              />
-              <FormHelperText>
-                Password should be at least 8 characters long, with at least 1 uppercase, 1
-                lowercase character amd 1 number
-              </FormHelperText>
-            </FormControl>
+        <Button
+          type="submit"
+          fullWidth
+          variant="outlined"
+          color="primary"
+          className={classes.submit}
+          disabled={loading || !passwordValid || !codeValid}
+        >
+          Reset Password
+        </Button>
 
-            <FormControl
-              margin="normal"
-              variant="outlined"
-              required
-              fullWidth
-              error={!pristine && !codeValid}
-            >
-              <InputLabel htmlFor="code">Enter the confirmation code</InputLabel>
-              <OutlinedInput
-                id="code"
-                name="code"
-                type="text"
-                value={code}
-                disabled={loading}
-                onChange={this.handleChange}
-                labelWidth={240}
-                fullWidth
-                required
-              />
-            </FormControl>
-            <FormHelperText hidden={pristine || codeValid}>
-              A valid code should be 6 digit long
-            </FormHelperText>
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="outlined"
-              color="primary"
-              className={classes.submit}
-              disabled={loading || !passwordValid || !codeValid}
-            >
-              Reset Password
-            </Button>
-          </form>
-        </CardContent>
-
-        <CardActions>
-          <Link component="button" onClick={onUndo}>
-            undo
-          </Link>
-        </CardActions>
-      </Card>
+        <Button
+          onClick={onUndo}
+          variant="text"
+          color="secondary"
+          className={classes.actionButton}
+          fullWidth
+        >
+          Undo
+        </Button>
+      </form>
     );
   }
 

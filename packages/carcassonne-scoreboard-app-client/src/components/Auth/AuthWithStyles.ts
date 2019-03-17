@@ -8,6 +8,11 @@ const styles = ({ spacing, palette }: Theme) =>
       marginLeft: 'auto',
       marginRight: 'auto',
     },
+    header: {
+      display: 'flex',
+      flexFlow: 'column',
+      alignItems: 'center',
+    },
     avatar: {
       margin: spacing.unit,
       backgroundColor: palette.secondary.main,
@@ -25,6 +30,9 @@ const styles = ({ spacing, palette }: Theme) =>
     submit: {
       marginTop: spacing.unit * 3,
     },
+    actionButton: {
+      marginTop: spacing.unit * 2,
+    }
   });
 
 export type IAuthWithStyles = WithStyles<typeof styles>;

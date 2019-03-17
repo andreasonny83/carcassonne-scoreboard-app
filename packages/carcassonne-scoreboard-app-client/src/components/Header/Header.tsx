@@ -1,45 +1,14 @@
 import React, { PureComponent } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-import { styled } from '@material-ui/styles';
+import { AppBar, Toolbar, Typography, Menu, MenuItem } from '@material-ui/core';
+
 import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Link,
-  Menu,
-  MenuItem,
-  IconButton,
-  Avatar,
-} from '@material-ui/core';
-
-import { WithStylesProps } from './HeaderWithStyles';
-
-const TitleLink = styled(RouterLink)({
-  textDecoration: 'none',
-});
-
-const StyledRouterLink = styled(RouterLink)({
-  textDecoration: 'none',
-  display: 'block',
-  paddingLeft: '1rem',
-  paddingRight: '1rem',
-});
-
-const StyledLink = styled(Link)({
-  textDecoration: 'none',
-  display: 'block',
-  paddingLeft: '1rem',
-  paddingRight: '1rem',
-});
-
-const StyledIconButton = styled(IconButton)({
-  padding: '4px',
-});
-
-const StyledAvatar = styled(Avatar)({
-  width: '36px',
-  height: '36px',
-});
+  WithStylesProps,
+  TitleLink,
+  StyledIconButton,
+  StyledAvatar,
+  StyledRouterLink,
+  StyledLink,
+} from './HeaderWithStyles';
 
 interface HeaderProps extends WithStylesProps {
   appName: string;
@@ -67,7 +36,9 @@ export class HeaderComponent extends PureComponent<HeaderProps, HeaderState> {
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" color="secondary" className={classes.title}>
-              <TitleLink className={classes.titleLink} to="/app">{appName}</TitleLink>
+              <TitleLink className={classes.titleLink} to="/app">
+                {appName}
+              </TitleLink>
             </Typography>
 
             {isSignedIn && (

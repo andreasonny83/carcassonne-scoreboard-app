@@ -13,7 +13,7 @@ import { MuiThemeProvider, CssBaseline } from '@material-ui/core';
 import { theme } from '../../theme';
 import { AMPLIFY, API_URL, APP_NAME } from '../../config';
 import { configureStore } from '../../configureStore';
-import { AppComponent } from './AppComponent';
+import { AppWithStyles } from './AppWithStyles';
 
 Amplify.configure(AMPLIFY);
 
@@ -52,7 +52,7 @@ export class App extends PureComponent {
           <ConnectedRouter history={history}>
             <MuiThemeProvider theme={theme}>
               <CssBaseline />
-              <AppComponent appName={APP_NAME} />
+              <AppWithStyles appName={APP_NAME} />
             </MuiThemeProvider>
           </ConnectedRouter>
         </Provider>
