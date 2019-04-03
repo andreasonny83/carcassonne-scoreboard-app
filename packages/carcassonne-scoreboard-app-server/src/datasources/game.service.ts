@@ -1,8 +1,12 @@
 import { DataSource } from 'apollo-datasource';
 import { uniqueNamesGenerator } from 'unique-names-generator';
 
-import { Game, IGame } from './game.data';
+import { Game, IGame, IPlayer } from './game.data';
 
+interface NewGameObject {
+  gameName: string,
+  players: IPlayer[],
+}
 export class GameService extends DataSource {
   private games: Map<string, IGame>;
 
@@ -16,12 +20,13 @@ export class GameService extends DataSource {
     console.log('...initialize...');
   }
 
-  public createGame(userId: string) {
+  public createGame(gameObject: NewGameObject, userId: string) {
     const gameId: string = newId();
     const game: IGame = {
       id: gameId,
-      name: gameId,
-      players: [
+      name: gameObject.gameName,
+      players: gameObject.players,
+      users: [
         userId
       ],
     };

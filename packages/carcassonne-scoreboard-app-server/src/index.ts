@@ -3,5 +3,9 @@ import { config } from './config';
 import { app } from './app';
 
 const port: string = config.getPort();
+const httpServer = server.init(app.appInstance, port);
 
-server.start(app, port);
+app.getApolloServer().then((apolloServer) => {
+  apolloServer.installSubscriptionHandlers(httpServer);
+  server.start(apolloServer);
+});

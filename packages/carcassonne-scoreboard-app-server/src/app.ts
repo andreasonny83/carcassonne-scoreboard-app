@@ -10,36 +10,43 @@ import { resolvers } from './graphql/resolvers';
 import { router } from './router';
 
 class App {
-  public app: Application;
+  public appInstance: Application;
   private admin: typeof adminController;
   private appConfig: IConfig;
 
   constructor(appConfig: IConfig) {
-    this.app = express();
+    this.appInstance = express();
     this.admin = adminController;
     this.appConfig = appConfig;
-    this.config();
   }
 
-  private config(): void {
-    this.app.use(morgan('dev'));
-    this.app.disable('x-powered-by');
-    this.app.use(cors());
+  public getApolloServer(): Promise<ApolloServer> {
+    return this.config();
+  }
+
+  private async config(): Promise<ApolloServer> {
+    this.appInstance.use(morgan('dev'));
+    this.appInstance.disable('x-powered-by');
+    this.appInstance.use(cors());
 
     // Support application/json type post data
-    this.app.use(bodyParser.json());
+    this.appInstance.use(bodyParser.json());
 
     // Support application/x-www-form-urlencoded post data
-    this.app.use(bodyParser.urlencoded({ extended: false }));
+    this.appInstance.use(bodyParser.urlencoded({ extended: false }));
 
-    this.app.use('/', router);
+    this.appInstance.use('/', router);
 
-    this.applyMiddlewares(this.app);
+    return this.applyMiddlewares(this.appInstance);
   }
 
-  private applyMiddlewares(expressApp: Application) {
-    const apolloServer: ApolloServer = new ApolloServer({
+  private async applyMiddlewares(expressApp: Application): Promise<ApolloServer> {
+    const apolloServer: ApolloServer = await new ApolloServer({
       context: async ({ req }: { req: Request }) => {
+        if (!req) {
+          return;
+        }
+
         // Allow GraphQL playground in development mode
         const originUrl: string = `localhost:${this.appConfig.getPort()}${req.baseUrl}`;
         const reg: RegExp = new RegExp(`${originUrl}$`, 'gi');
@@ -75,16 +82,22 @@ class App {
       `,
       resolvers,
       playground: this.appConfig.isDev(),
+      subscriptions: {
+        onConnect: () => console.log('Connected to websocket'),
+      },
+      tracing: true,
     });
 
-    apolloServer.applyMiddleware({
+    await apolloServer.applyMiddleware({
       app: expressApp,
       path: '/graph',
       // cors: {
       //   origin: 'http://localhost:3000',
       // },
     });
+
+    return apolloServer;
   }
 }
 
-export const app = new App(config).app;
+export const app = new App(config);
