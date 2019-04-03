@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Snackbar as Notification, Slide } from '@material-ui/core';
+import { Snackbar, Slide } from '@material-ui/core';
 
 class TransitionUp extends PureComponent {
   public render() {
@@ -23,14 +23,14 @@ export class SnackbarComponent extends PureComponent<SnackbarProps> {
     const { key = defaultProps.key, message, open, timeout = defaultProps.timeout } = notifications;
 
     return (
-      <Notification
+      <Snackbar
         open={open}
         onClose={closeNotification}
         TransitionComponent={TransitionUp}
         ContentProps={{
           'aria-describedby': `${key}`,
         }}
-        message={<span id={key}>{message}</span>}
+        message={<p id={key}>{message}</p>}
         autoHideDuration={timeout}
       />
     );

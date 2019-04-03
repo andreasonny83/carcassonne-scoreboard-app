@@ -19,7 +19,7 @@ const newGameMutation = gql`
 `;
 
 const joinGameMutation = gql`
-  mutation JoinGameQuery($gameId: String!) {
+  mutation JoinGame($gameId: String!) {
     joinGame(gameId: $gameId) {
       id
     }

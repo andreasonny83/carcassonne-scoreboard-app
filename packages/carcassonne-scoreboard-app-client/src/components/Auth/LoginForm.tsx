@@ -171,7 +171,7 @@ export class LoginForm extends PureComponent<LoginFormProps, LoginFormState> {
     }
 
     if (name === 'password') {
-      isPasswordValid = !!value.length && value.length >= 8;
+      isPasswordValid = Boolean(value.length) && value.length >= 8;
     }
 
     this.setState(

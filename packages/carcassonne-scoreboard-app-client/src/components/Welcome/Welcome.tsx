@@ -70,8 +70,8 @@ export class WelcomeComponent extends PureComponent<
               {error ? (
                 <div>
                   <Typography
-                    component="h1"
-                    variant="h2"
+                    component="h2"
+                    variant="h5"
                     color="inherit"
                     align="center"
                     gutterBottom

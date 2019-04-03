@@ -1,10 +1,13 @@
 import gql from 'graphql-tag';
+import { connect } from 'react-redux';
 import { graphql } from 'react-apollo';
-import { NewGameComponent } from './NewGame';
 
-const gamesStatQuery = gql`
-  query NewGameQuery($gameId: String!) {
-    game(gameId: $gameId) {
+import { showNotification } from '../../actions';
+import { NewGameWithStyles } from './NewGameWithStyles';
+
+const newGameMutation = gql`
+  mutation NewGame($gameName: String!, $players: [PlayerInfoInput!]!) {
+    newGame(gameName: $gameName, players: $players) {
       id
       name
       started
@@ -12,16 +15,19 @@ const gamesStatQuery = gql`
   }
 `;
 
-const withNewGame = graphql(gamesStatQuery, {
-  options: (props: any) => ({
-    variables: {
-      gameId: props.match && props.match.params && props.match.params.gameId,
-    },
-  }),
-  props: ({ data }: any) => ({
-    data,
-  }),
+
+const withNewGame = graphql(newGameMutation, {
+  name: 'newGame',
+  options: (props: any) => ({}),
 });
 
-// export const NewGame = withNewGame(NewGameComponent);
-export const NewGame = NewGameComponent;
+const mapDispatchToProps = {
+  showNotification,
+};
+
+export const NewGame = withNewGame(
+  connect(
+    null,
+    mapDispatchToProps
+  )(NewGameWithStyles)
+);

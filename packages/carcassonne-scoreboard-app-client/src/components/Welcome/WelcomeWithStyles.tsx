@@ -23,9 +23,6 @@ const styles = ({ spacing }: Theme) => ({
   mainFeaturedPostContent: {
     padding: `${spacing.unit * 6}px`,
   },
-  row: {
-    marginBottom: '1rem',
-  },
   form: {
     maxWidth: '500px',
     marginTop: '2em',
