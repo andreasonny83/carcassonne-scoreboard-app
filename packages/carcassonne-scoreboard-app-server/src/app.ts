@@ -90,7 +90,7 @@ class App {
 
     await apolloServer.applyMiddleware({
       app: expressApp,
-      path: '/graph',
+      path: '/graphql',
       // cors: {
       //   origin: 'http://localhost:3000',
       // },

@@ -18,6 +18,7 @@ export default `
     name: String!
     key: String!
     color: Color!
+    score: Int
   }
 
 
@@ -35,6 +36,7 @@ export default `
     newGame(gameName: String! players: [PlayerInfoInput!]!): Game
     startGame(gameId: String!): Game
     joinGame(gameId: String!): Game
+    updateGame(gameId: String, playerKey: String, score: Int): Game
   }
 
   type Query {
@@ -43,6 +45,7 @@ export default `
   }
 
   type Subscription {
-    connectGames: [Game]
+    gameCreated: Game
+    gameUpdated: Game
   }
 `;

@@ -175,15 +175,6 @@ export class WelcomeComponent extends PureComponent<
     });
   };
 
-  // private newGame = () => {
-  //   const { newGameMutation, newGame } = this.props;
-
-  //   newGameMutation().then(({ data }: any) => {
-  //     const id = data && data.newGame && data.newGame.id;
-  //     newGame(id);
-  //   });
-  // };
-
   private joinGame = (id: string) => () => {
     const { joinGameMutation, joinGame, showNotification } = this.props;
 

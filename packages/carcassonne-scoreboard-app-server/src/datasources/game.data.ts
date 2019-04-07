@@ -4,6 +4,7 @@ export interface IPlayer {
   name: string;
   key: string;
   color: MeepleColor;
+  score?: number;
 }
 
 export interface IGame {

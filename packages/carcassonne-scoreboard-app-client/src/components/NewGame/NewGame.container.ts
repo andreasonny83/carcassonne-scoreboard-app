@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 import { connect } from 'react-redux';
 import { graphql } from 'react-apollo';
 
-import { showNotification } from '../../actions';
+import { showNotification, joinGame } from '../../actions';
 import { NewGameWithStyles } from './NewGameWithStyles';
 
 const newGameMutation = gql`
@@ -15,7 +15,6 @@ const newGameMutation = gql`
   }
 `;
 
-
 const withNewGame = graphql(newGameMutation, {
   name: 'newGame',
   options: (props: any) => ({}),
@@ -23,6 +22,7 @@ const withNewGame = graphql(newGameMutation, {
 
 const mapDispatchToProps = {
   showNotification,
+  joinGame,
 };
 
 export const NewGame = withNewGame(

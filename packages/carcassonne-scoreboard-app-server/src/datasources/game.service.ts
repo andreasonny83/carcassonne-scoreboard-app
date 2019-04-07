@@ -4,8 +4,8 @@ import { uniqueNamesGenerator } from 'unique-names-generator';
 import { Game, IGame, IPlayer } from './game.data';
 
 interface NewGameObject {
-  gameName: string,
-  players: IPlayer[],
+  gameName: string;
+  players: IPlayer[];
 }
 export class GameService extends DataSource {
   private games: Map<string, IGame>;
@@ -16,7 +16,6 @@ export class GameService extends DataSource {
   }
 
   public initialize() {
-    //
     console.log('...initialize...');
   }
 
@@ -26,9 +25,7 @@ export class GameService extends DataSource {
       id: gameId,
       name: gameObject.gameName,
       players: gameObject.players,
-      users: [
-        userId
-      ],
+      users: [userId],
     };
 
     this.games.set(gameId, new Game(game));
@@ -57,17 +54,21 @@ export class GameService extends DataSource {
 
     const game = this.games.get(gameId);
 
-    if (game && game.started) {
-      throw new Error(`Game ${game && game.id} already started.`);
-    }
+    if (game) {
+      if (game.started) {
+        return game;
+      }
 
-    if (game && game.id && game.name) {
-      const gameUpdated = {
-        ...game,
-        started: true,
-      };
+      if (game && game.id && game.name) {
+        const gameUpdated = {
+          ...game,
+          started: true,
+        };
 
-      return this.games.set(gameId, gameUpdated);
+        this.games.set(gameId, gameUpdated);
+      }
+
+      return this.games.get(gameId);
     }
 
     throw new Error('Invalid game');

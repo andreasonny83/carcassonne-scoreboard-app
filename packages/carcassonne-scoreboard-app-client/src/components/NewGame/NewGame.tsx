@@ -29,6 +29,7 @@ const mapColor = new Map([
 interface NewGameComponentProps extends NewGameStylesProps {
   showNotification(message: string): void;
   newGame(options: any): Promise<any>;
+  joinGame(gameId: string): void;
 }
 
 type MeepleColor = 'green' | 'red' | 'blue' | 'yellow' | 'black' | 'gray';
@@ -302,7 +303,7 @@ export class NewGameComponent extends PureComponent<NewGameComponentProps, NewGa
   };
 
   private handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const { showNotification, newGame } = this.props;
+    const { showNotification, newGame, joinGame } = this.props;
     const { players, gameName } = this.state;
 
     event.preventDefault();
@@ -321,14 +322,15 @@ export class NewGameComponent extends PureComponent<NewGameComponentProps, NewGa
         key: player.key,
       }));
 
-    console.log(activePlayers);
-
     if (isGameReady) {
       newGame({
         variables: {
           gameName,
           players: activePlayers,
         },
+      }).then(({ data }: any) => {
+        const gameId: string = data.newGame && data.newGame.id;
+        joinGame(gameId);
       });
 
       this.setState({
