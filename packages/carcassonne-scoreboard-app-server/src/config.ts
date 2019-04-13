@@ -1,14 +1,6 @@
 import { config as dotEnvConfig } from 'dotenv';
 
-export interface IConfig {
-  get(propName: string): string | undefined;
-  isDebug(): boolean;
-  isDev(): boolean;
-  getEnv(): string;
-  getPort(): string;
-}
-
-class Config implements IConfig {
+class Config {
   public static getInstance() {
     if (!Config.instance) {
       Config.instance = new Config();
@@ -39,6 +31,10 @@ class Config implements IConfig {
     return this.envName === 'development';
   }
 
+  public isPlaygroundEnabled() {
+    return process.env.PLAYGROUND_ENABLED === 'true';
+  }
+
   public isDebug() {
     return process.env.DEBUG === 'true';
   }
@@ -56,4 +52,7 @@ class Config implements IConfig {
   }
 }
 
-export const config: IConfig = Config.getInstance();
+const configInstance = Config.getInstance();
+
+export type IConfig = typeof configInstance;
+export const config = configInstance;

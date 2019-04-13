@@ -18,6 +18,7 @@
     "webpack:build": "webpack --config webpack.$NODE_ENV.js",
     "webpack:dev": "NODE_ENV=development npm run webpack:build",
     "build": "NODE_ENV=production npm run webpack:build",
+    "postinstall": "npm run build",
     "start": "npm-run-all --parallel webpack:dev nodemon",
     "nodemon": "nodemon",
     "test": "echo \"Error: run tests from root\" && exit 1"

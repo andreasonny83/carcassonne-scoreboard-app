@@ -2,6 +2,9 @@
   "name": "carcassonne-scoreboard-app",
   "private": true,
   "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "build": "lerna run build",
+    "postinstall": "npm run bootstrap",
     "lint": "tslint -p tsconfig.json \"packages/*/{src,test}/**/*.{ts,tsx}\"",
     "tslint-check": "tslint-config-prettier-check ./tslint.json",
     "preformat": "npm run tslint-check && npm run lint",

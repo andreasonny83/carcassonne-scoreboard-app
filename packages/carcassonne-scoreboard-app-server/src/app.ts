@@ -52,7 +52,9 @@ class App {
         const reg: RegExp = new RegExp(`${originUrl}$`, 'gi');
         const isPlayground: boolean = reg.test(String(req.headers.referer));
 
-        if (this.appConfig.isDev() && isPlayground) {
+        console.log('playground', req.headers);
+
+        if ((this.appConfig.isDev() && isPlayground) || this.appConfig.isPlaygroundEnabled()) {
           return {
             userData: {
               data: {
@@ -81,7 +83,8 @@ class App {
         ${typeDefs}
       `,
       resolvers,
-      playground: this.appConfig.isDev(),
+      introspection: this.appConfig.isPlaygroundEnabled(),
+      playground: this.appConfig.isPlaygroundEnabled(),
       subscriptions: {
         onConnect: () => console.log('Connected to websocket'),
       },
