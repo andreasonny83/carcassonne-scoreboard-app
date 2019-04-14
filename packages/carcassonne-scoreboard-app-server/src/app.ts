@@ -88,7 +88,7 @@ class App {
       subscriptions: {
         onConnect: () => console.log('Connected to websocket'),
       },
-      tracing: true,
+      tracing: this.appConfig.isPlaygroundEnabled(),
     });
 
     await apolloServer.applyMiddleware({

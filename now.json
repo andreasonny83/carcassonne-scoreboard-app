@@ -11,21 +11,12 @@
   ],
   "build": {
     "env": {
-      "REACT_APP_API_URL": "http://localhost:8888",
+      "REACT_APP_API_URL": "https://carcassonne-scoreboard-graphql.herokuapp.com",
       "REACT_APP_APP_NAME": "Carcassonne Scoreboard",
       "REACT_APP_REGION": "@carcassonne_scoreboard_app_client_react_app_region",
       "REACT_APP_USER_POOL_ID": "@carcassonne_scoreboard_app_client_react_app_user_pool_id",
       "REACT_APP_APP_CLIENT_ID": "@carcassonne_scoreboard_app_client_react_app_app_client_id"
     }
-  },
-  "env": {
-    "APP_API_URL": "http://localhost:8888",
-    "APP_NAME": "Carcassonne Scoreboard",
-    "APP_REGION": "@carcassonne_scoreboard_app_client_react_app_region",
-    "APP_USER_POOL_ID": "@carcassonne_scoreboard_app_client_react_app_user_pool_id",
-    "APP_APP_CLIENT_ID": "@carcassonne_scoreboard_app_client_react_app_app_client_id",
-    "OFFLINE_MODE": "false",
-    "DEBUG": "false"
   },
   "routes": [
     {

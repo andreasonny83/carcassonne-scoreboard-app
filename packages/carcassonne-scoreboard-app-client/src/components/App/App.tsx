@@ -25,7 +25,7 @@ const history: History = createBrowserHistory();
 const store = configureStore(history);
 
 const httpUri = API_URL + '/graphql';
-const wsUri = httpUri.replace(/^https?/, 'ws');
+const wsUri = httpUri.replace(/^http?/, 'ws');
 
 const httpLink = createHttpLink({
   uri: httpUri,
