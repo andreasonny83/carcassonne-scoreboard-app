@@ -1,5 +1,14 @@
 import React from 'react';
 
+export const mapColor = new Map([
+  ['green', '#689f38'],
+  ['red', '#d32f2f'],
+  ['blue', '#1e88e5'],
+  ['yellow', '#fdd835'],
+  ['black', '#263238'],
+  ['gray', '#9e9e9e'],
+]);
+
 export const Meeple = (props: any) => (
   <svg fill="currentColor" viewBox="-5 -5 110 110" {...props} width="1em" height="1em">
     <path

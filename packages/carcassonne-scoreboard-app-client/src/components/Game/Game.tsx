@@ -1,20 +1,11 @@
 import React, { PureComponent } from 'react';
-import {
-  Paper,
-  Typography,
-  Grid,
-  CircularProgress,
-  ExpansionPanel,
-  ExpansionPanelSummary,
-  ExpansionPanelDetails,
-  TextField,
-  Button,
-} from '@material-ui/core';
-import { ExpandMore, FileCopyOutlined } from '@material-ui/icons';
+import { Paper, Typography, Grid, CircularProgress, TextField, Button } from '@material-ui/core';
+import { FileCopyOutlined } from '@material-ui/icons';
 
-import { Meeple } from '../Icons';
 import { GameStylesProps } from './GameWithStyles';
-import { ChildPropsData, subscribeToAuthorMutations } from './Game.container';
+import { ChildPropsData, subscribeToAuthorMutations, Player } from './Game.container';
+import { PlayerItem } from '../PlayerItem';
+import { UpdateScore } from '../UpdateScore';
 
 type GameComponentProps = GameStylesProps &
   ChildPropsData & {
@@ -23,7 +14,23 @@ type GameComponentProps = GameStylesProps &
     updateGame(options: any): any;
   };
 
-export class GameComponent extends PureComponent<GameComponentProps> {
+interface GameState {
+  updateScoreOpened: boolean;
+  selectedPlayer: string;
+  selectedPlayerName: string;
+  selectedPlayerColor: string;
+}
+
+const initialState: GameState = {
+  updateScoreOpened: false,
+  selectedPlayer: '',
+  selectedPlayerName: '',
+  selectedPlayerColor: '',
+};
+
+export class GameComponent extends PureComponent<GameComponentProps, GameState> {
+  public readonly state: GameState = initialState;
+
   private gameIdRef: any;
   private unsubscribe: any;
 
@@ -35,14 +42,12 @@ export class GameComponent extends PureComponent<GameComponentProps> {
 
   public render() {
     const { data, classes } = this.props;
-    const mapColor = new Map([
-      ['green', '#689f38'],
-      ['red', '#d32f2f'],
-      ['blue', '#1e88e5'],
-      ['yellow', '#fdd835'],
-      ['black', '#263238'],
-      ['gray', '#9e9e9e'],
-    ]);
+    const {
+      updateScoreOpened,
+      selectedPlayer,
+      selectedPlayerName,
+      selectedPlayerColor,
+    } = this.state;
 
     if (data.loading) {
       return (
@@ -83,16 +88,62 @@ export class GameComponent extends PureComponent<GameComponentProps> {
 
     return (
       <Paper elevation={1} className={classes.root}>
-        <Grid direction="column" container>
+        <Grid direction="column" container alignItems="center">
           <Typography component="h2" variant="h4" align="center" gutterBottom>
             {data.game.name}
           </Typography>
-          <Typography component="h2" variant="h4" align="center" gutterBottom>
-            Game started:{`${data.game.started}`}
-          </Typography>
 
-          <Button onClick={this.startGame}>Start Game</Button>
-          <Button onClick={this.updateGame}>update</Button>
+          {!data.game.started && (
+            <Typography align="center" gutterBottom>
+              Press Start Game when you're ready!
+            </Typography>
+          )}
+          {data.game.started && (
+            <Typography align="center" gutterBottom>
+              Game started. Good luck!
+            </Typography>
+          )}
+
+          {!data.game.started && (
+            <Button color="primary" variant="outlined" onClick={this.startGame}>
+              Start Game
+            </Button>
+          )}
+
+          <Grid item container direction="column" alignItems="center" justify="center" spacing={8}>
+            <Grid item xs={12} sm={8} md={6} lg={4}>
+              {data.game.started && (
+                <Button
+                  fullWidth={true}
+                  className={classes.buttons}
+                  color="primary"
+                  variant="outlined"
+                  disabled={!selectedPlayer || !data.game.started}
+                  onClick={this.handleShowUpdateScore}
+                >
+                  Update
+                </Button>
+              )}
+            </Grid>
+            <Grid item xs={12} sm={8} md={6} lg={4}>
+              {data.game.started && (
+                <Button
+                  className={classes.buttons}
+                  color="secondary"
+                  variant="outlined"
+                  onClick={this.handleShowUpdateScore}
+                >
+                  Undo
+                </Button>
+              )}
+            </Grid>
+          </Grid>
+          <UpdateScore
+            playerName={selectedPlayerName}
+            color={selectedPlayerColor}
+            open={updateScoreOpened}
+            onClose={this.handleHideUpdateScore}
+          />
 
           <Grid item container spacing={8} alignItems="flex-end">
             <Grid item xs={10} className={classes.gameIdLabel}>
@@ -110,43 +161,20 @@ export class GameComponent extends PureComponent<GameComponentProps> {
               <FileCopyOutlined onClick={this.focusGameId} />
             </Grid>
           </Grid>
-          <Typography variant="caption" color="textSecondary" gutterBottom>
-            Share this id with the other players
-          </Typography>
+
+          <Grid item container>
+            <Typography variant="caption" color="textSecondary" gutterBottom>
+              Share this id with the other players
+            </Typography>
+          </Grid>
         </Grid>
         <Grid direction="column" container>
-          {data.game.players.map(player => (
-            <ExpansionPanel key={player.key} className={classes.expansionPanel}>
-              <ExpansionPanelSummary
-                expandIcon={<ExpandMore />}
-                classes={{ content: classes.content }}
-              >
-                <div className={classes.meepleColumn}>
-                  <Meeple
-                    className={classes.meeple}
-                    fontSize="2.25em"
-                    color={mapColor.get(player.color)}
-                  />
-                </div>
-                <div className={classes.column}>
-                  <Typography className={classes.heading}>{player.name}</Typography>
-                </div>
-                <div className={classes.scoreColumn}>
-                  <Typography className={classes.scoreHeading}>{player.score || 0}pt</Typography>
-                </div>
-              </ExpansionPanelSummary>
-              <ExpansionPanelDetails className={classes.details}>
-                <div className={classes.column} />
-                <div className={classes.column}>test</div>
-                <div>
-                  <Typography variant="caption">
-                    Select your destination of choice
-                    <br />
-                  </Typography>
-                </div>
-              </ExpansionPanelDetails>
-            </ExpansionPanel>
-          ))}
+          <PlayerItem
+            disabled={!data.game.started}
+            players={data.game.players}
+            handleListItemClick={this.handleSelectPlayer}
+            playerSelected={selectedPlayer}
+          />
         </Grid>
       </Paper>
     );
@@ -167,7 +195,6 @@ export class GameComponent extends PureComponent<GameComponentProps> {
   private startGame = () => {
     const { data, startGame, showNotification } = this.props;
     const gameId = data && data.game && data.game.id;
-    console.log(this.props);
 
     if (!gameId) {
       showNotification('Something went wrong!');
@@ -175,7 +202,9 @@ export class GameComponent extends PureComponent<GameComponentProps> {
     }
 
     startGame({
-      variables: { gameId },
+      variables: {
+        startGameInput: { gameId },
+      },
     });
   };
 
@@ -191,7 +220,77 @@ export class GameComponent extends PureComponent<GameComponentProps> {
     }
 
     updateGame({
-      variables: { gameId, playerKey, score },
+      variables: {
+        updateGameInput: {
+          gameId,
+          playerKey,
+          score,
+        },
+      },
+    });
+  };
+
+  private handleShowUpdateScore = () => {
+    this.setState({
+      updateScoreOpened: true,
+    });
+  };
+
+  private handleHideUpdateScore = (newScore: any) => {
+    const { data, updateGame, showNotification } = this.props;
+    const { selectedPlayer } = this.state;
+    const game = data && data.game;
+
+    console.log('new score', newScore);
+    console.log('selectedPlayer', selectedPlayer);
+    if (!game) {
+      this.setState({
+        updateScoreOpened: false,
+      });
+      return;
+    }
+
+    const gameId = game.id;
+
+    updateGame({
+      variables: {
+        updateGameInput: {
+          gameId,
+          playerKey: selectedPlayer,
+          score: newScore,
+        },
+      },
+    })
+      .finally(() => {
+        this.setState({
+          updateScoreOpened: false,
+        });
+      })
+      .then(() => {
+        showNotification('New score updated');
+      })
+      .catch((err: any) => {
+        showNotification(err.message || 'Something went wrong');
+      });
+  };
+
+  private handleSelectPlayer = (playerKey: string) => () => {
+    const { data } = this.props;
+
+    if (!(data && data.game)) {
+      return;
+    }
+
+    const selectedPlayer = data.game.players.find(player => player.key === playerKey);
+
+    if (!selectedPlayer) {
+      return;
+    }
+
+    this.setState({
+      selectedPlayer: playerKey,
+      selectedPlayerName: selectedPlayer.name,
+      selectedPlayerColor: selectedPlayer.color,
     });
   };
 }

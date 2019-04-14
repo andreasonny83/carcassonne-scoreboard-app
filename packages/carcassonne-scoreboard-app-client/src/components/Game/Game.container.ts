@@ -24,8 +24,8 @@ const GAME_FETCH_QUERY = gql`
 `;
 
 const GAME_START = gql`
-  mutation StartGame($gameId: String!) {
-    startGame(gameId: $gameId) {
+  mutation StartGame($startGameInput: StartGameInput!) {
+    startGame(input: $startGameInput) {
       id
       name
       started
@@ -34,8 +34,8 @@ const GAME_START = gql`
 `;
 
 const GAME_UPDATE = gql`
-  mutation UpdateGame($gameId: String, $playerKey: String, $score: Int) {
-    updateGame(gameId: $gameId, playerKey: $playerKey, score: $score) {
+  mutation UpdateGame($updateGameInput: UpdateGameInput!) {
+    updateGame(input: $updateGameInput) {
       players {
         name
         key
@@ -62,7 +62,7 @@ const GAME_UPDATED = gql`
   }
 `;
 
-interface Player {
+export interface Player {
   name: string;
   key: string;
   color: string;

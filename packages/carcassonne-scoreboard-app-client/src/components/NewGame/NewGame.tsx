@@ -325,8 +325,10 @@ export class NewGameComponent extends PureComponent<NewGameComponentProps, NewGa
     if (isGameReady) {
       newGame({
         variables: {
-          gameName,
-          players: activePlayers,
+          newGameInput: {
+            name: gameName,
+            players: activePlayers,
+          },
         },
       }).then(({ data }: any) => {
         const gameId: string = data.newGame && data.newGame.id;

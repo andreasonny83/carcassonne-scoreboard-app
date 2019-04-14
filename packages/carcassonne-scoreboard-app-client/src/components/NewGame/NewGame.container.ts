@@ -6,8 +6,8 @@ import { showNotification, joinGame } from '../../actions';
 import { NewGameWithStyles } from './NewGameWithStyles';
 
 const newGameMutation = gql`
-  mutation NewGame($gameName: String!, $players: [PlayerInfoInput!]!) {
-    newGame(gameName: $gameName, players: $players) {
+  mutation NewGame($newGameInput: NewGameInput!) {
+    newGame(input: $newGameInput) {
       id
       name
       started

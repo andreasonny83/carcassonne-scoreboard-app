@@ -4,7 +4,7 @@ import { GameComponent } from './Game';
 
 const styles = ({ spacing, typography, palette }: Theme) => ({
   root: {
-    padding: `${spacing.unit * 3}px ${spacing.unit}px`,
+    padding: `${spacing.unit * 3}px ${spacing.unit * 2}px`,
   },
   loading: {
     margin: '3em 0',
@@ -15,11 +15,6 @@ const styles = ({ spacing, typography, palette }: Theme) => ({
   expansionPanel: {
     backgroundColor: palette.grey[100],
   },
-  meeple: {
-    stroke: 'black',
-    strokeWidth: '4px',
-    'stroke-opacity': '0.75',
-  },
   meepleColumn: {
     flexBasis: '60px',
   },
@@ -28,6 +23,10 @@ const styles = ({ spacing, typography, palette }: Theme) => ({
   },
   column: {
     flexBasis: '50%',
+  },
+  buttons: {
+    width: '800px',
+    maxWidth: '100%'
   },
   scoreColumn: {
     'text-align': 'right',
