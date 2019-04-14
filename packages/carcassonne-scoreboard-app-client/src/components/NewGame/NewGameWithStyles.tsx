@@ -30,6 +30,12 @@ const styles = ({ spacing }: Theme) => ({
   formControl: {
     margin: spacing.unit,
   },
+  gameName: {
+    marginBottom: spacing.unit * 1,
+  },
+  gameNameDescription: {
+    marginBottom: spacing.unit * 1,
+  },
 });
 
 export type NewGameStylesProps = WithStyles<typeof styles>;

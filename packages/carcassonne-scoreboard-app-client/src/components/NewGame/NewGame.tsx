@@ -76,11 +76,12 @@ export class NewGameComponent extends PureComponent<NewGameComponentProps, NewGa
                   autoComplete="gameName"
                   type="string"
                   value={gameName}
+                  className={classes.gameName}
                   onChange={this.handleChange}
                   labelWidth={110}
                   autoFocus
                 />
-                <FormHelperText hidden={pristine}>
+                <FormHelperText hidden={pristine} className={classes.gameNameDescription}>
                   Enter a valid game name. Only letters, numbers and underscore allowed.
                 </FormHelperText>
               </FormControl>

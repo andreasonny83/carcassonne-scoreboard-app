@@ -1,12 +1,12 @@
 import React, { PureComponent } from 'react';
-import { Paper, Typography, Grid, CircularProgress, TextField, Button } from '@material-ui/core';
-import { FileCopyOutlined } from '@material-ui/icons';
+import { Paper, Typography, Grid, CircularProgress, Button } from '@material-ui/core';
 
 import { GameStylesProps } from './GameWithStyles';
 import { ChildPropsData, subscribeToAuthorMutations } from './Game.container';
 import { PlayerItem } from '../PlayerItem';
 import { UpdateScore } from '../UpdateScore';
 import { MeepleColor } from '../Icons';
+import { ShareGame } from '../ShareGame';
 
 type GameComponentProps = GameStylesProps &
   ChildPropsData & {
@@ -27,8 +27,6 @@ type GameState = typeof initialState & {
 
 export class GameComponent extends PureComponent<GameComponentProps, GameState> {
   public readonly state: GameState = initialState;
-
-  private gameIdRef: any;
   private unsubscribe: any;
 
   public componentWillUnmount() {
@@ -86,30 +84,44 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     return (
       <Paper elevation={1} className={classes.root}>
         <Grid direction="column" container alignItems="center">
-          <Typography component="h2" variant="h4" align="center" gutterBottom>
+          <Typography component="h2" variant="h4" align="center">
             {data.game.name}
           </Typography>
 
+          <Typography component="caption" align="center" gutterBottom>
+            {(!data.game.started && `Press Start Game when you're ready!`) ||
+              `Game started. Good luck!`}
+          </Typography>
+
+          <ShareGame gameId={data.game.id} />
+
           {!data.game.started && (
-            <Typography align="center" gutterBottom>
-              Press Start Game when you're ready!
-            </Typography>
+            <Grid
+              item
+              container
+              direction="column"
+              alignItems="center"
+              justify="center"
+              spacing={8}
+              className={classes.actionButtons}
+            >
+              <Button color="primary" variant="outlined" onClick={this.startGame}>
+                Start Game
+              </Button>
+            </Grid>
           )}
+
           {data.game.started && (
-            <Typography align="center" gutterBottom>
-              Game started. Good luck!
-            </Typography>
-          )}
-
-          {!data.game.started && (
-            <Button color="primary" variant="outlined" onClick={this.startGame}>
-              Start Game
-            </Button>
-          )}
-
-          <Grid item container direction="column" alignItems="center" justify="center" spacing={8}>
-            <Grid item xs={12} sm={8} md={6} lg={4}>
-              {data.game.started && (
+            <Grid
+              item
+              container
+              direction="column"
+              alignItems="center"
+              justify="center"
+              spacing={8}
+              className={classes.actionButtons}
+            >
+              <Grid item xs={12} sm={8} md={6} lg={4}>
                 <Button
                   fullWidth={true}
                   className={classes.buttons}
@@ -120,44 +132,26 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                 >
                   Add points
                 </Button>
-              )}
-            </Grid>
-            <Grid item xs={12} sm={8} md={6} lg={4}>
-              {data.game.started && (
+              </Grid>
+              <Grid item xs={12} sm={8} md={6} lg={4}>
                 <Button
                   className={classes.buttons}
                   color="secondary"
                   variant="outlined"
-                  onClick={this.handleShowUpdateScore}
+                  onClick={this.undoScore}
                 >
                   Undo
                 </Button>
-              )}
+              </Grid>
             </Grid>
-          </Grid>
+          )}
+
           <UpdateScore
             playerName={selectedPlayerName}
             color={selectedPlayerColor}
             open={updateScoreOpened}
             onClose={this.handleHideUpdateScore}
           />
-
-          <Grid item container spacing={8} alignItems="flex-end">
-            <Grid item xs={10} className={classes.gameIdLabel}>
-              <TextField
-                fullWidth
-                label="Game id:"
-                value={data.game.id}
-                id="game-id"
-                inputRef={node => (this.gameIdRef = node)}
-                onSelect={this.gameIdOnFocus}
-                onFocus={this.focusGameId}
-              />
-            </Grid>
-            <Grid item>
-              <FileCopyOutlined onClick={this.focusGameId} />
-            </Grid>
-          </Grid>
 
           <Grid item container>
             <Typography variant="caption" color="textSecondary" gutterBottom>
@@ -177,18 +171,6 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     );
   }
 
-  private focusGameId = () => {
-    this.gameIdRef.select();
-  };
-
-  private gameIdOnFocus = (event: React.SyntheticEvent<HTMLDivElement>) => {
-    const { showNotification } = this.props;
-    this.gameIdRef.select();
-    document.execCommand('copy');
-
-    showNotification('Game Id copied to clipboard');
-  };
-
   private startGame = () => {
     const { data, startGame, showNotification } = this.props;
     const gameId = data && data.game && data.game.id;
@@ -205,26 +187,8 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     });
   };
 
-  private updateGame = () => {
-    const { data, updateGame, showNotification } = this.props;
-    const gameId = data && data.game && data.game.id;
-    const score = 10;
-    const playerKey = 'player1';
-
-    if (!gameId) {
-      showNotification('Something went wrong!');
-      return;
-    }
-
-    updateGame({
-      variables: {
-        updateGameInput: {
-          gameId,
-          playerKey,
-          score,
-        },
-      },
-    });
+  private undoScore = () => {
+    //
   };
 
   private handleShowUpdateScore = () => {

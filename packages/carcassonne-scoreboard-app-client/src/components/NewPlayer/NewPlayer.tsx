@@ -42,7 +42,7 @@ export class NewPlayer extends PureComponent<NewPlayerProps> {
     return (
       <Grid container spacing={16} direction="row" alignItems="center" justify="center">
         {!hideDelete && (
-          <Grid item xs={1} className={classes.deleteContainer}>
+          <Grid item xs={2} className={classes.deleteContainer}>
             <Fab
               size="small"
               color="primary"
@@ -57,7 +57,7 @@ export class NewPlayer extends PureComponent<NewPlayerProps> {
             </Fab>
           </Grid>
         )}
-        <Grid item xs={hideDelete ? 12 : 11}>
+        <Grid item xs={hideDelete ? 12 : 10}>
           <FormControl
             margin="normal"
             variant="outlined"

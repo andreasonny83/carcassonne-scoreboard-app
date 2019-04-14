@@ -14,9 +14,13 @@ const styles = ({ breakpoints, spacing, palette }: Theme) => ({
     marginBottom: 0,
   },
   main: {
-    marginLeft: spacing.unit * 2,
-    marginRight: spacing.unit * 2,
+    marginLeft: spacing.unit,
+    marginRight: spacing.unit,
     flex: '1 1 auto',
+    [breakpoints.up('sm')]: {
+      marginLeft: spacing.unit * 2,
+      marginRight: spacing.unit * 2,
+    },
     [breakpoints.up(breakpoints.values.lg + spacing.unit * 4)]: {
       width: breakpoints.values.lg,
       marginLeft: 'auto',

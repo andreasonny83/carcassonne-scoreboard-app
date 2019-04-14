@@ -4,13 +4,10 @@ import { GameComponent } from './Game';
 
 const styles = ({ spacing, typography, palette }: Theme) => ({
   root: {
-    padding: `${spacing.unit * 3}px ${spacing.unit * 2}px`,
+    padding: spacing.unit * 3,
   },
   loading: {
     margin: '3em 0',
-  },
-  gameIdLabel: {
-    maxWidth: '18em',
   },
   expansionPanel: {
     backgroundColor: palette.grey[100],
@@ -26,7 +23,11 @@ const styles = ({ spacing, typography, palette }: Theme) => ({
   },
   buttons: {
     width: '800px',
-    maxWidth: '100%'
+    maxWidth: '100%',
+  },
+  actionButtons: {
+    marginTop: spacing.unit * 2,
+    marginBottom: spacing.unit * 2,
   },
   scoreColumn: {
     'text-align': 'right',
