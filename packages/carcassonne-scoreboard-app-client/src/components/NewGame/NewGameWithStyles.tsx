@@ -18,6 +18,7 @@ export const ButtonLink = (props: any) => (
 const styles = ({ spacing }: Theme) => ({
   root: {
     padding: `${spacing.unit * 2}px ${spacing.unit}px`,
+    marginBottom: spacing.unit * 2,
   },
   form: {
     maxWidth: '500px',
@@ -28,30 +29,6 @@ const styles = ({ spacing }: Theme) => ({
   },
   formControl: {
     margin: spacing.unit,
-  },
-  formPlayerControl: {
-    margin: spacing.unit,
-    flexFlow: 'row',
-    alignItems: 'center',
-  },
-  playerSelect: {
-    flex: '1 1 auto',
-  },
-  meeple: {
-    margin: '0 0.2em',
-    stroke: 'black',
-    strokeWidth: '5px',
-    ['stroke-opacity']: '0.75',
-  },
-  deleteContainer: {
-    'text-align': 'center',
-  },
-  deleteButton: {
-    backgroundColor: '#d32f2f',
-    color: 'white',
-    '&:hover': {
-      backgroundColor: '#ef2323',
-    },
   },
 });
 

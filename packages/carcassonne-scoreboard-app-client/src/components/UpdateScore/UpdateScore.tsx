@@ -11,11 +11,11 @@ import {
   Typography,
 } from '@material-ui/core';
 import { UpdateScoreStylesProps } from './UpdateScoreWirhStyles';
-import { Meeple, mapColor } from '../Icons';
+import { Meeple, mapColor, MeepleColor } from '../Icons';
 
 interface UpdateScoreProps extends UpdateScoreStylesProps {
   playerName: string;
-  color: string;
+  color?: MeepleColor;
   open: boolean;
   onClose: any;
 }
@@ -45,9 +45,13 @@ export class UpdateScore extends PureComponent<UpdateScoreProps, UpdateScoreStat
       >
         <DialogTitle id="form-dialog-title">
           <Grid container direction="column" alignContent="center">
-            <Meeple className={classes.meeple} fontSize="1.75em" color={mapColor.get(color)} />
+            {typeof color !== 'undefined' && (
+              <Meeple className={classes.meeple} fontSize="1.75em" color={mapColor.get(color)} />
+            )}
           </Grid>
-          <Typography align="center" component="p" variant="h5">Update Score</Typography>
+          <Typography align="center" component="p" variant="h5">
+            Update Score
+          </Typography>
         </DialogTitle>
         <DialogContent>
           <DialogContentText>

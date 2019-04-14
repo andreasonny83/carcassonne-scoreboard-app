@@ -3,9 +3,10 @@ import { Paper, Typography, Grid, CircularProgress, TextField, Button } from '@m
 import { FileCopyOutlined } from '@material-ui/icons';
 
 import { GameStylesProps } from './GameWithStyles';
-import { ChildPropsData, subscribeToAuthorMutations, Player } from './Game.container';
+import { ChildPropsData, subscribeToAuthorMutations } from './Game.container';
 import { PlayerItem } from '../PlayerItem';
 import { UpdateScore } from '../UpdateScore';
+import { MeepleColor } from '../Icons';
 
 type GameComponentProps = GameStylesProps &
   ChildPropsData & {
@@ -14,18 +15,14 @@ type GameComponentProps = GameStylesProps &
     updateGame(options: any): any;
   };
 
-interface GameState {
-  updateScoreOpened: boolean;
-  selectedPlayer: string;
-  selectedPlayerName: string;
-  selectedPlayerColor: string;
-}
-
-const initialState: GameState = {
+const initialState = {
   updateScoreOpened: false,
   selectedPlayer: '',
   selectedPlayerName: '',
-  selectedPlayerColor: '',
+};
+
+type GameState = typeof initialState & {
+  selectedPlayerColor?: MeepleColor;
 };
 
 export class GameComponent extends PureComponent<GameComponentProps, GameState> {
@@ -121,7 +118,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                   disabled={!selectedPlayer || !data.game.started}
                   onClick={this.handleShowUpdateScore}
                 >
-                  Update
+                  Add points
                 </Button>
               )}
             </Grid>

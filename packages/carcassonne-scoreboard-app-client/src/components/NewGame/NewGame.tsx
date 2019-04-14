@@ -7,24 +7,13 @@ import {
   FormHelperText,
   InputLabel,
   Grid,
-  Select,
-  MenuItem,
   Button,
-  Fab,
 } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
 
 import { NewGameStylesProps } from './NewGameWithStyles';
-import { Meeple } from '../Icons';
-
-const mapColor = new Map([
-  ['green', '#689f38'],
-  ['red', '#d32f2f'],
-  ['blue', '#1e88e5'],
-  ['yellow', '#fdd835'],
-  ['black', '#263238'],
-  ['gray', '#9e9e9e'],
-]);
+import { MeepleColor } from '../Icons';
+import { NewPlayer } from '../NewPlayer';
+import { IPlayer } from './NewGame.container';
 
 interface NewGameComponentProps extends NewGameStylesProps {
   showNotification(message: string): void;
@@ -32,17 +21,8 @@ interface NewGameComponentProps extends NewGameStylesProps {
   joinGame(gameId: string): void;
 }
 
-type MeepleColor = 'green' | 'red' | 'blue' | 'yellow' | 'black' | 'gray';
-
-interface IPlayer {
-  key: string;
-  name: string;
-  color: MeepleColor;
-  active: boolean;
-}
-
 const initialPlayers: IPlayer[] = [
-  { key: 'player1', name: '', color: 'green', active: false },
+  { key: 'player1', name: '', color: 'green', active: true },
   { key: 'player2', name: '', color: 'red', active: false },
   { key: 'player3', name: '', color: 'yellow', active: false },
   { key: 'player4', name: '', color: 'blue', active: false },
@@ -68,148 +48,108 @@ export class NewGameComponent extends PureComponent<NewGameComponentProps, NewGa
     const { gameName, pristine, gameNameValid, players, busy } = this.state;
 
     return (
-      <Paper elevation={1} className={classes.root}>
-        <Grid container>
-          <Grid item xs={12}>
-            <Typography component="h2" variant="h5" color="inherit" align="center" gutterBottom>
-              New Game
-            </Typography>
-          </Grid>
+      <form onSubmit={this.handleSubmit}>
+        <Paper elevation={1} className={classes.root}>
+          <Grid container>
+            <Grid item xs={12}>
+              <Typography component="h2" variant="h5" color="inherit" align="center" gutterBottom>
+                Prepare the Game
+              </Typography>
+            </Grid>
 
-          <form onSubmit={this.handleSubmit} className={classes.form}>
-            <FormControl
-              margin="normal"
-              variant="outlined"
-              className={classes.formControl}
-              error={!pristine && !gameNameValid}
-              disabled={busy}
-              required
-              fullWidth
-            >
-              <InputLabel htmlFor="gameName" variant="outlined">
-                Game name
-              </InputLabel>
-              <OutlinedInput
-                id="gameName"
-                name="gameName"
-                autoComplete="gameName"
-                type="string"
-                value={gameName}
+            <div className={classes.form}>
+              <FormControl
+                margin="normal"
+                variant="outlined"
+                className={classes.formControl}
+                error={!pristine && !gameNameValid}
+                disabled={busy}
+                required
+                fullWidth
+              >
+                <InputLabel htmlFor="gameName" variant="outlined">
+                  Game name
+                </InputLabel>
+                <OutlinedInput
+                  id="gameName"
+                  name="gameName"
+                  autoComplete="gameName"
+                  type="string"
+                  value={gameName}
+                  onChange={this.handleChange}
+                  labelWidth={110}
+                  autoFocus
+                />
+                <FormHelperText hidden={pristine}>
+                  Enter a valid game name. Only letters, numbers and underscore allowed.
+                </FormHelperText>
+              </FormControl>
+
+              <NewPlayer
+                key={players[0].key}
+                player={players[0]}
+                busy={busy}
+                placeholder="Your player name"
+                labelWidth={160}
+                hideDelete={true}
+                onRemovePlayer={this.removePlayer}
                 onChange={this.handleChange}
-                labelWidth={110}
-                autoFocus
               />
-              <FormHelperText hidden={pristine}>
-                Enter a valid game name. Only letters, numbers and underscore allowed.
-              </FormHelperText>
-            </FormControl>
+            </div>
+          </Grid>
+        </Paper>
 
-            {players
-              .filter(player => player.active)
-              .map((player: IPlayer) => (
-                <div key={player.key}>
-                  <Grid container spacing={16} direction="row" alignItems="center" justify="center">
-                    <Grid item xs={1} className={classes.deleteContainer}>
-                      <Fab
-                        size="small"
-                        color="primary"
-                        aria-label="Delete"
-                        onClick={event => this.removePlayer(event, player)}
-                        disabled={busy}
-                        classes={{
-                          primary: classes.deleteButton,
-                        }}
-                      >
-                        <Delete fontSize="small" />
-                      </Fab>
-                    </Grid>
-                    <Grid item xs={11}>
-                      <FormControl
-                        margin="normal"
-                        variant="outlined"
-                        className={classes.formControl}
-                        disabled={busy}
-                        required
-                        fullWidth
-                      >
-                        <InputLabel htmlFor={`${player.key}-name`} variant="outlined">
-                          Player Name
-                        </InputLabel>
-                        <OutlinedInput
-                          id={`${player.key}-name`}
-                          name={`${player.key}-name`}
-                          value={`${player.name}`}
-                          onChange={event => this.handleChange(event, player, 'name')}
-                          type="string"
-                          placeholder="Player Name"
-                          labelWidth={120}
-                          autoFocus
-                        />
-                      </FormControl>
+        <Paper elevation={1} className={classes.root}>
+          <Grid container>
+            <Grid item xs={12}>
+              <Typography component="h2" variant="h6" color="inherit" align="center" gutterBottom>
+                Opponent players
+              </Typography>
+            </Grid>
 
-                      <FormControl
-                        variant="outlined"
-                        className={classes.formPlayerControl}
-                        disabled={busy}
-                        fullWidth
-                      >
-                        <InputLabel htmlFor={`${player.key}-color`}>Color</InputLabel>
-                        <Select
-                          value={player.color}
-                          onChange={event => this.handleChange(event, player, 'color')}
-                          className={classes.playerSelect}
-                          input={
-                            <OutlinedInput
-                              labelWidth={50}
-                              name={`${player.key}-color`}
-                              id={`${player.key}-color`}
-                            />
-                          }
-                        >
-                          <MenuItem value="green">Green</MenuItem>
-                          <MenuItem value="red">Red</MenuItem>
-                          <MenuItem value="blue">Blue</MenuItem>
-                          <MenuItem value="yellow">Yellow</MenuItem>
-                          <MenuItem value="black">Black</MenuItem>
-                          <MenuItem value="gray">Gray</MenuItem>
-                        </Select>
-                        <Meeple
-                          className={classes.meeple}
-                          fontSize="3em"
-                          color={mapColor.get(player.color)}
-                        />
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                </div>
-              ))}
+            <div className={classes.form}>
+              {players
+                .filter((player, index) => index && player.active)
+                .map((player: IPlayer) => (
+                  <NewPlayer
+                    key={player.key}
+                    player={player}
+                    busy={busy}
+                    autoFocus={true}
+                    placeholder="Player name"
+                    labelWidth={120}
+                    onRemovePlayer={this.removePlayer}
+                    onChange={this.handleChange}
+                  />
+                ))}
 
-            <FormControl variant="outlined" className={classes.formControl} fullWidth>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={this.addPlayer}
-                disabled={busy || players.filter(player => player.active).length >= 6}
-              >
-                Add Player
-              </Button>
-            </FormControl>
+              <FormControl variant="outlined" className={classes.formControl} fullWidth>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={this.addPlayer}
+                  disabled={busy || players.filter(player => player.active).length >= 6}
+                >
+                  Add Player
+                </Button>
+              </FormControl>
 
-            <FormControl variant="outlined" className={classes.formControl} fullWidth>
-              <Button
-                type="submit"
-                variant="outlined"
-                color="primary"
-                disabled={
-                  busy || !gameNameValid || players.filter(player => player.active).length < 2
-                }
-              >
-                Start The Game
-              </Button>
-            </FormControl>
-          </form>
-        </Grid>
-      </Paper>
+              <FormControl variant="outlined" className={classes.formControl} fullWidth>
+                <Button
+                  type="submit"
+                  variant="outlined"
+                  color="primary"
+                  disabled={
+                    busy || !gameNameValid || players.filter(player => player.active).length < 2
+                  }
+                >
+                  Go to the Game
+                </Button>
+              </FormControl>
+            </div>
+          </Grid>
+        </Paper>
+      </form>
     );
   }
 

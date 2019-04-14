@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import { showNotification } from '../../actions';
 import { GameWithStyles } from './GameWithStyles';
+import { MeepleColor } from '../Icons';
 
 const GAME_FETCH_QUERY = gql`
   query NewGameQuery($gameId: String!) {
@@ -65,7 +66,7 @@ const GAME_UPDATED = gql`
 export interface Player {
   name: string;
   key: string;
-  color: string;
+  color: MeepleColor;
   score?: number;
 }
 

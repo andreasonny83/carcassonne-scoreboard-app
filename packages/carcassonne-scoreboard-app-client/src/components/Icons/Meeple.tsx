@@ -1,6 +1,8 @@
 import React from 'react';
 
-export const mapColor = new Map([
+export type MeepleColor = 'green' | 'red' | 'blue' | 'yellow' | 'black' | 'gray';
+
+export const mapColor = new Map<MeepleColor, string>([
   ['green', '#689f38'],
   ['red', '#d32f2f'],
   ['blue', '#1e88e5'],

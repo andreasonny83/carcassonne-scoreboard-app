@@ -4,6 +4,14 @@ import { graphql } from 'react-apollo';
 
 import { showNotification, joinGame } from '../../actions';
 import { NewGameWithStyles } from './NewGameWithStyles';
+import { MeepleColor } from '../Icons';
+
+export interface IPlayer {
+  key: string;
+  name: string;
+  color: MeepleColor;
+  active: boolean;
+}
 
 const newGameMutation = gql`
   mutation NewGame($newGameInput: NewGameInput!) {
