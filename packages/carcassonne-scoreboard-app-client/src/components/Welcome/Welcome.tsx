@@ -14,7 +14,6 @@ interface UserQueryResult {
 
 export interface WelcomeProps extends WelcomeStylesProps {
   data: QueryResult & UserQueryResult;
-  newGameMutation(): Promise<any>;
   joinGameMutation(options: any): Promise<any>;
   newGame(gameId: string): void;
   joinGame(gameId: string): void;
@@ -190,7 +189,11 @@ export class WelcomeComponent extends PureComponent<
     });
 
     joinGameMutation({
-      variables: { gameId: id },
+      variables: {
+        joinGameInput: {
+          gameId: id,
+        },
+      },
     })
       .finally(() => {
         this.setState({

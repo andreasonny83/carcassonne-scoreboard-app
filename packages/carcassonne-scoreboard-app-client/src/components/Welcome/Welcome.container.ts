@@ -10,17 +10,9 @@ export interface UserData {
   games: string[];
 }
 
-const newGameMutation = gql`
-  mutation NewGameMutation {
-    newGame {
-      id
-    }
-  }
-`;
-
 const joinGameMutation = gql`
-  mutation JoinGame($gameId: String!) {
-    joinGame(gameId: $gameId) {
+  mutation JoinGame($joinGameInput: JoinGameInput!) {
+    joinGame(input: $joinGameInput) {
       id
     }
   }
@@ -35,10 +27,6 @@ const playerQuery = gql`
   }
 `;
 
-interface NewGameProps {
-  newGame(): any;
-}
-
 export interface NewGameResponse {
   newGame: {
     id: string;
@@ -47,12 +35,6 @@ export interface NewGameResponse {
 
 const withGame = compose(
   graphql(playerQuery),
-  graphql<WelcomeProps, NewGameResponse, null, NewGameProps>(newGameMutation, {
-    name: 'newGameMutation',
-    options: {
-      refetchQueries: [{ query: playerQuery }],
-    },
-  }),
   graphql<WelcomeProps, NewGameResponse, any, any>(joinGameMutation, {
     name: 'joinGameMutation',
     options: {
