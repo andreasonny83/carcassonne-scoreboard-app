@@ -1,16 +1,25 @@
-import { ValidationError, PubSub } from 'apollo-server';
+import { ValidationError, UserInputError, PubSub } from 'apollo-server';
 import get from 'lodash/get';
 const pubsub = new PubSub();
 
 import { dataSources } from '../../datasources';
-import { IGame } from '../../datasources/game.data';
+import { IGame, MeepleColor, IPlayer } from '../../datasources/game.data';
+import { NewGameObject } from '../../datasources/game.service';
 
-const validMeepleColor = ['green', 'red', 'blue', 'yellow', 'black', 'gray'];
+const validMeepleColor: MeepleColor[] = ['green', 'red', 'blue', 'yellow', 'black', 'gray'];
 const sanitizeInput = (input: any) =>
   String(input)
     .replace(/[^\w\s]|\s{2,}/g, '')
     .trim();
-const validateColor = (color: any) => Boolean(~validMeepleColor.indexOf(color)) && String(color);
+
+const validateColor = (color: string): MeepleColor | undefined => {
+  const index = validMeepleColor.indexOf(color as MeepleColor);
+
+  if (Boolean(~index)) {
+    return validMeepleColor[index];
+  }
+};
+
 const validatePlayer = (playerName: string) => {
   const playerNumber = Number(playerName.replace(/player/, ''));
   if (playerNumber > 0 && playerNumber < 7) {
@@ -18,6 +27,52 @@ const validatePlayer = (playerName: string) => {
   }
 
   return false;
+};
+
+const sanitizePlayers = (players: IPlayer[]) => {
+  const playerKeys = players.map((player: IPlayer) => player.key);
+  const playerColors: MeepleColor[] = players.map((player: IPlayer) => player.color);
+
+  const duplicatePlayers = playerKeys.some(
+    (playerName: string, index: Number) => playerKeys.indexOf(playerName) !== index
+  );
+
+  const duplicateColor = playerColors.some(
+    (playerColor: MeepleColor, index: Number) => playerColors.indexOf(playerColor) !== index
+  );
+
+  if (duplicatePlayers) {
+    throw new UserInputError(`Invalid request. Duplicated players found`);
+  }
+
+  console.log(duplicateColor);
+
+  if (duplicateColor) {
+    throw new UserInputError(
+      `Invalid request. Cannot assign the same meeple color to multiple players`
+    );
+  }
+
+  return players.map((player: IPlayer) => {
+    const { name, color, key } = player;
+
+    if (!(name && color && key)) {
+      throw new UserInputError(`Invalid request`);
+    }
+
+    const meepleColor = validateColor(color);
+    const playerKey = validatePlayer(key);
+
+    if (!(meepleColor && playerKey)) {
+      throw new UserInputError(`Invalid request`);
+    }
+
+    return {
+      name: sanitizeInput(player.name),
+      color: meepleColor,
+      key: playerKey,
+    };
+  });
 };
 
 const GAME_UPDATED = 'GAME_UPDATED';
@@ -58,42 +113,31 @@ export default {
 
   Mutation: {
     newGame: async (parent: any, args: any, context: any) => {
-      const { gameName, players } = args;
-      const userId = get(context, 'userData.data.username');
-      const sanitizedGameName = sanitizeInput(gameName);
-      const sanitizedPlayers = players.map((player: any) => {
-        const { name, color, key } = player;
+      const { input } = args;
 
-        console.log('name', name);
-        console.log('color', color);
-        console.log('key', key);
-
-        if (!(name && color && key)) {
-          throw new ValidationError(`Invalid request`);
-        }
-
-        const meepleColor = validateColor(color);
-        const playerKey = validatePlayer(key);
-
-        if (!(meepleColor && playerKey)) {
-          throw new ValidationError(`Invalid request`);
-        }
-
-        return {
-          name: sanitizeInput(player.name),
-          color: meepleColor,
-          key: playerKey,
-        };
-      });
-
-      const isValidRequest =
-        sanitizedGameName && sanitizedPlayers && Array.isArray(players) && players.length < 7;
-
-      if (!isValidRequest) {
-        throw new ValidationError(`Invalid request`);
+      if (!input) {
+        throw new UserInputError(`Invalid request`);
       }
 
-      const gameObj = {
+      const { name, players } = input;
+
+      if (
+        !(name && players && Array.isArray(players) && players.length > 1 && players.length < 7)
+      ) {
+        throw new UserInputError(`Invalid request`);
+      }
+
+      const userId = get(context, 'userData.data.username');
+      const sanitizedGameName = sanitizeInput(name);
+      const sanitizedPlayers = sanitizePlayers(players);
+
+      const isValidRequest = sanitizedGameName && sanitizedPlayers;
+
+      if (!isValidRequest) {
+        throw new UserInputError(`Invalid request`);
+      }
+
+      const gameObj: NewGameObject = {
         gameName: sanitizedGameName,
         players: sanitizedPlayers,
       };
@@ -108,7 +152,8 @@ export default {
     },
 
     joinGame(parent: any, args: any, context: any) {
-      const { gameId } = args;
+      const { input } = args;
+      const { gameId } = input;
       const userId =
         context && context.userData && context.userData.data && context.userData.data.username;
       const game = dataSources.gameService.getGame(gameId);
@@ -141,7 +186,8 @@ export default {
     },
 
     startGame(parent: any, args: any, context: any) {
-      const { gameId } = args;
+      const { input } = args;
+      const { gameId } = input;
       const userId = context.userData && context.userData.data && context.userData.data.username;
       const game = dataSources.gameService.getGame(gameId);
 
@@ -171,7 +217,8 @@ export default {
     },
 
     updateGame(parent: any, args: any, context: any) {
-      const { gameId, playerKey, score } = args;
+      const { input } = args;
+      const { gameId, playerKey, score } = input;
       const userId = context.userData && context.userData.data && context.userData.data.username;
       const game = dataSources.gameService.getGame(gameId);
 
@@ -206,6 +253,8 @@ export default {
         }
         return player;
       });
+
+      console.log('playersUpdated', playersUpdated);
 
       const gameUpdated = dataSources.gameService.updateGame({ ...game, players: playersUpdated });
       pubsub.publish(GAME_UPDATED, { gameUpdated });

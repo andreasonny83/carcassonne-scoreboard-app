@@ -21,6 +21,12 @@ export default `
     score: Int
   }
 
+  type Log {
+    id: ID!
+    userId: String!
+    score: String!
+    timestamp: Int!
+  }
 
   type Game {
     id: ID!
@@ -29,14 +35,33 @@ export default `
     users: [String!]
     started: Boolean!
     finished: Boolean!
-    # log: Log
+    log: [Log]!
+  }
+
+  input NewGameInput {
+    name: String!
+    players: [PlayerInfoInput!]!
+  }
+
+  input StartGameInput {
+    gameId: String!
+  }
+
+  input JoinGameInput {
+    gameId: String!
+  }
+
+  input UpdateGameInput {
+    gameId: String
+    playerKey: String
+    score: Int
   }
 
   type Mutation {
-    newGame(gameName: String! players: [PlayerInfoInput!]!): Game
-    startGame(gameId: String!): Game
-    joinGame(gameId: String!): Game
-    updateGame(gameId: String, playerKey: String, score: Int): Game
+    newGame(input: NewGameInput!): Game
+    startGame(input: StartGameInput!): Game
+    joinGame(input: JoinGameInput!): Game
+    updateGame(input: UpdateGameInput!): Game
   }
 
   type Query {

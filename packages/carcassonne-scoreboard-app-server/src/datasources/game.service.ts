@@ -3,7 +3,7 @@ import { uniqueNamesGenerator } from 'unique-names-generator';
 
 import { Game, IGame, IPlayer } from './game.data';
 
-interface NewGameObject {
+export interface NewGameObject {
   gameName: string;
   players: IPlayer[];
 }
