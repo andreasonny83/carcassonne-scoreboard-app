@@ -20,7 +20,7 @@ export class MainComponent extends PureComponent<MainComponentProps> {
     const { showNotification } = this.props;
     const { user } = this.context;
 
-    showNotification(`Welcome back ${user.nickname}`);
+    showNotification(`Welcome back ${user.nickname} 👋`);
   }
 
   public render(): JSX.Element {

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { closeNotification } from '../../actions';
-import { SnackbarComponent } from './Snackbar';
+import { SnackbarWithStyles } from './SnackbarWithStyles';
 
 const mapStateToProps = (state: any) => ({
   notifications: state.notifications,
@@ -13,4 +13,4 @@ const mapDispatchToProps = {
 export const Snackbar = connect(
   mapStateToProps,
   mapDispatchToProps
-)(SnackbarComponent);
+)(SnackbarWithStyles);

@@ -1,5 +1,7 @@
 import React, { PureComponent } from 'react';
-import { Snackbar, Slide } from '@material-ui/core';
+import twemoji from 'twemoji';
+import { Snackbar as SnackbarUI, Slide } from '@material-ui/core';
+import { SnackbarStylesProps } from './SnackbarWithStyles';
 
 class TransitionUp extends PureComponent {
   public render() {
@@ -7,30 +9,42 @@ class TransitionUp extends PureComponent {
   }
 }
 
-interface SnackbarProps {
+interface SnackbarProps extends SnackbarStylesProps {
   notifications: any;
   closeNotification(): void;
 }
 
 /* tslint:disable:max-classes-per-file */
-export class SnackbarComponent extends PureComponent<SnackbarProps> {
+export class Snackbar extends PureComponent<SnackbarProps> {
   public render() {
-    const { notifications, closeNotification } = this.props;
+    const { notifications, closeNotification, classes } = this.props;
     const defaultProps = {
       key: 'notification-message',
       timeout: 5000,
     };
     const { key = defaultProps.key, message, open, timeout = defaultProps.timeout } = notifications;
+    const messageParsed = twemoji.parse(String(message), {
+      base: '/',
+      folder: 'svg',
+      ext: '.svg',
+      size: 24,
+    });
 
     return (
-      <Snackbar
+      <SnackbarUI
         open={open}
         onClose={closeNotification}
         TransitionComponent={TransitionUp}
         ContentProps={{
           'aria-describedby': `${key}`,
         }}
-        message={<p id={key}>{message}</p>}
+        message={
+          <p
+            className={classes.message}
+            dangerouslySetInnerHTML={{ __html: messageParsed }}
+            id={key}
+          />
+        }
         autoHideDuration={timeout}
       />
     );
