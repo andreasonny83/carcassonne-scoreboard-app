@@ -4,10 +4,12 @@ import { NewPlayer } from './NewPlayer';
 
 const styles = ({ spacing }: Theme) => ({
   formControl: {
-    margin: spacing.unit,
+    margin: spacing(3, 0),
+  },
+  gridItem: {
+    padding: spacing(1),
   },
   formPlayerControl: {
-    margin: spacing.unit,
     flexFlow: 'row',
     alignItems: 'center',
   },

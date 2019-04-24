@@ -11,7 +11,12 @@ const styles = ({ palette }: Theme) => ({
     'stroke-opacity': '0.75',
   },
   listItemSelected: {
-    backgroundColor: `${palette.grey[300]}!important`
+    backgroundColor: `${palette.grey[300]}!important`,
+  },
+  listItemText: {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    'white-space': 'nowrap',
   },
 });
 

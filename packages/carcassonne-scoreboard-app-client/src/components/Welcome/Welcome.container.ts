@@ -27,15 +27,15 @@ const playerQuery = gql`
   }
 `;
 
-export interface NewGameResponse {
-  newGame: {
+export interface JoinGameResponse {
+  game: {
     id: string;
   };
 }
 
 const withGame = compose(
   graphql(playerQuery),
-  graphql<WelcomeProps, NewGameResponse, any, any>(joinGameMutation, {
+  graphql<WelcomeProps, JoinGameResponse, any, any>(joinGameMutation, {
     name: 'joinGameMutation',
     options: {
       refetchQueries: [{ query: playerQuery }],

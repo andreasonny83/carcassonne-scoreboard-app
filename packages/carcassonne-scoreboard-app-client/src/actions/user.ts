@@ -1,16 +1,20 @@
 import { Auth } from 'aws-amplify';
 import { Dispatch } from 'redux';
+
 import { USER_UPDATE, USER_UPDATED } from '../constants';
 
 const formatUserData = (userData: any) => {
   const userAttributes = userData && userData.attributes;
 
-  return userAttributes && {
-    username: userAttributes.sub,
-    email: userAttributes.email,
-    nickname: userAttributes.nickname,
-  }
-}
+  return (
+    userAttributes && {
+      username: userAttributes.sub,
+      email: userAttributes.email,
+      nickname: userAttributes.nickname,
+      picture: userAttributes.picture,
+    }
+  );
+};
 
 export const updateUserData = (userData: any) => async (dispatch: Dispatch) => {
   let user;
@@ -22,12 +26,12 @@ export const updateUserData = (userData: any) => async (dispatch: Dispatch) => {
       bypassCache: true,
     });
   } catch (err) {
-    throw new Error();
+    return;
   }
 
   return dispatch({
     type: USER_UPDATED,
-    payload: formatUserData(user)
+    payload: formatUserData(user),
   });
 };
 
@@ -44,6 +48,6 @@ export const getUserData = () => async (dispatch: Dispatch) => {
 
   return dispatch({
     type: USER_UPDATE,
-    payload: formatUserData(user)
+    payload: formatUserData(user),
   });
 };

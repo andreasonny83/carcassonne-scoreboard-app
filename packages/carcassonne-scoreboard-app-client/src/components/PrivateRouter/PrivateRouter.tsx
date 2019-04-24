@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { RouteProps, Route, Redirect } from 'react-router';
 
 import { IUser, AppContextProvider, IAppContext } from './app.context';
+import { Grid, CircularProgress } from '@material-ui/core';
 
 interface PrivateRouterProps extends RouteProps {
   target: React.ComponentClass;
@@ -18,7 +19,7 @@ interface PrivateRouterProps extends RouteProps {
 
 export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
   public componentDidMount() {
-    const { getUserData, signedOut, userSignedIn, push, location, isSignedIn } = this.props;
+    const { getUserData, signedOut, userSignedIn, push, location } = this.props;
 
     getUserData()
       .then(() => {
@@ -29,26 +30,20 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
   }
 
   public render(): JSX.Element {
-    const {
-      target,
-      redirectTo,
-      location,
-      loading,
-      isSignedIn,
-      user,
-      ...rest
-    } = this.props;
+    const { target, redirectTo, location, loading, isSignedIn, user, ...rest } = this.props;
 
     if (loading || !Object.keys(user).length) {
-      return <p>Loading...</p>;
+      return (
+        <Grid direction="column" alignContent="center" container>
+          <CircularProgress />
+        </Grid>
+      );
     }
 
     return (
       <Route
         {...rest}
-        render={props =>
-          this.renderRoute(target, isSignedIn, redirectTo, location, user, props)
-        }
+        render={props => this.renderRoute(target, isSignedIn, redirectTo, location, user, props)}
       />
     );
   }

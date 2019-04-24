@@ -3,7 +3,7 @@ import { styled } from '@material-ui/styles';
 import { Link } from 'react-router-dom';
 import { Button, withStyles, WithStyles, Theme } from '@material-ui/core';
 
-import { NewGameComponent } from './NewGame';
+import { NewGame } from './NewGame';
 
 const StyledLink = styled(Link)({
   color: 'inherit',
@@ -17,27 +17,26 @@ export const ButtonLink = (props: any) => (
 
 const styles = ({ spacing }: Theme) => ({
   root: {
-    padding: `${spacing.unit * 2}px ${spacing.unit}px`,
-    marginBottom: spacing.unit * 2,
+    padding: spacing(2, 1),
+    marginBottom: spacing(2),
   },
-  form: {
+  container: {
     maxWidth: '500px',
-    width: '500px',
+    marginTop: '2em',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '1em 0.5em',
   },
   formControl: {
-    margin: spacing.unit,
+    margin: spacing(1),
   },
   gameName: {
-    marginBottom: spacing.unit * 1,
+    marginBottom: spacing(1),
   },
   gameNameDescription: {
-    marginBottom: spacing.unit * 1,
+    marginBottom: spacing(1),
   },
 });
 
 export type NewGameStylesProps = WithStyles<typeof styles>;
 
-export const NewGameWithStyles = withStyles(styles)(NewGameComponent);
+export const NewGameWithStyles = withStyles(styles)(NewGame);

@@ -3,15 +3,16 @@ import { Paper, Typography, Grid, CircularProgress, Button } from '@material-ui/
 
 import { GameStylesProps } from './GameWithStyles';
 import { ChildPropsData, subscribeToAuthorMutations } from './Game.container';
-import { PlayerItem } from '../PlayerItem';
-import { UpdateScore } from '../UpdateScore';
+import { PlayerItem } from './PlayerItem';
+import { UpdateScore } from './UpdateScore';
 import { MeepleColor } from '../Icons';
-import { ShareGame } from '../ShareGame';
+import { ShareGame } from './ShareGame';
 
 type GameComponentProps = GameStylesProps &
   ChildPropsData & {
     showNotification(message: string): void;
     startGame(options: any): any;
+    endGame(options: any): any;
     updateGame(options: any): any;
   };
 
@@ -83,68 +84,74 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
 
     return (
       <Paper elevation={1} className={classes.root}>
-        <Grid direction="column" container alignItems="center">
-          <Typography component="h2" variant="h4" align="center">
-            {data.game.name}
-          </Typography>
+        <Grid container direction="column">
+          <Grid item xs={12}>
+            <Typography component="h2" variant="h4" align="center" className={classes.title}>
+              {data.game.name}
+            </Typography>
+          </Grid>
 
-          <Typography component="caption" align="center" gutterBottom>
-            {(!data.game.started && `Press Start Game when you're ready!`) ||
-              `Game started. Good luck!`}
-          </Typography>
+          <Grid item xs={12}>
+            <Typography align="center" gutterBottom>
+              {!data.game.started && !data.game.finished && `Press Start Game when you're ready!`}
+              {data.game.started && !data.game.finished && `Game started. Good luck!`}
+              {data.game.started && data.game.finished && `Game Ended`}
+            </Typography>
+          </Grid>
 
-          <ShareGame gameId={data.game.id} />
+          <Grid item xs={12}>
+            <ShareGame gameId={data.game.id} />
+          </Grid>
 
-          {!data.game.started && (
-            <Grid
-              item
-              container
-              direction="column"
-              alignItems="center"
-              justify="center"
-              spacing={8}
-              className={classes.actionButtons}
-            >
-              <Button color="primary" variant="outlined" onClick={this.startGame}>
-                Start Game
-              </Button>
-            </Grid>
-          )}
-
-          {data.game.started && (
-            <Grid
-              item
-              container
-              direction="column"
-              alignItems="center"
-              justify="center"
-              spacing={8}
-              className={classes.actionButtons}
-            >
+          <Grid
+            item
+            container
+            direction="column"
+            alignItems="center"
+            justify="center"
+            xs={12}
+            spacing={2}
+            className={classes.actionButtons}
+          >
+            {!data.game.started && !data.game.finished && (
               <Grid item xs={12} sm={8} md={6} lg={4}>
                 <Button
-                  fullWidth={true}
                   className={classes.buttons}
                   color="primary"
                   variant="outlined"
-                  disabled={!selectedPlayer || !data.game.started}
-                  onClick={this.handleShowUpdateScore}
+                  onClick={this.startGame}
                 >
-                  Add points
+                  Start Game
                 </Button>
               </Grid>
-              <Grid item xs={12} sm={8} md={6} lg={4}>
-                <Button
-                  className={classes.buttons}
-                  color="secondary"
-                  variant="outlined"
-                  onClick={this.undoScore}
-                >
-                  Undo
-                </Button>
-              </Grid>
-            </Grid>
-          )}
+            )}
+
+            {data.game.started && !data.game.finished && (
+              <>
+                <Grid item xs={12} sm={8} md={6} lg={4}>
+                  <Button
+                    className={classes.buttons}
+                    color="primary"
+                    variant="outlined"
+                    disabled={!selectedPlayer || !data.game.started}
+                    onClick={this.handleShowUpdateScore}
+                  >
+                    Add points
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={8} md={6} lg={4}>
+                  <Button
+                    className={classes.buttons}
+                    color="secondary"
+                    variant="outlined"
+                    onClick={this.undoScore}
+                  >
+                    Undo
+                  </Button>
+                </Grid>
+              </>
+            )}
+          </Grid>
 
           <UpdateScore
             playerName={selectedPlayerName}
@@ -152,21 +159,42 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
             open={updateScoreOpened}
             onClose={this.handleHideUpdateScore}
           />
+        </Grid>
 
-          <Grid item container>
-            <Typography variant="caption" color="textSecondary" gutterBottom>
-              Share this id with the other players
-            </Typography>
+        <Grid direction="column" container>
+          <Grid item xs={12}>
+            <PlayerItem
+              disabled={!data.game.started}
+              players={data.game.players}
+              handleListItemClick={this.handleSelectPlayer}
+              playerSelected={selectedPlayer}
+            />
           </Grid>
         </Grid>
-        <Grid direction="column" container>
-          <PlayerItem
-            disabled={!data.game.started}
-            players={data.game.players}
-            handleListItemClick={this.handleSelectPlayer}
-            playerSelected={selectedPlayer}
-          />
-        </Grid>
+
+        {data.game.started && !data.game.finished && (
+          <Grid
+            item
+            container
+            direction="column"
+            alignItems="center"
+            justify="center"
+            xs={12}
+            spacing={2}
+            className={classes.actionButtons}
+          >
+            <Grid item xs={12} sm={8} md={6} lg={4}>
+              <Button
+                className={classes.buttons}
+                color="secondary"
+                variant="outlined"
+                onClick={this.endGame}
+              >
+                End Game
+              </Button>
+            </Grid>
+          </Grid>
+        )}
       </Paper>
     );
   }
@@ -189,6 +217,19 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
 
   private undoScore = () => {
     //
+  };
+
+  private endGame = () => {
+    const { data, endGame, showNotification } = this.props;
+    const gameId = data && data.game && data.game.id;
+
+    endGame({
+      variables: {
+        endGameInput: { gameId },
+      },
+    }).catch(() => {
+      showNotification('Something went wrong. Cannot end this game 🤷‍');
+    });
   };
 
   private handleShowUpdateScore = () => {

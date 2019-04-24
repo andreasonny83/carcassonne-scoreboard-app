@@ -5,6 +5,7 @@ import * as serviceWorker from './serviceWorker';
 import { App } from './components';
 
 import './fonts/raleway.css';
+import './index.css';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

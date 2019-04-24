@@ -1,18 +1,24 @@
 import React, { PureComponent } from 'react';
 import { AppBar, Toolbar, Typography, Menu, MenuItem } from '@material-ui/core';
+import { isWidthUp } from '@material-ui/core/withWidth';
+import { Avatar } from 'react-avataaars';
 
+import { UserState } from '../../reducers/user';
 import {
   WithStylesProps,
   TitleLink,
   StyledIconButton,
-  StyledAvatar,
   StyledRouterLink,
   StyledLink,
 } from './HeaderWithStyles';
+import { AnyARecord } from 'dns';
+import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 
 interface HeaderProps extends WithStylesProps {
+  width: Breakpoint;
   appName: string;
   isSignedIn: boolean;
+  user: UserState;
   signOut(): void;
 }
 
@@ -24,11 +30,11 @@ const initialState: HeaderState = {
   anchorEl: null,
 };
 
-export class HeaderComponent extends PureComponent<HeaderProps, HeaderState> {
+export class Header extends PureComponent<HeaderProps, HeaderState> {
   public readonly state: HeaderState = initialState;
 
   public render(): JSX.Element {
-    const { appName, signOut, isSignedIn, classes } = this.props;
+    const { appName, signOut, isSignedIn, user, width, classes } = this.props;
     const { anchorEl } = this.state;
 
     return (
@@ -48,10 +54,9 @@ export class HeaderComponent extends PureComponent<HeaderProps, HeaderState> {
                   aria-haspopup="true"
                   onClick={this.handleMenuOpen}
                 >
-                  <StyledAvatar
-                    alt="User avatar"
-                    src="https://avatars1.githubusercontent.com/u/8806300?s=460&v=4"
-                  />
+                  <div className={classes.avarWrapper}>
+                    <Avatar size={isWidthUp('sm', width) ? '48px' : '40px'} hash={user.picture} className={classes.avatar} />
+                  </div>
                 </StyledIconButton>
                 <Menu
                   id="user-menu"

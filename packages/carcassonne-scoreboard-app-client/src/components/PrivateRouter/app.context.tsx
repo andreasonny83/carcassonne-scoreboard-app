@@ -4,7 +4,7 @@ export interface IUser {
   username: string;
   email: string;
   nickname: string;
-  avatar?: string;
+  picture?: string;
 }
 
 export interface IAppContext {

@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react';
 import { List, ListItem, ListItemText, ListItemIcon } from '@material-ui/core';
 
-import { Meeple, mapColor } from '../Icons';
+import { Meeple, mapColor } from '../../Icons';
 import { PlayerItemStylesProps } from './PlayerItemWithStyles';
-import { Player } from '../Game';
+import { Player } from '..';
 
 type PlayerItemProps = PlayerItemStylesProps & {
   players: Player[];
@@ -38,7 +38,11 @@ export class PlayerItem extends PureComponent<PlayerItemProps> {
                 color={mapColor.get(player.color)}
               />
             </ListItemIcon>
-            <ListItemText primary={player.name} secondary={`${player.score || 0}pt`} />
+            <ListItemText
+              className={classes.listItemText}
+              primary={player.name}
+              secondary={`${player.score || 0}pt`}
+            />
           </ListItem>
         ))}
       </List>

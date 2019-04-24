@@ -11,7 +11,8 @@ import { ApolloLink, split } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
 import { getMainDefinition } from 'apollo-utilities';
 import { InMemoryCache } from 'apollo-cache-inmemory';
-import { MuiThemeProvider, CssBaseline } from '@material-ui/core';
+import { ThemeProvider } from '@material-ui/styles';
+import { CssBaseline } from '@material-ui/core';
 
 import { theme } from '../../theme';
 import { AMPLIFY, API_URL, APP_NAME } from '../../config';
@@ -75,10 +76,10 @@ export class App extends PureComponent {
       <ApolloProvider client={apolloClient}>
         <Provider store={store}>
           <ConnectedRouter history={history}>
-            <MuiThemeProvider theme={theme}>
+            <ThemeProvider theme={theme}>
               <CssBaseline />
               <AppWithStyles appName={APP_NAME} />
-            </MuiThemeProvider>
+            </ThemeProvider>
           </ConnectedRouter>
         </Provider>
       </ApolloProvider>

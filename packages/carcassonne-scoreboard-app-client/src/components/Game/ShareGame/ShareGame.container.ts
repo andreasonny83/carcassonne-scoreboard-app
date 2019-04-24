@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 
-import { showNotification } from '../../actions';
+import { showNotification } from '../../../actions';
 import { ShareGameWithStyles } from './ShareGameWithStyles';
 
 const mapDispatchToProps = { showNotification };

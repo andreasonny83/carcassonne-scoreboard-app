@@ -1,34 +1,22 @@
 import React, { PureComponent } from 'react';
-import twemoji from 'twemoji';
 import { Snackbar as SnackbarUI, Slide } from '@material-ui/core';
-import { SnackbarStylesProps } from './SnackbarWithStyles';
 
-class TransitionUp extends PureComponent {
-  public render() {
-    return <Slide {...this.props} direction="up" />;
-  }
-}
+import { Twemoji } from '../twemoji';
 
-interface SnackbarProps extends SnackbarStylesProps {
+const TransitionUp = (props: any) => <Slide {...props} direction="up" />;
+
+interface SnackbarProps {
   notifications: any;
   closeNotification(): void;
 }
 
-/* tslint:disable:max-classes-per-file */
 export class Snackbar extends PureComponent<SnackbarProps> {
   public render() {
-    const { notifications, closeNotification, classes } = this.props;
+    const { notifications, closeNotification } = this.props;
     const defaultProps = {
-      key: 'notification-message',
       timeout: 5000,
     };
-    const { key = defaultProps.key, message, open, timeout = defaultProps.timeout } = notifications;
-    const messageParsed = twemoji.parse(String(message), {
-      base: '/',
-      folder: 'svg',
-      ext: '.svg',
-      size: 24,
-    });
+    const { message, open, timeout = defaultProps.timeout } = notifications;
 
     return (
       <SnackbarUI
@@ -36,15 +24,13 @@ export class Snackbar extends PureComponent<SnackbarProps> {
         onClose={closeNotification}
         TransitionComponent={TransitionUp}
         ContentProps={{
-          'aria-describedby': `${key}`,
+          'aria-describedby': 'notification-message',
+          style: {
+            display: 'flex',
+            justifyContent: 'center',
+          },
         }}
-        message={
-          <p
-            className={classes.message}
-            dangerouslySetInnerHTML={{ __html: messageParsed }}
-            id={key}
-          />
-        }
+        message={<Twemoji copy={message} />}
         autoHideDuration={timeout}
       />
     );

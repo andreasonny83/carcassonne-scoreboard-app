@@ -14,14 +14,14 @@ const styles = ({ breakpoints, spacing, palette }: Theme) => ({
     marginBottom: 0,
   },
   main: {
-    marginLeft: spacing.unit,
-    marginRight: spacing.unit,
+    marginLeft: spacing(1),
+    marginRight: spacing(1),
     flex: '1 1 auto',
     [breakpoints.up('sm')]: {
-      marginLeft: spacing.unit * 2,
-      marginRight: spacing.unit * 2,
+      marginLeft: spacing(2),
+      marginRight: spacing(2),
     },
-    [breakpoints.up(breakpoints.values.lg + spacing.unit * 4)]: {
+    [breakpoints.up(breakpoints.values.lg + spacing(4))]: {
       width: breakpoints.values.lg,
       marginLeft: 'auto',
       marginRight: 'auto',
@@ -30,7 +30,7 @@ const styles = ({ breakpoints, spacing, palette }: Theme) => ({
   mainFeaturedPost: {
     backgroundColor: palette.grey[100],
     color: palette.common.white,
-    marginBottom: spacing.unit * 4,
+    marginBottom: spacing(4),
   },
   footer: {
     paddingBottom: 0,

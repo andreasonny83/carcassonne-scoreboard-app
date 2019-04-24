@@ -12,10 +12,10 @@ import {
 
 import { NewGameStylesProps } from './NewGameWithStyles';
 import { MeepleColor } from '../Icons';
-import { NewPlayer } from '../NewPlayer';
+import { NewPlayer } from './NewPlayer';
 import { IPlayer } from './NewGame.container';
 
-interface NewGameComponentProps extends NewGameStylesProps {
+interface NewGameProps extends NewGameStylesProps {
   showNotification(message: string): void;
   newGame(options: any): Promise<any>;
   joinGame(gameId: string): void;
@@ -40,7 +40,7 @@ const initialState = {
 
 type NewGameState = Readonly<typeof initialState>;
 
-export class NewGameComponent extends PureComponent<NewGameComponentProps, NewGameState> {
+export class NewGame extends PureComponent<NewGameProps, NewGameState> {
   public readonly state = initialState;
 
   public render() {
@@ -56,59 +56,58 @@ export class NewGameComponent extends PureComponent<NewGameComponentProps, NewGa
                 Prepare the Game
               </Typography>
             </Grid>
+          </Grid>
 
-            <div className={classes.form}>
-              <FormControl
-                margin="normal"
-                variant="outlined"
-                className={classes.formControl}
-                error={!pristine && !gameNameValid}
-                disabled={busy}
-                required
-                fullWidth
-              >
-                <InputLabel htmlFor="gameName" variant="outlined">
-                  Game name
-                </InputLabel>
-                <OutlinedInput
-                  id="gameName"
-                  name="gameName"
-                  autoComplete="gameName"
-                  type="string"
-                  value={gameName}
-                  className={classes.gameName}
-                  onChange={this.handleChange}
-                  labelWidth={110}
-                  autoFocus
-                />
-                <FormHelperText hidden={pristine} className={classes.gameNameDescription}>
-                  Enter a valid game name. Only letters, numbers and underscore allowed.
-                </FormHelperText>
-              </FormControl>
-
-              <NewPlayer
-                key={players[0].key}
-                player={players[0]}
-                busy={busy}
-                placeholder="Your player name"
-                labelWidth={160}
-                hideDelete={true}
-                onRemovePlayer={this.removePlayer}
+          <Grid container className={classes.container}>
+            <FormControl
+              variant="outlined"
+              className={classes.formControl}
+              error={!pristine && !gameNameValid}
+              disabled={busy}
+              required
+              fullWidth
+            >
+              <InputLabel htmlFor="gameName" variant="outlined">
+                Game name
+              </InputLabel>
+              <OutlinedInput
+                id="gameName"
+                name="gameName"
+                autoComplete="gameName"
+                type="string"
+                value={gameName}
+                className={classes.gameName}
                 onChange={this.handleChange}
+                labelWidth={110}
+                autoFocus
               />
-            </div>
+              <FormHelperText hidden={pristine} className={classes.gameNameDescription}>
+                Enter a valid game name. Only letters, numbers and underscore allowed.
+              </FormHelperText>
+            </FormControl>
+
+            <NewPlayer
+              key={players[0].key}
+              player={players[0]}
+              busy={busy}
+              placeholder="Your player name"
+              labelWidth={160}
+              hideDelete={true}
+              onRemovePlayer={this.removePlayer}
+              onChange={this.handleChange}
+            />
           </Grid>
         </Paper>
 
         <Paper elevation={1} className={classes.root}>
-          <Grid container>
+          <Grid container className={classes.container}>
             <Grid item xs={12}>
               <Typography component="h2" variant="h6" color="inherit" align="center" gutterBottom>
                 Opponent players
               </Typography>
             </Grid>
 
-            <div className={classes.form}>
+            <Grid container>
               {players
                 .filter((player, index) => index && player.active)
                 .map((player: IPlayer) => (
@@ -147,7 +146,7 @@ export class NewGameComponent extends PureComponent<NewGameComponentProps, NewGa
                   Go to the Game
                 </Button>
               </FormControl>
-            </div>
+            </Grid>
           </Grid>
         </Paper>
       </form>

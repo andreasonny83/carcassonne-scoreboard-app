@@ -138,6 +138,7 @@ export const signUp = (data: SignInData) => async (dispatch: Dispatch) => {
       ...data,
       attributes: {
         nickname: data.username,
+        picture: data.username,
       },
     });
   } catch (err) {

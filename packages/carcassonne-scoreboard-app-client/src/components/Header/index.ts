@@ -1,1 +1,1 @@
-export * from './HeaderWithStyles';
+export * from './Header.container';

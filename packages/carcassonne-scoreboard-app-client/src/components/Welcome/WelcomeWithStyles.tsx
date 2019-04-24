@@ -1,27 +1,14 @@
-import React from 'react';
-import { styled } from '@material-ui/styles';
-import { Link } from 'react-router-dom';
-import { Button, withStyles, WithStyles } from '@material-ui/core';
+import { withStyles, WithStyles } from '@material-ui/core';
 import { Theme } from '@material-ui/core';
 
 import { WelcomeComponent } from './Welcome';
 
-const StyledLink = styled(Link)({
-  color: 'inherit',
-});
-
-export const ButtonLink = (props: any) => (
-  <Button variant="outlined" color="primary" {...props}>
-    <StyledLink to={'/app/game/new'} {...props} />
-  </Button>
-);
-
 const styles = ({ spacing }: Theme) => ({
   mainFeaturedPost: {
-    marginBottom: spacing.unit * 4,
+    marginBottom: spacing(4),
   },
   mainFeaturedPostContent: {
-    padding: `${spacing.unit * 6}px`,
+    padding: spacing(6),
   },
   form: {
     maxWidth: '500px',

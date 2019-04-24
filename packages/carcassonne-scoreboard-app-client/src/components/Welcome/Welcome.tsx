@@ -1,12 +1,11 @@
 import React, { PureComponent } from 'react';
 import { QueryResult, ChildProps } from 'react-apollo';
 
-import { Link, Button, TextField, Paper, FormControl } from '@material-ui/core';
+import { Button, TextField, Paper, FormControl, CircularProgress } from '@material-ui/core';
 import { Grid, Typography } from '@material-ui/core';
 
-import { AppContext, IAppContext } from '../PrivateRouter/app.context';
-import { UserData, NewGameResponse } from './Welcome.container';
-import { WelcomeStylesProps, ButtonLink } from './WelcomeWithStyles';
+import { UserData, JoinGameResponse } from './Welcome.container';
+import { WelcomeStylesProps } from './WelcomeWithStyles';
 
 interface UserQueryResult {
   user: UserData;
@@ -15,7 +14,7 @@ interface UserQueryResult {
 export interface WelcomeProps extends WelcomeStylesProps {
   data: QueryResult & UserQueryResult;
   joinGameMutation(options: any): Promise<any>;
-  newGame(gameId: string): void;
+  newGame(): void;
   joinGame(gameId: string): void;
   showNotification(message: string, timeout?: number): void;
 }
@@ -37,11 +36,9 @@ const initialState: WelcomeState = {
 };
 
 export class WelcomeComponent extends PureComponent<
-  ChildProps<WelcomeProps, NewGameResponse>,
+  ChildProps<WelcomeProps, JoinGameResponse>,
   WelcomeState
 > {
-  public static contextType: React.Context<IAppContext> = AppContext;
-  public context!: React.ContextType<typeof AppContext>;
   public readonly state: WelcomeState = initialState;
 
   public render(): JSX.Element | null {
@@ -53,18 +50,13 @@ export class WelcomeComponent extends PureComponent<
       joinGameFieldPristine,
     } = this.state;
     const { classes } = this.props;
-    const { user: userContext } = this.context;
     const { loading, error, user } = this.props.data;
     const userGames = (user && user.games && user.games.length) || 0;
-
-    if (!user) {
-      console.warn('no user found');
-    }
 
     return (
       <Paper className={classes.mainFeaturedPost} elevation={1}>
         <Grid container>
-          <Grid item md={12}>
+          <Grid item xs={12}>
             <div className={classes.mainFeaturedPostContent}>
               {error ? (
                 <div>
@@ -82,9 +74,9 @@ export class WelcomeComponent extends PureComponent<
                   </Typography>
                 </div>
               ) : loading ? (
-                <Typography variant="h5" color="inherit" align="center" paragraph>
-                  Loading...
-                </Typography>
+                <Grid direction="column" alignContent="center" container>
+                  <CircularProgress />
+                </Grid>
               ) : (
                 <Grid container>
                   <Grid item xs={12}>
@@ -95,7 +87,7 @@ export class WelcomeComponent extends PureComponent<
                       align="center"
                       gutterBottom
                     >
-                      Welcome back {userContext.nickname}
+                      Welcome back
                     </Typography>
 
                     <Typography align="center" gutterBottom>
@@ -107,9 +99,9 @@ export class WelcomeComponent extends PureComponent<
                     <form className={classes.form}>
                       <Grid container justify="center">
                         <FormControl>
-                          <Link gutterBottom component={ButtonLink} underline="none">
+                          <Button variant="outlined" color="primary" onClick={this.newGame}>
                             Start a new game
-                          </Link>
+                          </Button>
                         </FormControl>
                       </Grid>
 
@@ -172,6 +164,12 @@ export class WelcomeComponent extends PureComponent<
       joinGameError: false,
       joinGameFieldPristine: false,
     });
+  };
+
+  private newGame = () => {
+    const { newGame } = this.props;
+
+    newGame();
   };
 
   private joinGame = (id: string) => () => {

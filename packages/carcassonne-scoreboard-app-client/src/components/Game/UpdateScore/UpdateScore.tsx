@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { UpdateScoreStylesProps } from './UpdateScoreWirhStyles';
-import { Meeple, mapColor, MeepleColor } from '../Icons';
+import { Meeple, mapColor, MeepleColor } from '../../Icons';
 
 interface UpdateScoreProps extends UpdateScoreStylesProps {
   playerName: string;
@@ -54,15 +54,15 @@ export class UpdateScore extends PureComponent<UpdateScoreProps, UpdateScoreStat
           </Typography>
         </DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          {/* <DialogContentText>
             How many points do you want to assign to {playerName}?
-          </DialogContentText>
+          </DialogContentText> */}
           <TextField
             autoFocus
             fullWidth
             margin="dense"
             id="name"
-            label="Score"
+            label="Add Points"
             type="number"
             value={score || ''}
             onChange={this.updateScore}

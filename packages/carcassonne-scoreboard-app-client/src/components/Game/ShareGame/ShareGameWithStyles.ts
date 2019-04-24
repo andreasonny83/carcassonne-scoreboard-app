@@ -2,11 +2,11 @@ import { withStyles, createStyles, WithStyles, Theme } from '@material-ui/core/s
 
 import { ShareGame } from './ShareGame';
 
-const styles = ({ palette, spacing, breakpoints }: Theme) =>
+const styles = ({ spacing, breakpoints }: Theme) =>
   createStyles({
     root: {
-      marginTop: spacing.unit,
-      marginBottom: spacing.unit,
+      marginTop: spacing(1),
+      marginBottom: spacing(1),
       justifyContent: 'center',
       [breakpoints.up('sm')]: {
         justifyContent: 'flex-start',

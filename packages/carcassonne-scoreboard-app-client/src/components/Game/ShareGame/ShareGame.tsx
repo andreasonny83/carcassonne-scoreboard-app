@@ -16,11 +16,12 @@ export class ShareGame extends PureComponent<ShareGameProps> {
     const { classes, gameId } = this.props;
 
     return (
-      <Grid item container spacing={8} alignItems="flex-end" className={classes.root}>
+      <Grid item container spacing={2} alignItems="center" className={classes.root}>
         <Grid item xs={10} className={classes.gameIdLabel}>
           <TextField
             fullWidth
-            label="Game id:"
+            helperText="Share this id with the other players"
+            label="Game ID"
             value={gameId}
             id="game-id"
             inputRef={node => (this.gameIdRef = node)}

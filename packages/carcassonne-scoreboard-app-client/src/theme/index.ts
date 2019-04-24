@@ -1,6 +1,6 @@
-import { createMuiTheme, Theme } from '@material-ui/core/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
 
-const defaultTheme = createMuiTheme({
+export const theme = createMuiTheme({
   palette: {
     primary: {
       main: '#0D47A1',
@@ -30,33 +30,8 @@ const defaultTheme = createMuiTheme({
   direction: 'ltr',
 
   typography: {
-    useNextVariants: true,
     fontSize: 16,
     fontWeightMedium: 500,
     fontFamily: "'Raleway', Lucida Grande, sans-serif",
   },
 });
-
-export const theme: Theme = {
-  ...defaultTheme,
-
-  typography: {
-    ...defaultTheme.typography,
-
-    h5: {
-      ...defaultTheme.typography.h5,
-      [defaultTheme.breakpoints.down('sm')]: {
-        fontSize: '1.5rem'
-      }
-    },
-
-    h6: {
-      ...defaultTheme.typography.h6,
-      [defaultTheme.breakpoints.down('xs')]: {
-        fontSize: '1rem',
-      },
-    },
-  },
-};
-
-(window as any).theme = theme;

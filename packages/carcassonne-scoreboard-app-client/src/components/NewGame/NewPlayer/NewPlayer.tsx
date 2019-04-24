@@ -10,9 +10,9 @@ import {
 } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 
-import { Meeple, mapColor } from '../Icons';
+import { Meeple, mapColor } from '../../Icons';
 import { NewPlayerStylesProps } from './NewPlayerWithStyles';
-import { IPlayer } from '../NewGame';
+import { IPlayer } from '..';
 
 type NewPlayerProps = NewPlayerStylesProps & {
   player: IPlayer;
@@ -40,11 +40,11 @@ export class NewPlayer extends PureComponent<NewPlayerProps> {
     } = this.props;
 
     return (
-      <Grid container spacing={16} direction="row" alignItems="center" justify="center">
+      <Grid container direction="row" alignItems="center" justify="center">
         {!hideDelete && (
           <Grid item xs={2} className={classes.deleteContainer}>
             <Fab
-              size="small"
+              size="medium"
               color="primary"
               aria-label="Delete"
               onClick={event => onRemovePlayer(event, player)}
@@ -57,14 +57,13 @@ export class NewPlayer extends PureComponent<NewPlayerProps> {
             </Fab>
           </Grid>
         )}
-        <Grid item xs={hideDelete ? 12 : 10}>
+        <Grid item xs={hideDelete ? 12 : 10} className={classes.gridItem}>
           <FormControl
-            margin="normal"
             variant="outlined"
-            className={classes.formControl}
             disabled={busy}
             required
             fullWidth
+            className={classes.formControl}
           >
             <InputLabel htmlFor={`${player.key}-name`} variant="outlined">
               {placeholder}

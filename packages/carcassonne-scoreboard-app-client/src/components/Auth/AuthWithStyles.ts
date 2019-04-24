@@ -14,25 +14,25 @@ const styles = ({ spacing, palette }: Theme) =>
       alignItems: 'center',
     },
     avatar: {
-      margin: spacing.unit,
+      margin: spacing(1),
       backgroundColor: palette.secondary.main,
     },
     card: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: `${spacing.unit * 2}px ${spacing.unit * 3}px ${spacing.unit * 3}px`,
+      padding: spacing(2, 3, 3),
     },
     form: {
       width: '100%',
-      marginTop: spacing.unit,
+      marginTop: spacing(1),
     },
     submit: {
-      marginTop: spacing.unit * 3,
+      marginTop: spacing(3),
     },
     actionButton: {
-      marginTop: spacing.unit * 2,
-    }
+      marginTop: spacing(2),
+    },
   });
 
 export type IAuthWithStyles = WithStyles<typeof styles>;

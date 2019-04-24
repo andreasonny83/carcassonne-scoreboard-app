@@ -24,17 +24,29 @@ const GAME_FETCH_QUERY = gql`
   }
 `;
 
-const GAME_START = gql`
+const START_GAME = gql`
   mutation StartGame($startGameInput: StartGameInput!) {
     startGame(input: $startGameInput) {
       id
       name
       started
+      finished
     }
   }
 `;
 
-const GAME_UPDATE = gql`
+const END_GAME = gql`
+  mutation EndGame($endGameInput: EndGameInput!) {
+    endGame(input: $endGameInput) {
+      id
+      name
+      started
+      finished
+    }
+  }
+`;
+
+const UPDATE_GAME = gql`
   mutation UpdateGame($updateGameInput: UpdateGameInput!) {
     updateGame(input: $updateGameInput) {
       players {
@@ -110,10 +122,13 @@ const withGame = compose(
       return { data } as ChildPropsData;
     },
   }),
-  graphql(GAME_START, {
+  graphql(START_GAME, {
     name: 'startGame',
   }),
-  graphql(GAME_UPDATE, {
+  graphql(END_GAME, {
+    name: 'endGame',
+  }),
+  graphql(UPDATE_GAME, {
     name: 'updateGame',
   })
 );
@@ -130,6 +145,7 @@ export const Game = withGame(
 export function subscribeToAuthorMutations(subscribeToMore: any) {
   return subscribeToMore({
     document: GAME_UPDATED,
+
     updateQuery: (prev: any, { subscriptionData }: any) => {
       console.log('prev', prev);
       console.log('subscriptionData', subscriptionData);
