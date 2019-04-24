@@ -34,6 +34,11 @@
       "headers": { "cache-control": "s-maxage=31536000,immutable" },
       "dest": "/packages/carcassonne-scoreboard-app-client/svg/$1"
     },
+    {
+      "src": "/images/(.*)",
+      "headers": { "cache-control": "s-maxage=31536000,immutable" },
+      "dest": "/packages/carcassonne-scoreboard-app-client/images/$1"
+    },
     { "src": "/favicon.ico", "dest": "/packages/carcassonne-scoreboard-app-client/favicon.ico" },
     {
       "src": "/asset-manifest.json",
