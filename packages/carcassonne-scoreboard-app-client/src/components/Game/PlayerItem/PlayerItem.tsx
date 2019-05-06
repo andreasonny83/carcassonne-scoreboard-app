@@ -10,12 +10,13 @@ type PlayerItemProps = PlayerItemStylesProps & {
   player: Player;
   playerSelected?: Player;
   disabled: boolean;
+  finished: boolean;
   handleListItemClick(player: Player): (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
 
 export class PlayerItem extends PureComponent<PlayerItemProps> {
   public render() {
-    const { classes, player, handleListItemClick, playerSelected, disabled } = this.props;
+    const { classes, player, handleListItemClick, playerSelected, disabled, finished } = this.props;
 
     return (
       <ListItem
@@ -23,7 +24,7 @@ export class PlayerItem extends PureComponent<PlayerItemProps> {
         key={`player-${player.color}`}
         alignItems="center"
         classes={{ selected: classes.listItemSelected }}
-        selected={playerSelected && playerSelected.color === player.color}
+        selected={!finished && playerSelected && playerSelected.color === player.color}
         onClick={handleListItemClick(player)}
         divider
         button

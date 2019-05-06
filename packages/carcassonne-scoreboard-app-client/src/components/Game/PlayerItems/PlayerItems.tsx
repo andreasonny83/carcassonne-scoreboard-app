@@ -9,12 +9,20 @@ type PlayerItemsProps = PlayerItemsStylesProps & {
   players: Player[];
   playerSelected?: Player;
   disabled: boolean;
+  finished: boolean;
   handleListItemClick(player: Player): (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
 
 export class PlayerItems extends PureComponent<PlayerItemsProps> {
   public render() {
-    const { classes, players, handleListItemClick, playerSelected, disabled } = this.props;
+    const {
+      classes,
+      players,
+      handleListItemClick,
+      playerSelected,
+      disabled,
+      finished,
+    } = this.props;
 
     return (
       <List className={classes.root}>
@@ -24,6 +32,7 @@ export class PlayerItems extends PureComponent<PlayerItemsProps> {
             player={player}
             playerSelected={playerSelected}
             disabled={disabled}
+            finished={finished}
             handleListItemClick={handleListItemClick}
           />
         ))}

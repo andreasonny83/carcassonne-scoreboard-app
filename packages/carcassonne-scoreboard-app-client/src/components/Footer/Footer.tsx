@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { Typography } from '@material-ui/core';
-
 import { FooterWithStyles } from './FooterWithStyles';
+import { version } from '../../../package.json';
 
 type FooterProps = FooterWithStyles;
 
@@ -12,7 +12,7 @@ export class FooterComponent extends PureComponent<FooterProps> {
     return (
       <footer className={classes.footer}>
         <Typography variant="h6" align="center" gutterBottom>
-          Footer
+          Carcassonne Scoreboard v{version}
         </Typography>
         <Typography variant="subtitle1" align="center" color="textSecondary" component="p">
           Copyright &copy; 2019

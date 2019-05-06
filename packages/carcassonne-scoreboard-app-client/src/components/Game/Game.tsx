@@ -76,7 +76,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
         <Paper className="paper" style={{ padding: '4em' }}>
           <Grid direction="column" alignItems="center" container>
             <CircularProgress style={{ marginBottom: '2em' }} />
-            <Typography>Searching for the {gameId} game...</Typography>
+            <Typography>Searching for a game named {gameId}...</Typography>
           </Grid>
         </Paper>
       );
@@ -98,8 +98,9 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
             <Typography component="p" align="center">
               {graphQLError}
             </Typography>
-            <Typography align="center">Make sure you spelled the game {gameId} correctly then try again</Typography>
-
+            <Typography align="center">
+              Make sure you spelled the game {gameId} correctly then try again
+            </Typography>
           </Grid>
         </Paper>
       );
@@ -144,6 +145,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                   className={classes.buttons}
                   color="primary"
                   variant="outlined"
+                  disabled={disableButtons}
                   onClick={this.startGame}
                 >
                   Start Game
@@ -195,6 +197,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
             <Grid item xs={12}>
               <PlayerItems
                 disabled={!game.started}
+                finished={game.finished}
                 players={game.players}
                 handleListItemClick={this.handleSelectPlayer}
                 playerSelected={selectedPlayer}
@@ -240,6 +243,10 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
       return;
     }
 
+    this.setState({
+      disableButtons: true,
+    });
+
     try {
       await startGame({
         variables: {
@@ -249,6 +256,10 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     } catch (err) {
       showNotification(`⛔️ ${formatErrorAndLog(err).message}`);
     }
+
+    this.setState({
+      disableButtons: false,
+    });
   };
 
   private undoScore = async () => {
@@ -258,6 +269,10 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
   private endGame = async () => {
     const { data, endGame, showNotification } = this.props;
     const gameId = data && data.game && data.game.id;
+
+    this.setState({
+      disableButtons: true,
+    });
 
     try {
       await endGame({
@@ -269,6 +284,10 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
       formatErrorAndLog(err);
       showNotification('Something went wrong. Cannot end this game 🤷‍');
     }
+
+    this.setState({
+      disableButtons: false,
+    });
   };
 
   private handleShowUpdateScore = () => {
