@@ -219,7 +219,7 @@ export default {
     async startGame(parent: any, args: any, context: any) {
       const { input } = args;
       const { gameId } = input;
-      const userId = context.userData && context.userData.data && context.userData.data.username;
+      const userId = get(context, 'userData.data.username');
       let game;
 
       if (!userId) {
@@ -253,41 +253,42 @@ export default {
       throw new ValidationError(`Unauthenticated user request`);
     },
 
-    // endGame(parent: any, args: any, context: any) {
-    //   const { input } = args;
-    //   const { gameId } = input;
-    //   const userId = context.userData && context.userData.data && context.userData.data.username;
-    //   const game = dataSources.gameService.getGame(gameId);
+    async endGame(parent: any, args: any, context: any) {
+      const { input } = args;
+      const { gameId } = input;
+      const userId = get(context, 'userData.data.username');
+      let game;
 
-    //   if (!userId) {
-    //     throw new ValidationError(`Unauthenticated user request`);
-    //   }
-    //   if (!game) {
-    //     throw new ValidationError(`GameID not found`);
-    //   }
+      if (!userId) {
+        throw new ValidationError(`Unauthenticated user request`);
+      }
 
-    //   const index = game.users.indexOf(userId);
-    //   const userIdMatches = game.users[index] === userId;
+      try {
+        game = await dataSources.gameService.getGame(gameId);
+      } catch (err) {
+        throw new Error(err);
+      }
 
-    //   if (userIdMatches) {
-    //     let gameUpdated;
+      if (!game) {
+        throw new ValidationError(`GameID not found`);
+      }
 
-    //     if (game.started && !game.finished) {
-    //       dataSources.gameService.endGame(gameId);
-    //       try {
-    //         gameUpdated = dataSources.gameService.getGame(gameId);
-    //         pubsub.publish(GAME_UPDATED, { gameUpdated });
-    //         return gameUpdated;
-    //       } catch (err) {
-    //         throw new UserInputError(err);
-    //       }
-    //     }
+      const index = game.users.indexOf(userId);
+      const userIdMatches = game.users[index] === userId;
 
-    //     throw new UserInputError('Cannot end this game');
-    //   }
+      if (userIdMatches) {
+        let gameUpdated = game;
 
-    //   throw new ValidationError(`Unauthenticated user request`);
-    // },
+        if (game.started && !game.finished) {
+          gameUpdated = await dataSources.gameService.endGame(gameId);
+          pubsub.publish(GAME_UPDATED, { gameUpdated });
+        }
+
+        return gameUpdated;
+      }
+
+      throw new ValidationError(`Unauthenticated user request`);
+    },
 
     async updateGame(parent: any, args: any, context: any) {
       const { input } = args;

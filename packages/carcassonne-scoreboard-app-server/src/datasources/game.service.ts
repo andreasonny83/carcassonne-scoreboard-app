@@ -148,36 +148,34 @@ export class GameService extends DataSource {
     throw new Error('Invalid game');
   }
 
-  // public endGame(gameId: string) {
-  //   if (!gameId) {
-  //     throw new Error('A game id should be specified.');
-  //   }
+  public async endGame(gameId: string = required('Game Id')) {
+    const game = await this.getGame(gameId);
 
-  //   const game = this.games.get(gameId);
+    if (game) {
+      if (game.finished) {
+        throw new Error('Cannot end this game. The game is already finished.');
+      }
 
-  //   if (game) {
-  //     if (game.finished) {
-  //       throw new Error('Cannot end this game. The game is already finished.');
-  //     }
+      const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+        TableName: AWS_CONFIG.gamesTableName,
+        Key: { id: gameId },
+        UpdateExpression: 'SET finished = :finished',
+        ExpressionAttributeValues: {
+          ':finished': true,
+        },
+      };
 
-  //     if (game && game.id && game.name) {
-  //       const gameUpdated = {
-  //         ...game,
-  //         finished: true,
-  //       };
+      await this.dynamoDb.update(params).promise();
+      return {
+        ...game,
+        finished: true,
+      };
+    }
 
-  //       this.games.set(gameId, gameUpdated);
-  //     }
+    throw new Error('Invalid game');
+  }
 
-  //     return this.games.get(gameId);
-  //   }
-
-  //   throw new Error('Invalid game');
-  // }
-
-  // public getGames() {
-  //   return this.games;
-  // }
+  public getGames() {
+    // return this.games;
+  }
 }
-
-// ----- Helper Functions -----
