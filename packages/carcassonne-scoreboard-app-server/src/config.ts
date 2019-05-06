@@ -48,7 +48,7 @@ class Config {
       return this.getPort();
     }
 
-    return process.env[propName];
+    return process.env[propName] || '';
   }
 }
 

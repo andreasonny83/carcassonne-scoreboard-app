@@ -41,6 +41,7 @@
     "lodash": "^4.17.11",
     "merge-graphql-schemas": "^1.5.8",
     "morgan": "^1.9.1",
+    "node-fetch": "^2.5.0",
     "ts-node": "^8.0.3",
     "unique-names-generator": "^2.0.2",
     "uuid": "^3.3.2"
@@ -55,6 +56,7 @@
     "@types/lodash": "^4.14.123",
     "@types/lodash-es": "^4.17.3",
     "@types/morgan": "^1.7.35",
+    "@types/node-fetch": "^2.3.3",
     "@types/uuid": "^3.4.4",
     "@types/webpack-env": "^1.13.9",
     "clean-webpack-plugin": "^2.0.1",

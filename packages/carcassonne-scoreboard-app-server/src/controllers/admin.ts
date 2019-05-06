@@ -1,3 +1,6 @@
+import Axios, { AxiosResponse } from 'axios';
+import jwkToPem from 'jwk-to-pem';
+import jwt from 'jsonwebtoken';
 import {
   CognitoUserPool,
   CognitoUserAttribute,
@@ -6,10 +9,6 @@ import {
   AuthenticationDetails,
   CognitoUserSession,
 } from 'amazon-cognito-identity-js';
-import Axios, { AxiosResponse } from 'axios';
-import jwkToPem from 'jwk-to-pem';
-import jwt from 'jsonwebtoken';
-import AWS from 'aws-sdk';
 
 import { config, IConfig } from '../config';
 
@@ -42,10 +41,6 @@ class AdminController {
         Name: 'email',
         Value: username,
       }),
-      new CognitoUserAttribute({
-        Name: 'nickname',
-        Value: 'andreasonny83',
-      }),
     ];
 
     return new Promise(res => {
@@ -55,12 +50,12 @@ class AdminController {
         attributeList,
         [],
         (err: Error | undefined, result: ISignUpResult | undefined) => {
-          if (err) {
+          if (err || !result) {
             console.log(err);
             return res(403);
           }
 
-          const cognitoUser: CognitoUser = result!.user;
+          const cognitoUser: CognitoUser = result.user;
 
           console.log('user name is ' + cognitoUser.getUsername());
           console.log('result is:', result);
@@ -106,48 +101,6 @@ class AdminController {
 
         console.log(result);
         res(200);
-      });
-    });
-  }
-
-  public login(
-    username: string,
-    password: string
-  ): Promise<{ status: number; data?: any; error?: boolean }> {
-    const authenticationData = {
-      Username: username,
-      Password: password,
-    };
-
-    const authenticationDetails: AuthenticationDetails = new AuthenticationDetails(
-      authenticationData
-    );
-
-    const userData = {
-      Username: username,
-      Pool: this.userPool,
-    };
-
-    const cognitoUser: CognitoUser = new CognitoUser(userData);
-
-    return new Promise(res => {
-      cognitoUser.authenticateUser(authenticationDetails, {
-        onSuccess: (result: CognitoUserSession) => {
-          const accessToken = result.getAccessToken().getJwtToken();
-          const idToken = result.getIdToken().getJwtToken();
-          const refreshToken = result.getRefreshToken().getToken();
-
-          return res({ status: 200, data: { accessToken, idToken, refreshToken } });
-        },
-        onFailure: (err: IErrorCode) => {
-          console.log(err);
-
-          if (err && err.code === 'UserNotConfirmedException') {
-            return res({ status: 223, error: true });
-          }
-
-          return res({ status: 401, error: true });
-        },
       });
     });
   }
@@ -204,50 +157,11 @@ class AdminController {
       jwt.verify(token, pem, (err: any, payload: any) => {
         if (err) {
           throw new Error('Invalid Token.');
-        } else {
-          console.log('Valid Token.');
-          return res({ status: 200, data: payload });
         }
+
+        return res({ status: 200, data: payload });
       });
     });
-  }
-
-  public getUser(username: string) {
-    const userData = {
-      Username: username,
-      Pool: this.userPool,
-    };
-
-    const cognitoUser: CognitoUser = new CognitoUser(userData);
-
-    // console.log('userdata', userData);
-    // console.log(cognitoUser);
-
-    return;
-
-    if (cognitoUser !== null) {
-      cognitoUser.getSession((err: any, session: any) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-
-        console.log('session validity: ' + session.isValid());
-
-        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-          IdentityPoolId: '...', // your identity pool id here
-          Logins: {
-            // Change the key below according to the specific region your user pool is in.
-            'cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>': session
-              .getIdToken()
-              .getJwtToken(),
-          },
-        });
-
-        // Instantiate aws sdk service objects now that the credentials have been updated.
-        // example: var s3 = new AWS.S3();
-      });
-    }
   }
 }
 

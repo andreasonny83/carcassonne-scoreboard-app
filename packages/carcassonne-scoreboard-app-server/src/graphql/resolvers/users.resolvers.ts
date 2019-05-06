@@ -1,17 +1,53 @@
-import { ValidationError } from 'apollo-server';
+import get from 'lodash/get';
 import { dataSources } from '../../datasources';
+import { IUser } from '../../datasources/user.service';
+import { required } from '../../datasources/utils';
+import { AuthenticationError } from 'apollo-server';
 
 export default {
   Query: {
-    user(parent: any, args: any, context: any) {
-      const user = context && context.userData && context.userData.data;
-      const userId = user && user.username;
+    async user(parent: any, args: any, context: any): Promise<IUser> {
+      const { userId } = args;
+      const currentUserId = get(context, 'userData.data.username');
+      let userRes;
 
-      return dataSources.userService.getUser(userId);
+      try {
+        userRes = await dataSources.userService.getUser(userId);
+      } catch (err) {
+        if (userId === currentUserId) {
+          return dataSources.userService.createUser(currentUserId);
+        }
+
+        throw new Error(err);
+      }
+
+      return userRes;
     },
+  },
 
-    users() {
-      return dataSources.userService.getUsers();
+  Mutation: {
+    async updateUser(parent: any, args: any, context: any) {
+      const { input } = args;
+      const {
+        userId = required('User Id'),
+        nickname = required('Nickname'),
+        picture = required('Picture'),
+      } = input;
+      const currentUserId = get(context, 'userData.data.username');
+
+      if (userId !== currentUserId) {
+        throw new AuthenticationError('Unauthenticated user request');
+      }
+
+      let userRes;
+
+      try {
+        userRes = await dataSources.userService.updateUser(userId, { nickname, picture });
+      } catch (err) {
+        throw new Error(err);
+      }
+
+      return userRes;
     },
   },
 };

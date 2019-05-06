@@ -1,8 +1,12 @@
 import express, { Application, Request } from 'express';
 import { ApolloServer, AuthenticationError, gql } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
+import { v4 } from 'uuid';
 import morgan from 'morgan';
 import cors from 'cors';
 import * as bodyParser from 'body-parser';
+import get from 'lodash/get';
+
 import { adminController } from './controllers/admin';
 import { config, IConfig } from './config';
 import { typeDefs } from './graphql/typedefs';
@@ -52,13 +56,20 @@ class App {
         const reg: RegExp = new RegExp(`${originUrl}$`, 'gi');
         const isPlayground: boolean = reg.test(String(req.headers.referer));
 
-        console.log('playground', req.headers);
+        if (
+          (this.appConfig.isDev() && isPlayground) ||
+          (this.appConfig.isPlaygroundEnabled() && isPlayground)
+        ) {
+          const username = get(req, 'headers.username');
 
-        if ((this.appConfig.isDev() && isPlayground) || this.appConfig.isPlaygroundEnabled()) {
+          if (!username) {
+            throw new AuthenticationError('you must be logged in');
+          }
+
           return {
             userData: {
               data: {
-                username: 'dea9adba-4ef3-4687-ac7b-59a53ffafc5b',
+                username,
               },
             },
           };
@@ -89,6 +100,18 @@ class App {
         onConnect: () => console.log('Connected to websocket'),
       },
       tracing: this.appConfig.isPlaygroundEnabled(),
+      formatError: (error: GraphQLError | any) => {
+        const errId = v4();
+        const err = new GraphQLError(error.message || error);
+
+        console.log('errId:', errId);
+        console.log(JSON.stringify(error, null, 2));
+
+        return {
+          message: err.message,
+          errorId: errId,
+        } as any;
+      },
     });
 
     await apolloServer.applyMiddleware({

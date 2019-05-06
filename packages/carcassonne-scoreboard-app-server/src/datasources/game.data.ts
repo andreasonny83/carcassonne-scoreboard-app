@@ -1,38 +1,53 @@
+import uuid = require('uuid');
+import { uniqueNamesGenerator } from 'unique-names-generator';
+
 export type MeepleColor = 'green' | 'red' | 'blue' | 'yellow' | 'black' | 'gray';
 
-export interface IPlayer {
+export interface PlayerInput {
   name: string;
-  key: string;
   color: MeepleColor;
-  score?: number;
+  userId?: string;
+  picture?: string;
 }
+class Player {
+  public name: string;
+  public color: MeepleColor;
+  public id: string;
+  public score: number;
+  public userId?: string;
+  public picture?: string;
 
-export interface IGame {
-  name: string;
-  id: string;
-  started?: boolean;
-  finished?: boolean;
-  players: IPlayer[];
-  users: string[];
-  log?: any[];
+  constructor(name: string, color: MeepleColor, userId?: string, picture?: string) {
+    this.name = name;
+    this.color = color;
+    this.id = uuid.v1();
+    this.score = 0;
+
+    if (userId) {
+      this.userId = userId;
+    }
+    if (picture) {
+      this.picture = picture;
+    }
+  }
 }
 
 export class Game {
-  public name: string;
   public id: string;
+  public name: string;
   public started: boolean;
   public finished: boolean;
-  public players: IPlayer[];
+  public players: Player[];
   public users: string[];
   public log: any[];
 
-  constructor({ id, name, started, finished, players, users, log }: IGame) {
-    this.id = id;
+  constructor(name: string, players: PlayerInput[], users: string[]) {
+    this.id = uniqueNamesGenerator('_');
     this.name = name;
-    this.started = started || false;
-    this.finished = finished || false;
-    this.players = players;
-    this.users = users || [];
-    this.log = log || [];
+    this.users = users;
+    this.started = false;
+    this.finished = false;
+    this.log = [];
+    this.players = players.map(player => new Player(player.name, player.color, player.userId, player.picture));
   }
 }
