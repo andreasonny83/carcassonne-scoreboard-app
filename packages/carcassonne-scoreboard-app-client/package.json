@@ -1,7 +1,7 @@
 {
   "name": "carcassonne-scoreboard-app-client",
-  "version": "0.0.0",
-  "description": "> TODO: description",
+  "version": "0.0.1",
+  "description": "Online Scoreboard for the board game Carcassonne",
   "author": "andreasonny83 <andreasonny83@gmail.com>",
   "homepage": "",
   "license": "MIT",
