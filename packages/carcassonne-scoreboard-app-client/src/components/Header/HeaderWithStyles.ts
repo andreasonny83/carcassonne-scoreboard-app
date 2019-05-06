@@ -42,7 +42,7 @@ const styles = ({ palette, spacing, breakpoints }: Theme) =>
     },
     title: {
       flexGrow: 1,
-      fontSize: '1rem',
+      fontSize: '1.2rem',
       [breakpoints.up('sm')]: {
         fontSize: '1.4rem',
       },
@@ -50,13 +50,17 @@ const styles = ({ palette, spacing, breakpoints }: Theme) =>
     titleLink: {
       color: palette.secondary.main,
     },
-    avarWrapper: {
+    avatarWrapper: {
       borderRadius: '50%',
-      background: 'rgba(255, 255, 255, 0.2)',
+      background: 'rgba(255, 255, 255, 0.8)',
       overflow: 'hidden',
     },
     avatar: {
       position: 'relative',
+
+      '& svg': {
+        filter: 'drop-shadow(1px -1px 1px rgba(0,0,0,0.3))',
+      }
     },
   });
 

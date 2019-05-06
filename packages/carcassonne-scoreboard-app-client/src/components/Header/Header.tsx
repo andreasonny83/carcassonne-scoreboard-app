@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { AppBar, Toolbar, Typography, Menu, MenuItem } from '@material-ui/core';
 import { isWidthUp } from '@material-ui/core/withWidth';
+import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 import { Avatar } from 'react-avataaars';
 
 import { UserState } from '../../reducers/user';
@@ -11,8 +12,6 @@ import {
   StyledRouterLink,
   StyledLink,
 } from './HeaderWithStyles';
-import { AnyARecord } from 'dns';
-import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 
 interface HeaderProps extends WithStylesProps {
   width: Breakpoint;
@@ -54,8 +53,12 @@ export class Header extends PureComponent<HeaderProps, HeaderState> {
                   aria-haspopup="true"
                   onClick={this.handleMenuOpen}
                 >
-                  <div className={classes.avarWrapper}>
-                    <Avatar size={isWidthUp('sm', width) ? '48px' : '40px'} hash={user.picture} className={classes.avatar} />
+                  <div className={classes.avatarWrapper}>
+                    <Avatar
+                      size={isWidthUp('sm', width) ? '50px' : '40px'}
+                      hash={user.picture}
+                      className={classes.avatar}
+                    />
                   </div>
                 </StyledIconButton>
                 <Menu

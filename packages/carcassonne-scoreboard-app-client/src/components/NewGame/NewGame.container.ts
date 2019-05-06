@@ -1,17 +1,15 @@
 import gql from 'graphql-tag';
 import { connect } from 'react-redux';
-import { graphql } from 'react-apollo';
+import { graphql, ChildDataProps } from 'react-apollo';
 
 import { showNotification, joinGame } from '../../actions';
 import { NewGameWithStyles } from './NewGameWithStyles';
-import { MeepleColor } from '../Icons';
+import { Player } from '../Game';
+import { type } from 'os';
 
-export interface IPlayer {
+export type NewGamePlayer = Player & {
   key: string;
-  name: string;
-  color: MeepleColor;
-  active: boolean;
-}
+};
 
 const newGameMutation = gql`
   mutation NewGame($newGameInput: NewGameInput!) {
@@ -23,10 +21,9 @@ const newGameMutation = gql`
   }
 `;
 
-const withNewGame = graphql(newGameMutation, {
-  name: 'newGame',
-  options: (props: any) => ({}),
-});
+const withNewGame = graphql(newGameMutation, { name: 'newGame' });
+
+export type ChildPropsData = ChildDataProps<any>;
 
 const mapDispatchToProps = {
   showNotification,

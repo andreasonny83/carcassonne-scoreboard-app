@@ -1,12 +1,13 @@
 import React, { PureComponent } from 'react';
+import get from 'lodash/get';
 import { Paper, Typography, Grid, CircularProgress, Button } from '@material-ui/core';
 
 import { GameStylesProps } from './GameWithStyles';
-import { ChildPropsData, subscribeToAuthorMutations } from './Game.container';
-import { PlayerItem } from './PlayerItem';
+import { ChildPropsData, Player, onGameUpdated, onGameUpdating } from './Game.container';
+import { PlayerItems } from './PlayerItems';
 import { UpdateScore } from './UpdateScore';
-import { MeepleColor } from '../Icons';
 import { ShareGame } from './ShareGame';
+import { formatErrorAndLog } from '../../utils/formatErrors';
 
 type GameComponentProps = GameStylesProps &
   ChildPropsData & {
@@ -16,53 +17,77 @@ type GameComponentProps = GameStylesProps &
     updateGame(options: any): any;
   };
 
-const initialState = {
-  updateScoreOpened: false,
-  selectedPlayer: '',
-  selectedPlayerName: '',
-};
+interface GameState {
+  updateScoreOpened: boolean;
+  selectedPlayer?: Player;
+  updatingScores?: boolean;
+  disableButtons?: boolean;
+}
 
-type GameState = typeof initialState & {
-  selectedPlayerColor?: MeepleColor;
+const initialState: GameState = {
+  updateScoreOpened: false,
 };
 
 export class GameComponent extends PureComponent<GameComponentProps, GameState> {
   public readonly state: GameState = initialState;
-  private unsubscribe: any;
+  private unsubscribeGameUpdated: any;
+  private unsubscribeGameUpdating: any;
+
+  public componentDidMount() {
+    const { data } = this.props;
+
+    this.unsubscribeGameUpdated = onGameUpdated(data.subscribeToMore);
+    this.unsubscribeGameUpdating = onGameUpdating(data.subscribeToMore);
+  }
 
   public componentWillUnmount() {
-    if (this.unsubscribe) {
-      this.unsubscribe();
+    this.unsubscribeGameUpdated();
+    this.unsubscribeGameUpdating();
+  }
+
+  public componentDidUpdate() {
+    const { data, showNotification } = this.props;
+    const { updatingScores } = this.state;
+    const currentScoresUpdatingStatus = Boolean(data.gameUpdating && data.gameUpdating.loading);
+
+    if (!currentScoresUpdatingStatus && updatingScores) {
+      this.setState({
+        disableButtons: false,
+        updatingScores: currentScoresUpdatingStatus,
+      });
+
+      showNotification('New score updated');
+      return;
     }
+
+    this.setState({
+      updatingScores: currentScoresUpdatingStatus,
+    });
   }
 
   public render() {
     const { data, classes } = this.props;
-    const {
-      updateScoreOpened,
-      selectedPlayer,
-      selectedPlayerName,
-      selectedPlayerColor,
-    } = this.state;
+    const { updateScoreOpened, selectedPlayer, updatingScores, disableButtons } = this.state;
+
+    const gameId = this.props.match && this.props.match.params && this.props.match.params.gameId;
 
     if (data.loading) {
       return (
-        <Paper elevation={1} className={classes.root}>
-          <Grid direction="column" alignContent="center" container>
-            <CircularProgress className={classes.loading} />
+        <Paper className="paper" style={{ padding: '4em' }}>
+          <Grid direction="column" alignItems="center" container>
+            <CircularProgress style={{ marginBottom: '2em' }} />
+            <Typography>Searching for the {gameId} game...</Typography>
           </Grid>
         </Paper>
       );
     }
 
     if (data.error || !data.game) {
-      const graphQLError =
-        (data &&
-          data.error &&
-          data.error.graphQLErrors &&
-          data.error.graphQLErrors[0] &&
-          data.error.graphQLErrors[0].message) ||
-        'Ops! Something went wrong.';
+      const graphQLError = get(
+        data,
+        'error.graphQLErrors[0].message',
+        'Ops! Something went wrong.'
+      );
 
       return (
         <Paper elevation={1} className={classes.root}>
@@ -73,34 +98,34 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
             <Typography component="p" align="center">
               {graphQLError}
             </Typography>
+            <Typography align="center">Make sure you spelled the game {gameId} correctly then try again</Typography>
+
           </Grid>
         </Paper>
       );
     }
 
-    if (!this.unsubscribe && !data.game.finished) {
-      this.unsubscribe = subscribeToAuthorMutations(data.subscribeToMore);
-    }
+    const { game } = data;
 
     return (
       <Paper elevation={1} className={classes.root}>
         <Grid container direction="column">
           <Grid item xs={12}>
             <Typography component="h2" variant="h4" align="center" className={classes.title}>
-              {data.game.name}
+              {game.name}
             </Typography>
           </Grid>
 
           <Grid item xs={12}>
             <Typography align="center" gutterBottom>
-              {!data.game.started && !data.game.finished && `Press Start Game when you're ready!`}
-              {data.game.started && !data.game.finished && `Game started. Good luck!`}
-              {data.game.started && data.game.finished && `Game Ended`}
+              {!game.started && !game.finished && `Press Start Game when you're ready!`}
+              {game.started && !game.finished && `Game started. Good luck!`}
+              {game.started && game.finished && `Game Ended`}
             </Typography>
           </Grid>
 
           <Grid item xs={12}>
-            <ShareGame gameId={data.game.id} />
+            <ShareGame gameId={game.id} />
           </Grid>
 
           <Grid
@@ -113,7 +138,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
             spacing={2}
             className={classes.actionButtons}
           >
-            {!data.game.started && !data.game.finished && (
+            {!game.started && !game.finished && (
               <Grid item xs={12} sm={8} md={6} lg={4}>
                 <Button
                   className={classes.buttons}
@@ -126,14 +151,14 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
               </Grid>
             )}
 
-            {data.game.started && !data.game.finished && (
+            {game.started && !game.finished && (
               <>
                 <Grid item xs={12} sm={8} md={6} lg={4}>
                   <Button
                     className={classes.buttons}
                     color="primary"
                     variant="outlined"
-                    disabled={!selectedPlayer || !data.game.started}
+                    disabled={!selectedPlayer || updatingScores || disableButtons || !game.started}
                     onClick={this.handleShowUpdateScore}
                   >
                     Add points
@@ -144,6 +169,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                     className={classes.buttons}
                     color="secondary"
                     variant="outlined"
+                    disabled={updatingScores || disableButtons}
                     onClick={this.undoScore}
                   >
                     Undo
@@ -154,25 +180,30 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
           </Grid>
 
           <UpdateScore
-            playerName={selectedPlayerName}
-            color={selectedPlayerColor}
+            player={selectedPlayer}
             open={updateScoreOpened}
             onClose={this.handleHideUpdateScore}
           />
         </Grid>
 
-        <Grid direction="column" container>
-          <Grid item xs={12}>
-            <PlayerItem
-              disabled={!data.game.started}
-              players={data.game.players}
-              handleListItemClick={this.handleSelectPlayer}
-              playerSelected={selectedPlayer}
-            />
+        {(updatingScores && (
+          <Grid direction="column" alignContent="center" container>
+            <CircularProgress className={classes.loading} />
           </Grid>
-        </Grid>
+        )) || (
+          <Grid direction="column" container>
+            <Grid item xs={12}>
+              <PlayerItems
+                disabled={!game.started}
+                players={game.players}
+                handleListItemClick={this.handleSelectPlayer}
+                playerSelected={selectedPlayer}
+              />
+            </Grid>
+          </Grid>
+        )}
 
-        {data.game.started && !data.game.finished && (
+        {game.started && !game.finished && (
           <Grid
             item
             container
@@ -189,6 +220,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                 color="secondary"
                 variant="outlined"
                 onClick={this.endGame}
+                disabled={updatingScores || disableButtons}
               >
                 End Game
               </Button>
@@ -199,37 +231,44 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     );
   }
 
-  private startGame = () => {
+  private startGame = async () => {
     const { data, startGame, showNotification } = this.props;
     const gameId = data && data.game && data.game.id;
 
     if (!gameId) {
-      showNotification('Something went wrong!');
+      showNotification('Ops! Something went wrong 🤷‍');
       return;
     }
 
-    startGame({
-      variables: {
-        startGameInput: { gameId },
-      },
-    });
+    try {
+      await startGame({
+        variables: {
+          startGameInput: { gameId },
+        },
+      });
+    } catch (err) {
+      showNotification(`⛔️ ${formatErrorAndLog(err).message}`);
+    }
   };
 
-  private undoScore = () => {
+  private undoScore = async () => {
     //
   };
 
-  private endGame = () => {
+  private endGame = async () => {
     const { data, endGame, showNotification } = this.props;
     const gameId = data && data.game && data.game.id;
 
-    endGame({
-      variables: {
-        endGameInput: { gameId },
-      },
-    }).catch(() => {
+    try {
+      await endGame({
+        variables: {
+          endGameInput: { gameId },
+        },
+      });
+    } catch (err) {
+      formatErrorAndLog(err);
       showNotification('Something went wrong. Cannot end this game 🤷‍');
-    });
+    }
   };
 
   private handleShowUpdateScore = () => {
@@ -238,61 +277,52 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     });
   };
 
-  private handleHideUpdateScore = (newScore: any) => {
+  private handleHideUpdateScore = async (newScore: number) => {
     const { data, updateGame, showNotification } = this.props;
     const { selectedPlayer } = this.state;
     const game = data && data.game;
 
-    console.log('new score', newScore);
-    console.log('selectedPlayer', selectedPlayer);
-    if (!game) {
+    if (!selectedPlayer || !game || !newScore) {
       this.setState({
         updateScoreOpened: false,
       });
+
       return;
     }
 
+    console.log('disable buttons');
+
+    this.setState({
+      updateScoreOpened: false,
+      disableButtons: true,
+    });
+
     const gameId = game.id;
 
-    updateGame({
-      variables: {
-        updateGameInput: {
-          gameId,
-          playerKey: selectedPlayer,
-          score: newScore,
+    try {
+      await updateGame({
+        variables: {
+          updateGameInput: {
+            gameId,
+            player: selectedPlayer.color,
+            score: newScore,
+          },
         },
-      },
-    })
-      .finally(() => {
-        this.setState({
-          updateScoreOpened: false,
-        });
-      })
-      .then(() => {
-        showNotification('New score updated');
-      })
-      .catch((err: any) => {
-        showNotification(err.message || 'Something went wrong');
       });
+    } catch (err) {
+      this.setState({ disableButtons: false });
+      showNotification(`⛔️ ${formatErrorAndLog(err).message}`);
+    }
   };
 
-  private handleSelectPlayer = (playerKey: string) => () => {
+  private handleSelectPlayer = (playerSelected: Player) => () => {
     const { data } = this.props;
-
     if (!(data && data.game)) {
       return;
     }
 
-    const selectedPlayer = data.game.players.find(player => player.key === playerKey);
-
-    if (!selectedPlayer) {
-      return;
-    }
-
     this.setState({
-      selectedPlayer: playerKey,
-      selectedPlayerName: selectedPlayer.name,
-      selectedPlayerColor: selectedPlayer.color,
+      selectedPlayer: playerSelected,
     });
   };
 }

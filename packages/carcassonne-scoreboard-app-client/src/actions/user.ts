@@ -3,35 +3,27 @@ import { Dispatch } from 'redux';
 
 import { USER_UPDATE, USER_UPDATED } from '../constants';
 
-const formatUserData = (userData: any) => {
-  const userAttributes = userData && userData.attributes;
+interface CognitoUser {
+  username: string;
+  attributes: {
+    email: string;
+    email_verified: boolean;
+    sub: string;
+  };
+}
 
-  return (
-    userAttributes && {
-      username: userAttributes.sub,
-      email: userAttributes.email,
-      nickname: userAttributes.nickname,
-      picture: userAttributes.picture,
-    }
-  );
-};
+const getUsername = (userData: CognitoUser) => userData.attributes.sub;
 
-export const updateUserData = (userData: any) => async (dispatch: Dispatch) => {
-  let user;
+interface UserData {
+  nickname: string;
+  username: string;
+  picture: string;
+}
 
-  try {
-    user = await Auth.currentAuthenticatedUser();
-    await Auth.updateUserAttributes(user, userData);
-    user = await Auth.currentAuthenticatedUser({
-      bypassCache: true,
-    });
-  } catch (err) {
-    return;
-  }
-
+export const updateUserData = (userData: Partial<UserData>) => async (dispatch: Dispatch) => {
   return dispatch({
     type: USER_UPDATED,
-    payload: formatUserData(user),
+    payload: userData,
   });
 };
 
@@ -48,6 +40,6 @@ export const getUserData = () => async (dispatch: Dispatch) => {
 
   return dispatch({
     type: USER_UPDATE,
-    payload: formatUserData(user),
+    payload: getUsername(user),
   });
 };

@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
-import { signedOut, toggleLoading, userSignedIn, getUserData } from '../../actions';
 import { push } from 'connected-react-router';
+
+import { signedOut, toggleLoading, userSignedIn, getUserData } from '../../actions';
 import { PrivateRouterComponent } from './PrivateRouter';
 
 const mapDispactToProps = {
@@ -8,7 +9,7 @@ const mapDispactToProps = {
   getUserData,
   signedOut,
   toggleLoading,
-  push
+  push,
 };
 
 const mapStateToProps = (state: any) => ({

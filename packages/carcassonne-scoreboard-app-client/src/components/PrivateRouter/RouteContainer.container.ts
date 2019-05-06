@@ -1,10 +1,9 @@
 import gql from 'graphql-tag';
 import { graphql, compose, ChildDataProps } from 'react-apollo';
 import { connect } from 'react-redux';
-import { goBack } from 'connected-react-router';
 
-import { showNotification, updateUserData } from '../../actions';
-import { ProfileWithStyles } from './ProfileWithStyles';
+import { updateUserData, showNotification } from '../../actions';
+import { RouteContainer } from './RouteContainer';
 import { UserState } from '../../reducers/user';
 
 interface UserData {
@@ -13,24 +12,20 @@ interface UserData {
   nickname: string;
 }
 
+interface Response {
+  user: UserData;
+}
+
 const QUERY_USER = gql`
   query UserQuery($userId: String!) {
     user(userId: $userId) {
-      id
       picture
       nickname
     }
   }
 `;
 
-const UPDATE_USER = gql`
-  mutation UpdateUser($updateUserInput: UpdateUserInput!) {
-    updateUser(input: $updateUserInput) {
-      picture
-      nickname
-    }
-  }
-`;
+export type RouteContainerPropsData = ChildDataProps<{}, Response>;
 
 const withUser = compose(
   graphql(QUERY_USER, {
@@ -44,32 +39,15 @@ const withUser = compose(
         },
       };
     },
-  }),
-  graphql(UPDATE_USER, {
-    name: 'updateUser',
-    options: {
-      // refetchQueries: [{ query: playerQuery }],
-    }
   })
 );
 
-interface Response {
-  user: UserData;
-}
-
-export type ChildPropsData = ChildDataProps<{}, Response>;
-
-const mapStateToProps = (store: any) => ({
-  user: store.user,
-});
-
 const mapDispactToProps = {
-  goBack,
   updateUserData,
   showNotification,
 };
 
-export const UserProfile = connect(
-  mapStateToProps,
+export const PrivateRouterContainer = connect(
+  null,
   mapDispactToProps
-)(withUser(ProfileWithStyles));
+)(withUser(RouteContainer)) as any;

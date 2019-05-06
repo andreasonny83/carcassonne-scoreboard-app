@@ -6,8 +6,8 @@ import { showNotification } from '../../actions';
 import { GameWithStyles } from './GameWithStyles';
 import { MeepleColor } from '../Icons';
 
-const GAME_FETCH_QUERY = gql`
-  query NewGameQuery($gameId: String!) {
+const GAME_QUERY = gql`
+  query GameQuery($gameId: String!) {
     game(gameId: $gameId) {
       id
       name
@@ -15,11 +15,16 @@ const GAME_FETCH_QUERY = gql`
       finished
       players {
         name
-        key
         color
         score
+        userId
+        picture
       }
       users
+    }
+
+    gameUpdating(gameId: $gameId) {
+      loading
     }
   }
 `;
@@ -51,9 +56,10 @@ const UPDATE_GAME = gql`
     updateGame(input: $updateGameInput) {
       players {
         name
-        key
         color
         score
+        userId
+        picture
       }
     }
   }
@@ -62,27 +68,34 @@ const UPDATE_GAME = gql`
 const GAME_UPDATED = gql`
   subscription GameUpdated {
     gameUpdated {
-      id
-      started
-      finished
       players {
         name
-        key
         color
         score
+        userId
+        picture
       }
+    }
+  }
+`;
+
+const GAME_UPDATING = gql`
+  subscription GameUpdating {
+    gameUpdating {
+      loading
     }
   }
 `;
 
 export interface Player {
   name: string;
-  key: string;
   color: MeepleColor;
   score?: number;
+  userId?: string;
+  picture?: string;
 }
 
-interface Game {
+export interface Game {
   id: string;
   name: string;
   started: boolean;
@@ -93,6 +106,9 @@ interface Game {
 
 interface Response {
   game: Game;
+  gameUpdating: {
+    loading: boolean;
+  };
 }
 
 interface Variables {
@@ -110,49 +126,74 @@ interface InputProps {
 export type ChildPropsData = ChildDataProps<InputProps, Response, Variables>;
 
 const withGame = compose(
-  graphql<InputProps, Response, Variables, ChildPropsData>(GAME_FETCH_QUERY, {
+  graphql<InputProps, Response, Variables, ChildPropsData>(GAME_QUERY, {
     options: ({ match }) => ({
       variables: {
         gameId: match && match.params && match.params.gameId,
       },
     }),
     props: ({ data }) => {
-      console.log('data:', data);
-
       return { data } as ChildPropsData;
     },
   }),
-  graphql(START_GAME, {
-    name: 'startGame',
-  }),
-  graphql(END_GAME, {
-    name: 'endGame',
-  }),
-  graphql(UPDATE_GAME, {
-    name: 'updateGame',
-  })
+  graphql(START_GAME, { name: 'startGame' }),
+  graphql(END_GAME, { name: 'endGame' }),
+  graphql(UPDATE_GAME, { name: 'updateGame' }),
+  graphql(GAME_UPDATED, { name: 'gameUpdated' }),
+  graphql(GAME_UPDATING, { name: 'gameUpdating' })
 );
+
+const mapStateToProps = (state: any) => ({
+  user: state.user,
+});
 
 const mapDispatchToProps = { showNotification };
 
-export const Game = withGame(
-  connect(
-    null,
-    mapDispatchToProps
-  )(GameWithStyles)
-);
+export const Game = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withGame(GameWithStyles));
 
-export function subscribeToAuthorMutations(subscribeToMore: any) {
+export function onGameUpdated(subscribeToMore: any) {
   return subscribeToMore({
     document: GAME_UPDATED,
 
     updateQuery: (prev: any, { subscriptionData }: any) => {
-      console.log('prev', prev);
-      console.log('subscriptionData', subscriptionData);
-      const data = subscriptionData.data;
+      const { data } = subscriptionData;
+
       if (!data) {
         return prev;
       }
+
+      return {
+        ...prev,
+        game: {
+          ...prev.game,
+          ...data.gameUpdated,
+        },
+      };
+    },
+  });
+}
+
+export function onGameUpdating(subscribeToMore: any) {
+  return subscribeToMore({
+    document: GAME_UPDATING,
+
+    updateQuery: (prev: any, { subscriptionData }: any) => {
+      const { data } = subscriptionData;
+
+      if (!data) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        gameUpdating: {
+          ...prev.gameUpdating,
+          loading: Boolean(data.gameUpdating.loading),
+        },
+      };
     },
   });
 }

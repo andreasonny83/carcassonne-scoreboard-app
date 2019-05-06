@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react';
 import {
   Dialog,
   DialogTitle,
-  DialogContentText,
   TextField,
   DialogContent,
   DialogActions,
@@ -11,28 +10,26 @@ import {
   Typography,
 } from '@material-ui/core';
 import { UpdateScoreStylesProps } from './UpdateScoreWirhStyles';
-import { Meeple, mapColor, MeepleColor } from '../../Icons';
+import { Meeple, mapColor } from '../../Icons';
+import { Player } from '../Game.container';
 
 interface UpdateScoreProps extends UpdateScoreStylesProps {
-  playerName: string;
-  color?: MeepleColor;
+  player?: Player;
   open: boolean;
   onClose: any;
 }
 
 interface UpdateScoreState {
-  score: number | null;
+  readonly score?: number | null;
 }
 
-const initialState: UpdateScoreState = {
-  score: null,
-};
+const initialState: UpdateScoreState = {};
 
 export class UpdateScore extends PureComponent<UpdateScoreProps, UpdateScoreState> {
-  public readonly state: UpdateScoreState = initialState;
+  public readonly state = initialState;
 
   public render() {
-    const { open, playerName, color, classes } = this.props;
+    const { open, player, classes } = this.props;
     const { score } = this.state;
 
     return (
@@ -40,13 +37,17 @@ export class UpdateScore extends PureComponent<UpdateScoreProps, UpdateScoreStat
         open={open}
         onEnter={this.resetScore}
         onKeyPress={this.handleKeyPress}
-        onClose={this.handleClose}
+        onClose={this.handleCancel}
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">
           <Grid container direction="column" alignContent="center">
-            {typeof color !== 'undefined' && (
-              <Meeple className={classes.meeple} fontSize="1.75em" color={mapColor.get(color)} />
+            {player && (
+              <Meeple
+                className={classes.meeple}
+                fontSize="1.75em"
+                color={mapColor.get(player.color)}
+              />
             )}
           </Grid>
           <Typography align="center" component="p" variant="h5">
@@ -54,9 +55,6 @@ export class UpdateScore extends PureComponent<UpdateScoreProps, UpdateScoreStat
           </Typography>
         </DialogTitle>
         <DialogContent>
-          {/* <DialogContentText>
-            How many points do you want to assign to {playerName}?
-          </DialogContentText> */}
           <TextField
             autoFocus
             fullWidth
@@ -64,15 +62,16 @@ export class UpdateScore extends PureComponent<UpdateScoreProps, UpdateScoreStat
             id="name"
             label="Add Points"
             type="number"
+            inputProps={{ min: '0', max: '100', step: '1' }}
             value={score || ''}
             onChange={this.updateScore}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={this.handleClose} color="primary">
+          <Button onClick={this.handleCancel} color="primary">
             Cancel
           </Button>
-          <Button onClick={this.handleClose} color="primary">
+          <Button onClick={this.handleAdd} color="primary">
             Add
           </Button>
         </DialogActions>
@@ -84,19 +83,33 @@ export class UpdateScore extends PureComponent<UpdateScoreProps, UpdateScoreStat
     const { score } = this.state;
 
     if (event.key === 'Enter' && score && score > 0) {
-      this.handleClose();
+      this.handleAdd();
     }
   };
 
-  private handleClose = () => {
+  private handleAdd = () => {
     const { score } = this.state;
+
+    if (!score || score < 1) {
+      return this.handleCancel();
+    }
+
+    this.handleClose(Number(score));
+  };
+
+  private handleCancel = () => {
+    this.handleClose();
+  };
+
+  private handleClose = (score?: number) => {
     const { onClose } = this.props;
+
     onClose(score);
   };
 
   private resetScore = () => {
     this.setState({
-      score: null,
+      score: 0,
     });
   };
 

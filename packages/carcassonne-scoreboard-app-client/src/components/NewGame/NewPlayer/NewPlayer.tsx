@@ -12,17 +12,17 @@ import { Delete } from '@material-ui/icons';
 
 import { Meeple, mapColor } from '../../Icons';
 import { NewPlayerStylesProps } from './NewPlayerWithStyles';
-import { IPlayer } from '..';
+import { NewGamePlayer } from '../NewGame.container';
 
 type NewPlayerProps = NewPlayerStylesProps & {
-  player: IPlayer;
+  player: NewGamePlayer;
   placeholder: string;
   labelWidth: number;
   busy: boolean;
   autoFocus?: boolean;
   hideDelete?: boolean;
-  onRemovePlayer(event: any, player: IPlayer): void;
-  onChange(event: any, player: IPlayer, field: string): void;
+  onRemovePlayer(event: any, player: NewGamePlayer): void;
+  onChange(event: any, player: NewGamePlayer, field: string): void;
 };
 
 export class NewPlayer extends PureComponent<NewPlayerProps> {

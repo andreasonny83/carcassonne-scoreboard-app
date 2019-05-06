@@ -1,57 +1,48 @@
 import gql from 'graphql-tag';
 import { graphql, compose } from 'react-apollo';
 import { connect } from 'react-redux';
-import { newGame, joinGame, showNotification } from '../../actions';
-import { WelcomeProps } from './Welcome';
+import { newGame, joinGame } from '../../actions';
 import { WelcomeWithStyles } from './WelcomeWithStyles';
 
-export interface UserData {
+export interface WelcomeUserData {
   id: string;
   games: string[];
+  victories: number;
+  defeats: number;
 }
-
-const joinGameMutation = gql`
-  mutation JoinGame($joinGameInput: JoinGameInput!) {
-    joinGame(input: $joinGameInput) {
-      id
-    }
-  }
-`;
 
 const playerQuery = gql`
-  query PlayerQuery {
-    user {
+  query PlayerQuery($userId: String!) {
+    user(userId: $userId) {
       id
       games
+      victories
+      defeats
     }
   }
 `;
 
-export interface JoinGameResponse {
-  game: {
-    id: string;
-  };
-}
 
 const withGame = compose(
-  graphql(playerQuery),
-  graphql<WelcomeProps, JoinGameResponse, any, any>(joinGameMutation, {
-    name: 'joinGameMutation',
-    options: {
-      refetchQueries: [{ query: playerQuery }],
-    },
-  })
+  graphql(playerQuery, {
+    options: (props: any) => ({
+      variables: {
+        userId: props.user.username,
+      },
+    }),
+  }),
 );
+
+const mapStateToProps = (state: any) => ({
+  user: state.user,
+});
 
 const mapDispatchToProps = {
   newGame,
   joinGame,
-  showNotification,
 };
 
-export const Welcome = withGame(
-  connect(
-    null,
-    mapDispatchToProps
-  )(WelcomeWithStyles)
-);
+export const Welcome = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withGame(WelcomeWithStyles));

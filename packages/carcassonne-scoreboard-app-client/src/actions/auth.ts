@@ -134,20 +134,12 @@ export const signIn = (data: SignInData) => async (dispatch: Dispatch) => {
 
 export const signUp = (data: SignInData) => async (dispatch: Dispatch) => {
   try {
-    await Auth.signUp({
-      ...data,
-      attributes: {
-        nickname: data.username,
-        picture: data.username,
-      },
+    await axios(`${API_URL}/sign-up`, {
+      method: 'POST',
+      data,
     });
   } catch (err) {
-    if (err && err.message) {
-      showNotification(err.message)(dispatch);
-    } else {
-      showNotification('Something went wrong. Please try again later.')(dispatch);
-    }
-
+    showNotification(err.message || err)(dispatch);
     return dispatch({
       type: SIGN_UP_FAILURE,
     });

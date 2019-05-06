@@ -6,23 +6,9 @@ import { NewGame } from '../NewGame';
 import { Game } from '../Game';
 import { UserProfile } from '../User';
 
-import { AppContext, IAppContext } from '../PrivateRouter/app.context';
-
-interface MainComponentProps extends RouteComponentProps {
-  showNotification(message: string, timeout?: number): void;
-}
+type MainComponentProps = RouteComponentProps;;
 
 export class MainComponent extends PureComponent<MainComponentProps> {
-  public static contextType: React.Context<IAppContext> = AppContext;
-  public context!: React.ContextType<typeof AppContext>;
-
-  public componentDidMount(): void {
-    const { showNotification } = this.props;
-    const { user } = this.context;
-
-    showNotification(`Welcome back ${user.nickname} 👋`);
-  }
-
   public render(): JSX.Element {
     return (
       <Switch>

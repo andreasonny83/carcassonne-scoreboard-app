@@ -119,12 +119,7 @@ export class RegistrationForm extends PureComponent<RegistrationFormProps, Regis
     event.preventDefault();
     toggleLoading(true);
 
-    onRegister({
-      ...data,
-      attributes: {
-        nickname: data.username,
-      },
-    });
+    onRegister(data);
   };
 
   public handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {

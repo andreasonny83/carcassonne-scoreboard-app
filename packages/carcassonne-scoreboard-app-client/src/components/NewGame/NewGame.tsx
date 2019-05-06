@@ -8,29 +8,49 @@ import {
   InputLabel,
   Grid,
   Button,
+  CircularProgress,
 } from '@material-ui/core';
+import { v4 } from 'uuid';
+import get from 'lodash/get';
 
 import { NewGameStylesProps } from './NewGameWithStyles';
 import { MeepleColor } from '../Icons';
 import { NewPlayer } from './NewPlayer';
-import { IPlayer } from './NewGame.container';
+import { NewGamePlayer, ChildPropsData } from './NewGame.container';
+import { formatErrorAndLog } from '../../utils/formatErrors';
 
-interface NewGameProps extends NewGameStylesProps {
+interface NewGameMutationInput {
+  variables: {
+    newGameInput: {
+      name: string;
+      players: string;
+    }
+  }
+};
+
+type NewGameProps = NewGameStylesProps & ChildPropsData & {
+  newGame(props: NewGameMutationInput): Promise<any>;
   showNotification(message: string): void;
-  newGame(options: any): Promise<any>;
   joinGame(gameId: string): void;
 }
 
-const initialPlayers: IPlayer[] = [
-  { key: 'player1', name: '', color: 'green', active: true },
-  { key: 'player2', name: '', color: 'red', active: false },
-  { key: 'player3', name: '', color: 'yellow', active: false },
-  { key: 'player4', name: '', color: 'blue', active: false },
-  { key: 'player5', name: '', color: 'black', active: false },
-  { key: 'player6', name: '', color: 'gray', active: false },
+interface NewGameState {
+  busy: boolean;
+  pristine: boolean;
+  gameNameValid: boolean;
+  gameName: string;
+  players: NewGamePlayer[];
+}
+
+const initialPlayers: NewGamePlayer[] = [
+  {
+    name: '',
+    color: 'green',
+    key: v4(),
+  },
 ];
 
-const initialState = {
+const initialState: NewGameState = {
   busy: false,
   pristine: true,
   gameNameValid: false,
@@ -38,14 +58,22 @@ const initialState = {
   players: initialPlayers,
 };
 
-type NewGameState = Readonly<typeof initialState>;
-
 export class NewGame extends PureComponent<NewGameProps, NewGameState> {
   public readonly state = initialState;
 
   public render() {
     const { classes } = this.props;
     const { gameName, pristine, gameNameValid, players, busy } = this.state;
+
+    if (busy) {
+      return (
+        <Paper elevation={1} className={classes.root}>
+          <Grid direction="column" alignContent="center" container>
+            <CircularProgress  />
+          </Grid>
+        </Paper>
+      );
+    }
 
     return (
       <form onSubmit={this.handleSubmit}>
@@ -87,7 +115,6 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
             </FormControl>
 
             <NewPlayer
-              key={players[0].key}
               player={players[0]}
               busy={busy}
               placeholder="Your player name"
@@ -108,27 +135,25 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
             </Grid>
 
             <Grid container>
-              {players
-                .filter((player, index) => index && player.active)
-                .map((player: IPlayer) => (
-                  <NewPlayer
-                    key={player.key}
-                    player={player}
-                    busy={busy}
-                    autoFocus={true}
-                    placeholder="Player name"
-                    labelWidth={120}
-                    onRemovePlayer={this.removePlayer}
-                    onChange={this.handleChange}
-                  />
-                ))}
+              {players.slice(1).map((player: NewGamePlayer) => (
+                <NewPlayer
+                  key={player.key}
+                  player={player}
+                  busy={busy}
+                  autoFocus={true}
+                  placeholder="Player name"
+                  labelWidth={120}
+                  onRemovePlayer={this.removePlayer}
+                  onChange={this.handleChange}
+                />
+              ))}
 
               <FormControl variant="outlined" className={classes.formControl} fullWidth>
                 <Button
                   variant="outlined"
                   color="primary"
                   onClick={this.addPlayer}
-                  disabled={busy || players.filter(player => player.active).length >= 6}
+                  disabled={busy || players.length >= 6}
                 >
                   Add Player
                 </Button>
@@ -139,9 +164,7 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
                   type="submit"
                   variant="outlined"
                   color="primary"
-                  disabled={
-                    busy || !gameNameValid || players.filter(player => player.active).length < 2
-                  }
+                  disabled={busy || !gameNameValid || players.length < 2}
                 >
                   Go to the Game
                 </Button>
@@ -155,14 +178,14 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
 
   private handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-    player?: IPlayer,
+    player?: NewGamePlayer,
     playerField?: string
   ): void => {
     const target = event && event.target;
     const name: string = target && target.name;
     const value: string = target && target.value;
     let isGameNameValid: boolean;
-    let newPlayers: IPlayer[];
+    let newPlayers: NewGamePlayer[];
 
     event.preventDefault();
 
@@ -198,20 +221,11 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
 
   private removePlayer = (
     event: React.MouseEvent<HTMLElement, MouseEvent>,
-    selectedPlayer: IPlayer
+    selectedPlayer: NewGamePlayer
   ) => {
     const { players } = this.state;
 
-    const newPlayers = players.map(currPlayer => {
-      if (currPlayer.key === selectedPlayer.key) {
-        return {
-          ...currPlayer,
-          active: false,
-        };
-      }
-
-      return currPlayer;
-    });
+    const newPlayers = players.filter(currPlayer => currPlayer.key !== selectedPlayer.key);
 
     this.setState({
       players: [...newPlayers],
@@ -220,70 +234,65 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
 
   private addPlayer = () => {
     const { players } = this.state;
-    const newPlayerIndex = players.findIndex(player => !player.active);
 
-    if (newPlayerIndex < 0) {
-      return;
-    }
-
-    const newPlayers = players.map(player => {
-      if (player.key === players[newPlayerIndex].key) {
-        return {
-          ...player,
-          active: true,
-        };
-      }
-
-      return player;
-    });
+    const newPlayer: NewGamePlayer = {
+      name: '',
+      color: 'blue',
+      key: v4(),
+    };
 
     this.setState({
-      players: [...newPlayers],
+      players: [...players, newPlayer],
     });
   };
 
-  private handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const { showNotification, newGame, joinGame } = this.props;
+  private handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const { showNotification, joinGame, newGame } = this.props;
     const { players, gameName } = this.state;
 
     event.preventDefault();
 
-    const playersColors = players
-      .filter((player: IPlayer) => player.active)
-      .map((player: IPlayer) => player.color);
+    const playersColors = players.map((player: NewGamePlayer) => player.color);
+
     const isGameReady = playersColors.every(
       (item: any, index: number) => playersColors.indexOf(item) === index
     );
-    const activePlayers = players
-      .filter((player: IPlayer) => player.active)
-      .map((player: IPlayer) => ({
-        name: player.name,
-        color: player.color,
-        key: player.key,
-      }));
 
-    if (isGameReady) {
-      newGame({
+    if (!isGameReady) {
+      showNotification(
+        'You cannot have more players with the same color. Please check your game and try again.'
+      );
+
+      return;
+    }
+
+    const gamePlayers = players.map(player => ({ color: player.color, name: player.name }));
+    let newGameRes;
+
+    this.setState({
+      busy: true,
+    });
+
+    try {
+      newGameRes = await newGame({
         variables: {
           newGameInput: {
             name: gameName,
-            players: activePlayers,
+            players: gamePlayers,
           },
         },
-      }).then(({ data }: any) => {
-        const gameId: string = data.newGame && data.newGame.id;
-        joinGame(gameId);
       });
-
+    } catch (err) {
+      showNotification(`⛔️ ${formatErrorAndLog(err).message}`);
       this.setState({
-        busy: true,
+        busy: false,
       });
 
       return;
     }
 
-    showNotification(
-      'You cannot have more players with the same color. Please check your game and try again.'
-    );
+    const gameId = get(newGameRes, 'data.newGame.id');
+
+    joinGame(gameId);
   };
 }

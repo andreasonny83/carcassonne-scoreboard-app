@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
 import { RouteProps, Route, Redirect } from 'react-router';
+import { Grid, CircularProgress, Paper, Typography } from '@material-ui/core';
 
-import { IUser, AppContextProvider, IAppContext } from './app.context';
-import { Grid, CircularProgress } from '@material-ui/core';
+import { IUser } from '../../user';
+import { PrivateRouterContainer } from './RouteContainer.container';
 
 interface PrivateRouterProps extends RouteProps {
   target: React.ComponentClass;
@@ -34,9 +35,12 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
 
     if (loading || !Object.keys(user).length) {
       return (
-        <Grid direction="column" alignContent="center" container>
-          <CircularProgress />
-        </Grid>
+        <Paper className="paper" style={{ padding: '4em' }}>
+          <Grid direction="column" alignItems="center" container>
+            <CircularProgress style={{ marginBottom: '2em' }} />
+            <Typography>Authenticating user...</Typography>
+          </Grid>
+        </Paper>
       );
     }
 
@@ -49,21 +53,15 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
   }
 
   private renderRoute(
-    TargetComponent: any,
+    target: any,
     isSignedIn: boolean,
     redirectTo: string,
     location: any,
     user: any,
     props: any
   ): JSX.Element {
-    const app: IAppContext = {
-      user,
-    };
-
     return isSignedIn ? (
-      <AppContextProvider value={app}>
-        <TargetComponent {...props} />
-      </AppContextProvider>
+      <PrivateRouterContainer target={target} user={user} props={props} />
     ) : (
       <Redirect
         to={{

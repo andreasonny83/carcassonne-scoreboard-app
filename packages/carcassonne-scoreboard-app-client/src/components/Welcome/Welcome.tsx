@@ -1,28 +1,25 @@
 import React, { PureComponent } from 'react';
-import { QueryResult, ChildProps } from 'react-apollo';
+import { QueryResult } from 'react-apollo';
 
 import { Button, TextField, Paper, FormControl, CircularProgress } from '@material-ui/core';
 import { Grid, Typography } from '@material-ui/core';
 
-import { UserData, JoinGameResponse } from './Welcome.container';
+import { WelcomeUserData } from './Welcome.container';
 import { WelcomeStylesProps } from './WelcomeWithStyles';
 
 interface UserQueryResult {
-  user: UserData;
+  user: WelcomeUserData;
 }
 
 export interface WelcomeProps extends WelcomeStylesProps {
   data: QueryResult & UserQueryResult;
-  joinGameMutation(options: any): Promise<any>;
   newGame(): void;
   joinGame(gameId: string): void;
-  showNotification(message: string, timeout?: number): void;
 }
 
 interface WelcomeState {
   joinGameId: string;
   busy: boolean;
-  joinGameError: boolean;
   joinGameFieldError: boolean;
   joinGameFieldPristine: boolean;
 }
@@ -30,25 +27,15 @@ interface WelcomeState {
 const initialState: WelcomeState = {
   joinGameId: '',
   busy: false,
-  joinGameError: false,
   joinGameFieldError: false,
   joinGameFieldPristine: true,
 };
 
-export class WelcomeComponent extends PureComponent<
-  ChildProps<WelcomeProps, JoinGameResponse>,
-  WelcomeState
-> {
+export class WelcomeComponent extends PureComponent<WelcomeProps, WelcomeState> {
   public readonly state: WelcomeState = initialState;
 
   public render(): JSX.Element | null {
-    const {
-      joinGameId,
-      busy,
-      joinGameError,
-      joinGameFieldError,
-      joinGameFieldPristine,
-    } = this.state;
+    const { joinGameId, busy, joinGameFieldError, joinGameFieldPristine } = this.state;
     const { classes } = this.props;
     const { loading, error, user } = this.props.data;
     const userGames = (user && user.games && user.games.length) || 0;
@@ -74,8 +61,9 @@ export class WelcomeComponent extends PureComponent<
                   </Typography>
                 </div>
               ) : loading ? (
-                <Grid direction="column" alignContent="center" container>
-                  <CircularProgress />
+                <Grid direction="column" alignItems="center" container>
+                  <CircularProgress style={{ marginBottom: '2em' }} />
+                  <Typography>Preparing welcome screen...</Typography>
                 </Grid>
               ) : (
                 <Grid container>
@@ -93,10 +81,15 @@ export class WelcomeComponent extends PureComponent<
                     <Typography align="center" gutterBottom>
                       You have played {userGames} {userGames === 1 ? 'game' : 'games'} so far
                     </Typography>
+                    <Typography align="center" gutterBottom>
+                      {user.victories
+                        ? `You won ${user.victories} time${user.victories > 1 ? 's' : ''}`
+                        : `You haven't won any game yet`}
+                    </Typography>
                   </Grid>
 
                   <Grid item xs={12}>
-                    <form className={classes.form}>
+                    <form className={classes.form} onSubmit={this.joinGame(joinGameId)}>
                       <Grid container justify="center">
                         <FormControl>
                           <Button variant="outlined" color="primary" onClick={this.newGame}>
@@ -121,18 +114,15 @@ export class WelcomeComponent extends PureComponent<
                             onChange={this.updateJoinGameName}
                             label="Game name"
                           />
-                          {joinGameError && (
-                            <Typography>The game you entered is not valid</Typography>
-                          )}
                         </FormControl>
                       </Grid>
 
                       <Grid container justify="center">
                         <FormControl>
                           <Button
+                            type="submit"
                             variant="outlined"
                             color="primary"
-                            onClick={this.joinGame(joinGameId)}
                             disabled={joinGameFieldError || joinGameFieldPristine}
                           >
                             Join
@@ -161,7 +151,6 @@ export class WelcomeComponent extends PureComponent<
     this.setState({
       joinGameFieldError,
       joinGameId: value,
-      joinGameError: false,
       joinGameFieldPristine: false,
     });
   };
@@ -172,44 +161,24 @@ export class WelcomeComponent extends PureComponent<
     newGame();
   };
 
-  private joinGame = (id: string) => () => {
-    const { joinGameMutation, joinGame, showNotification } = this.props;
+  private joinGame = (id: string) => (event: React.FormEvent<HTMLFormElement>) => {
+    const { joinGame } = this.props;
+    const { joinGameFieldError, joinGameFieldPristine } = this.state;
+
+    event.preventDefault();
+
+    if (joinGameFieldError || joinGameFieldPristine) {
+      return;
+    }
 
     if (!id) {
       this.setState({
         joinGameFieldError: true,
       });
+
       return;
     }
 
-    this.setState({
-      busy: true,
-    });
-
-    joinGameMutation({
-      variables: {
-        joinGameInput: {
-          gameId: id,
-        },
-      },
-    })
-      .finally(() => {
-        this.setState({
-          busy: false,
-        });
-      })
-      .then(({ data }: any) => {
-        const gameId = data && data.joinGame && data.joinGame.id;
-
-        joinGame(gameId);
-      })
-      .catch(() => {
-        this.setState({
-          joinGameError: true,
-          joinGameId: '',
-        });
-
-        showNotification(`Error. No game named ${id} has been found.`);
-      });
+    joinGame(id);
   };
 }

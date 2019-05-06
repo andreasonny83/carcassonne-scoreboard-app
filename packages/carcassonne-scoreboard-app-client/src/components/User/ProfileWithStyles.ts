@@ -4,8 +4,20 @@ import { Profile } from './Profile';
 
 const styles = ({ spacing, palette }: Theme) => ({
   root: {
-    padding: spacing(2, 4),
+    padding: spacing(2),
     marginBottom: spacing(2),
+  },
+  title: {
+    marginBottom: spacing(4),
+  },
+  loading: {
+    margin: '3em 0',
+  },
+  formControl: {
+    maxWidth: '600px',
+  },
+  block: {
+    marginBottom: spacing(4),
   },
   avatar: {
     backgroundColor: 'rgba(224, 224, 224, 0.25)',
@@ -14,6 +26,17 @@ const styles = ({ spacing, palette }: Theme) => ({
     'box-sizing': 'content-box',
     padding: spacing(1, 1, 0),
     marginBottom: spacing(2),
+    overflow: 'hidden',
+
+    '& svg': {
+      filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.3))',
+    }
+  },
+  action: {
+    marginTop: spacing(2),
+  },
+  button: {
+    margin: spacing(1, 0, 0, 2),
   },
 });
 
