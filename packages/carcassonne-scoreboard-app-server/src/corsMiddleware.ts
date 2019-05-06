@@ -10,7 +10,7 @@ const serverConfig: CorsConfig = {
 };
 
 const corsOptions = (whitelist?: string[]): CorsOptions => ({
-  origin(origin: string, callback: (err: Error | null, allow?: boolean) => void) {
+  origin(origin: any, callback: (err: Error | null, allow?: boolean) => void) {
     if (!(whitelist && whitelist.length)) {
       callback(null, true);
     }
