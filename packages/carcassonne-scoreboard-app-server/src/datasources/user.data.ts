@@ -3,11 +3,17 @@ export interface UserAttributes {
   picture: string;
 }
 
+export interface UserGame {
+  gameId: string;
+  finished: boolean;
+  date: string;
+}
+
 export class User {
   public id: string;
   public nickname: string;
   public picture: string;
-  public games: string[];
+  public games: UserGame[];
   public victories: number;
   public defeats: number;
 

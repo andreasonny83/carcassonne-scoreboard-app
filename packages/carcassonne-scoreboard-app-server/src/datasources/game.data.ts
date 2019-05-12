@@ -9,6 +9,16 @@ export interface PlayerInput {
   userId?: string;
   picture?: string;
 }
+
+export type IPlayer = {
+  name: string;
+  color: MeepleColor;
+  id: string;
+  score: number;
+  userId?: string;
+  picture?: string;
+};
+
 class Player {
   public name: string;
   public color: MeepleColor;
@@ -37,12 +47,14 @@ export class Game {
   public name: string;
   public started: boolean;
   public finished: boolean;
-  public players: Player[];
+  public date: string;
+  public players: IPlayer[];
   public users: string[];
   public log: any[];
 
   constructor(name: string, players: PlayerInput[], users: string[]) {
     this.id = uniqueNamesGenerator('_');
+    this.date = new Date().toDateString();
     this.name = name;
     this.users = users;
     this.started = false;

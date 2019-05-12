@@ -2,7 +2,8 @@ import { withStyles, WithStyles, Theme } from '@material-ui/core';
 import { PlayerItem } from './PlayerItem';
 import { mapColor } from '../../Icons';
 
-const styles = ({ palette }: Theme) => ({
+const styles = ({ palette }: Theme) =>
+  ({
     meeple: {
       stroke: 'black',
       strokeWidth: '4px',
@@ -29,10 +30,10 @@ const styles = ({ palette }: Theme) => ({
     avatar: {
       position: 'relative' as 'relative',
       '& svg': {
-          filter: 'drop-shadow(1px -1px 1px rgba(0,0,0,0.3))',
-      }
+        filter: 'drop-shadow(1px -1px 1px rgba(0,0,0,0.3))',
+      },
     },
-  }) as any;
+  } as any);
 
 export type PlayerItemStylesProps = WithStyles<typeof styles>;
 

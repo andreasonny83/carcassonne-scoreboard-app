@@ -1,6 +1,6 @@
 {
   "name": "carcassonne-scoreboard-app-server",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "ServerSide GraphQL layer for Carcassonne Scoreboard App",
   "author": "andreasonny83 <andreasonny83@gmail.com>",
   "homepage": "",

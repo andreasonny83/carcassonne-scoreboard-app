@@ -3,9 +3,10 @@ import { DataSource } from 'apollo-datasource';
 import { PromiseResult } from 'aws-sdk/lib/request';
 import { GetItemOutput, AttributeMap } from 'aws-sdk/clients/dynamodb';
 
-import { Game, PlayerInput } from './game.data';
+import { Game, PlayerInput, IPlayer } from './game.data';
 import { config } from '../config';
 import { required } from './utils';
+import { ValidationError } from 'apollo-server';
 
 type IGame = AttributeMap & Game;
 
@@ -75,14 +76,24 @@ export class GameService extends DataSource {
       throw new Error('Cannot find game Id');
     }
 
+    const index = game.users.indexOf(userId);
+    const userIdMatches = game.users[index] === userId;
+
+    if (userIdMatches) {
+      return game;
+    }
+
     const users: string[] = [...game.users, userId];
 
     const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
       TableName: AWS_CONFIG.gamesTableName,
       Key: { id: gameId },
-      UpdateExpression: 'SET users = :users',
+      UpdateExpression: 'SET #users = :users',
       ExpressionAttributeValues: {
         ':users': users,
+      },
+      ExpressionAttributeNames: {
+        '#users': 'users',
       },
     };
 
@@ -101,20 +112,91 @@ export class GameService extends DataSource {
   ) {
     const game = await this.getGame(gameId);
 
+    const newLog = {
+      id: Date.now(),
+      score: newScore,
+      points: newScore - game.players[playerIndex].score,
+      userId: game.players[playerIndex].id,
+      color: game.players[playerIndex].color,
+    };
+
     if (game) {
       const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
         TableName: AWS_CONFIG.gamesTableName,
         Key: { id: gameId },
-        UpdateExpression: `SET players[${playerIndex}].score = :newScore`,
+        UpdateExpression: `SET players[${playerIndex}].score = :newScore, #log = list_append(#log, :log)`,
+        ExpressionAttributeNames: {
+          '#log': 'log',
+        },
         ExpressionAttributeValues: {
           ':newScore': newScore,
+          ':log': [newLog],
         },
       };
 
       await this.dynamoDb.update(params).promise();
-      const gameUpdated = await this.getGame(gameId);
+      game.players[playerIndex].score = newScore;
+      game.log.push(newLog);
 
-      return gameUpdated;
+      return game;
+    }
+
+    throw new Error('Invalid game');
+  }
+
+  public async undoMove(gameId: string = required('Game Id')) {
+    const game = await this.getGame(gameId);
+
+    if (game.log.length < 1) {
+      return game;
+    }
+
+    console.log('before', game.log);
+    game.log.pop();
+    console.log('after', game.log);
+
+    if (game) {
+      const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+        TableName: AWS_CONFIG.gamesTableName,
+        Key: { id: gameId },
+        UpdateExpression: `SET #log = :log`,
+        ExpressionAttributeNames: {
+          '#log': 'log',
+        },
+        ExpressionAttributeValues: {
+          ':log': game.log,
+        },
+      };
+
+      await this.dynamoDb.update(params).promise();
+
+      return { ...game };
+    }
+
+    throw new Error('Invalid game');
+  }
+
+  public async updatePlayer(
+    gameId: string = required('Game Id'),
+    playerData: IPlayer = required('Player Data'),
+    playerIndex: number = required('Player Index')
+  ) {
+    const game = await this.getGame(gameId);
+
+    if (game) {
+      const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+        TableName: AWS_CONFIG.gamesTableName,
+        Key: { id: gameId },
+        UpdateExpression: `SET players[${playerIndex}] = :newPlayerData`,
+        ExpressionAttributeValues: {
+          ':newPlayerData': playerData,
+        },
+      };
+
+      await this.dynamoDb.update(params).promise();
+      game.players[playerIndex] = playerData;
+
+      return game;
     }
 
     throw new Error('Invalid game');
@@ -148,31 +230,26 @@ export class GameService extends DataSource {
     throw new Error('Invalid game');
   }
 
-  public async endGame(gameId: string = required('Game Id')) {
-    const game = await this.getGame(gameId);
-
-    if (game) {
-      if (game.finished) {
-        throw new Error('Cannot end this game. The game is already finished.');
-      }
-
-      const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
-        TableName: AWS_CONFIG.gamesTableName,
-        Key: { id: gameId },
-        UpdateExpression: 'SET finished = :finished',
-        ExpressionAttributeValues: {
-          ':finished': true,
-        },
-      };
-
-      await this.dynamoDb.update(params).promise();
-      return {
-        ...game,
-        finished: true,
-      };
+  public async endGame(game: Game = required('Game')) {
+    if (game.finished) {
+      throw new Error('Cannot end this game. The game is already finished.');
     }
 
-    throw new Error('Invalid game');
+    const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+      TableName: AWS_CONFIG.gamesTableName,
+      Key: { id: game.id },
+      UpdateExpression: 'SET finished = :finished',
+      ExpressionAttributeValues: {
+        ':finished': true,
+      },
+    };
+
+    await this.dynamoDb.update(params).promise();
+
+    return {
+      ...game,
+      finished: true,
+    };
   }
 
   public getGames() {

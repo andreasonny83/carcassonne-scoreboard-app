@@ -1,8 +1,14 @@
 export default `
+  type UserGame {
+    gameId: ID!
+    finished: Boolean!
+    date: String!
+  }
+
   type User {
     id: ID!
     nickname: String!
-    games: [String]!
+    games: [UserGame]!
     victories: Int!
     defeats: Int!
     picture: String!

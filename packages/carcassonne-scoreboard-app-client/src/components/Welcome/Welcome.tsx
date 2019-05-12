@@ -3,6 +3,7 @@ import { QueryResult } from 'react-apollo';
 
 import { Button, TextField, Paper, FormControl, CircularProgress } from '@material-ui/core';
 import { Grid, Typography } from '@material-ui/core';
+import { Twemoji } from '../twemoji';
 
 import { WelcomeUserData } from './Welcome.container';
 import { WelcomeStylesProps } from './WelcomeWithStyles';
@@ -93,7 +94,7 @@ export class WelcomeComponent extends PureComponent<WelcomeProps, WelcomeState> 
                       <Grid container justify="center">
                         <FormControl>
                           <Button variant="outlined" color="primary" onClick={this.newGame}>
-                            Start a new game
+                            <Twemoji copy="Start a new game ▶️" size={24} />
                           </Button>
                         </FormControl>
                       </Grid>

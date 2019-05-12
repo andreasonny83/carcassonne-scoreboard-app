@@ -17,7 +17,10 @@ const styles = ({ spacing, typography, palette }: Theme) => ({
     lineHeight: '1.2em',
     display: '-webkit-box',
     maxHeight: '2.4em',
-    marginBottom: '1rem',
+    marginBottom: spacing(2),
+  },
+  logTitle: {
+    marginTop: spacing(4),
   },
   expansionPanel: {
     backgroundColor: palette.grey[100],

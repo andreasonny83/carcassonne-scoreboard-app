@@ -26,6 +26,9 @@ const styles = ({ spacing }: Theme) => ({
     marginLeft: 'auto',
     marginRight: 'auto',
   },
+  goBack: {
+    marginBottom: '1em',
+  },
   formControl: {
     margin: spacing(1),
   },

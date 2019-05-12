@@ -4,17 +4,23 @@ import { Paper, Typography, Grid, CircularProgress, Button } from '@material-ui/
 
 import { GameStylesProps } from './GameWithStyles';
 import { ChildPropsData, Player, onGameUpdated, onGameUpdating } from './Game.container';
-import { PlayerItems } from './PlayerItems';
+import { PlayerItems } from './PlayerItem';
+import { LogItemsWithStyles as LogItems } from './LogItem';
 import { UpdateScore } from './UpdateScore';
 import { ShareGame } from './ShareGame';
 import { formatErrorAndLog } from '../../utils/formatErrors';
+import { UserState } from '../../reducers/user';
 
 type GameComponentProps = GameStylesProps &
   ChildPropsData & {
+    user: UserState;
     showNotification(message: string): void;
+    joinGame(options: any): any;
     startGame(options: any): any;
     endGame(options: any): any;
     updateGame(options: any): any;
+    redeemPlayer(options: any): any;
+    undoMove(options: any): any;
   };
 
 interface GameState {
@@ -56,7 +62,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
         updatingScores: currentScoresUpdatingStatus,
       });
 
-      showNotification('New score updated');
+      showNotification('Game updated');
       return;
     }
 
@@ -66,7 +72,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
   }
 
   public render() {
-    const { data, classes } = this.props;
+    const { data, user, classes } = this.props;
     const { updateScoreOpened, selectedPlayer, updatingScores, disableButtons } = this.state;
 
     const gameId = this.props.match && this.props.match.params && this.props.match.params.gameId;
@@ -107,9 +113,13 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     }
 
     const { game } = data;
+    const userIsAPlayer = Boolean(~game.users.indexOf(user.username));
+    const userHasAMeeple = Boolean(game.players.find(player => player.userId === user.username));
 
     return (
       <Paper elevation={1} className={classes.root}>
+        <Typography>Game created: {game.date}</Typography>
+
         <Grid container direction="column">
           <Grid item xs={12}>
             <Typography component="h2" variant="h4" align="center" className={classes.title}>
@@ -119,15 +129,22 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
 
           <Grid item xs={12}>
             <Typography align="center" gutterBottom>
-              {!game.started && !game.finished && `Press Start Game when you're ready!`}
-              {game.started && !game.finished && `Game started. Good luck!`}
-              {game.started && game.finished && `Game Ended`}
+              {!game.started && !game.finished && !userIsAPlayer && `The game has not started yet`}
+              {!game.started &&
+                !game.finished &&
+                userIsAPlayer &&
+                `Press Start Game when you're ready!`}
+              {game.started && !game.finished && !userIsAPlayer && `The game is in progress.`}
+              {game.started && !game.finished && userIsAPlayer && `Game started. Good luck!`}
+              {game.finished && `This Game is Ended`}
             </Typography>
           </Grid>
 
-          <Grid item xs={12}>
-            <ShareGame gameId={game.id} />
-          </Grid>
+          {!game.finished && (
+            <Grid item xs={12}>
+              <ShareGame gameId={game.id} />
+            </Grid>
+          )}
 
           <Grid
             item
@@ -139,7 +156,27 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
             spacing={2}
             className={classes.actionButtons}
           >
-            {!game.started && !game.finished && (
+            {!userIsAPlayer && (
+              <>
+                <Typography align="center">You're watching this game</Typography>
+                <Typography align="center">
+                  If you are a player, click 'Join this game' to interact.
+                </Typography>
+                <Grid item xs={12} sm={8} md={6} lg={4}>
+                  <Button
+                    className={classes.buttons}
+                    color="primary"
+                    variant="outlined"
+                    disabled={disableButtons}
+                    onClick={this.joinGame}
+                  >
+                    Join this game
+                  </Button>
+                </Grid>
+              </>
+            )}
+
+            {userIsAPlayer && !game.started && !game.finished && (
               <Grid item xs={12} sm={8} md={6} lg={4}>
                 <Button
                   className={classes.buttons}
@@ -153,7 +190,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
               </Grid>
             )}
 
-            {game.started && !game.finished && (
+            {userIsAPlayer && game.started && !game.finished && (
               <>
                 <Grid item xs={12} sm={8} md={6} lg={4}>
                   <Button
@@ -172,7 +209,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                     color="secondary"
                     variant="outlined"
                     disabled={updatingScores || disableButtons}
-                    onClick={this.undoScore}
+                    onClick={this.undoMove}
                   >
                     Undo
                   </Button>
@@ -198,13 +235,27 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
               <PlayerItems
                 disabled={!game.started}
                 finished={game.finished}
-                players={game.players}
+                items={game.players}
+                showRedeem={!userHasAMeeple}
+                itemSelected={selectedPlayer}
                 handleListItemClick={this.handleSelectPlayer}
-                playerSelected={selectedPlayer}
+                onRedeem={this.redeemPlayer}
               />
             </Grid>
           </Grid>
         )}
+
+        {game.log.length ? (
+          <Grid direction="column" container>
+            <Typography className={classes.logTitle} component="h3" variant="h6">
+              Game Log
+            </Typography>
+
+            <Grid item xs={12}>
+              <LogItems items={game.log} />
+            </Grid>
+          </Grid>
+        ) : null}
 
         {game.started && !game.finished && (
           <Grid
@@ -262,13 +313,59 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     });
   };
 
-  private undoScore = async () => {
-    //
+  private joinGame = async () => {
+    const { data, joinGame, showNotification } = this.props;
+    const gameId = data && data.game && data.game.id;
+
+    if (!gameId) {
+      showNotification('Ops! Something went wrong 🤷‍');
+      return;
+    }
+
+    this.setState({
+      disableButtons: true,
+    });
+
+    try {
+      await joinGame({
+        variables: {
+          joinGameInput: { gameId },
+        },
+      });
+    } catch (err) {
+      showNotification(`⛔️ ${formatErrorAndLog(err).message}`);
+    }
+
+    this.setState({
+      disableButtons: false,
+    });
+  };
+
+  private undoMove = async () => {
+    const { showNotification, undoMove, data } = this.props;
+    const gameId = get(data, 'game.id');
+
+    this.setState({
+      disableButtons: true,
+    });
+
+    try {
+      await undoMove({
+        variables: {
+          undoLastMoveInput: {
+            gameId,
+          },
+        },
+      });
+    } catch (err) {
+      this.setState({ disableButtons: false });
+      showNotification(`⛔️ ${formatErrorAndLog(err).message}`);
+    }
   };
 
   private endGame = async () => {
     const { data, endGame, showNotification } = this.props;
-    const gameId = data && data.game && data.game.id;
+    const gameId = get(data, 'game.id');
 
     this.setState({
       disableButtons: true,
@@ -309,8 +406,6 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
       return;
     }
 
-    console.log('disable buttons');
-
     this.setState({
       updateScoreOpened: false,
       disableButtons: true,
@@ -343,5 +438,29 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     this.setState({
       selectedPlayer: playerSelected,
     });
+  };
+
+  private redeemPlayer = (playerSelected: Player) => async () => {
+    const { showNotification, redeemPlayer, data } = this.props;
+
+    if (!(data && data.game)) {
+      return;
+    }
+
+    const game = data && data.game;
+
+    try {
+      await redeemPlayer({
+        variables: {
+          redeemPlayerInput: {
+            gameId: game.id,
+            player: playerSelected.color,
+          },
+        },
+      });
+    } catch (err) {
+      this.setState({ disableButtons: false });
+      showNotification(`⛔️ ${formatErrorAndLog(err).message}`);
+    }
   };
 }

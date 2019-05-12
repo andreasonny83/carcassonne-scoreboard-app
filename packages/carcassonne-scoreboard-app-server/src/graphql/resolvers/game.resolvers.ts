@@ -8,7 +8,7 @@ import {
 } from 'apollo-server';
 
 import { dataSources } from '../../datasources';
-import { MeepleColor, PlayerInput, Game } from '../../datasources/game.data';
+import { MeepleColor, PlayerInput, Game, IPlayer } from '../../datasources/game.data';
 import { NewGameInput } from '../../datasources/game.service';
 import { required } from '../../datasources/utils';
 
@@ -100,11 +100,6 @@ export default {
   Subscription: {
     gameUpdated: {
       subscribe: (root: any, args: any, context: any) => {
-        console.log('gameUpdated');
-
-        console.log('root', root);
-        console.log('args', args);
-        console.log('context', context);
         return pubsub.asyncIterator(GAME_UPDATED);
       },
     },
@@ -148,7 +143,7 @@ export default {
         throw new UserInputError(`Invalid request`);
       }
 
-      sanitizedPlayers[0].userId = userId;
+      sanitizedPlayers[0].userId = userData.id;
       sanitizedPlayers[0].picture = userData.picture;
 
       const gameObj: NewGameInput = {
@@ -156,12 +151,12 @@ export default {
         players: sanitizedPlayers,
       };
 
-      if (userId) {
+      if (userData.id) {
         let res;
 
         try {
-          res = await dataSources.gameService.createGame(gameObj, userId);
-          await dataSources.userService.joinGame(userId, res.id);
+          res = await dataSources.gameService.createGame(gameObj, userData.id);
+          await dataSources.userService.joinGame(userData.id, res);
         } catch (err) {
           throw new ApolloError(err.message || err);
         }
@@ -172,49 +167,37 @@ export default {
       throw new AuthenticationError(`Unauthenticated user request`);
     },
 
-    // async joinGame(parent: any, args: any, context: any): Promise<Game> {
-    //   const { input } = args;
-    //   const { gameId } = input;
-    //   const userId = get(context, 'userData.data.username');
-    //   let game;
+    async joinGame(parent: any, args: any, context: any): Promise<Game> {
+      const { input } = args;
+      const { gameId } = input;
+      const userId = get(context, 'userData.data.username');
 
-    //   try {
-    //     game = await dataSources.gameService.getGame(gameId);
-    //   } catch (err) {
-    //     throw new Error(err);
-    //   }
+      try {
+        await dataSources.userService.getUser(userId);
+      } catch (err) {
+        throw new AuthenticationError(`Unauthenticated user request`);
+      }
 
-    //   if (!userId) {
-    //     console.log('Unauthenticated user request');
-    //     throw new ValidationError(`Unauthenticated user request`);
-    //   }
-    //   if (!game) {
-    //     console.log('GameID not found');
-    //     throw new ValidationError(`GameID not found`);
-    //   }
+      let game;
 
-    //   const index = game.users.indexOf(userId);
-    //   const userIdMatches = game.users[index] === userId;
+      try {
+        game = await dataSources.gameService.getGame(gameId);
+      } catch (err) {
+        throw new ValidationError(`Game not found`);
+      }
 
-    //   console.log('context', context);
-    //   console.log('userId', userId);
-    //   console.log('game.users', game.users);
-    //   console.log('index', index);
-    //   console.log('userIdMatches', userIdMatches);
+      let gameUpdated;
 
-    //   let gameUpdated = game;
+      try {
+        gameUpdated = await dataSources.gameService.joinGame(userId, gameId);
+        await dataSources.userService.joinGame(userId, game);
+        pubsub.publish(GAME_UPDATED, { gameUpdated });
+      } catch (err) {
+        throw new Error(err);
+      }
 
-    //   if (!userIdMatches) {
-    //     try {
-    //       await dataSources.userService.joinGame(userId, gameId);
-    //       gameUpdated = await dataSources.gameService.joinGame(userId, gameId);
-    //     } catch (err) {
-    //       throw new Error(err);
-    //     }
-    //   }
-
-    //   return gameUpdated;
-    // },
+      return gameUpdated;
+    },
 
     async startGame(parent: any, args: any, context: any) {
       const { input } = args;
@@ -270,7 +253,7 @@ export default {
       }
 
       if (!game) {
-        throw new ValidationError(`GameID not found`);
+        throw new ValidationError(`Game not found`);
       }
 
       const index = game.users.indexOf(userId);
@@ -280,7 +263,9 @@ export default {
         let gameUpdated = game;
 
         if (game.started && !game.finished) {
-          gameUpdated = await dataSources.gameService.endGame(gameId);
+          gameUpdated = await dataSources.gameService.endGame(game);
+          await dataSources.userService.endGame(game);
+
           pubsub.publish(GAME_UPDATED, { gameUpdated });
         }
 
@@ -339,7 +324,111 @@ export default {
       pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: true } });
 
       const gameUpdated = await dataSources.gameService.updateScore(gameId, newScore, playerIndex);
-      await new Promise(res => setTimeout(() => res(), 250));
+      gameUpdated.log.sort().reverse();
+
+      pubsub.publish(GAME_UPDATED, { gameUpdated });
+      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: false } });
+
+      return gameUpdated;
+    },
+
+    async undoLastMove(parent: any, args: any, context: any) {
+      const { input } = args;
+      const {
+        gameId = required('Game Id'),
+      } = input;
+      const userId = context.userData && context.userData.data && context.userData.data.username;
+      const game = await dataSources.gameService.getGame(gameId);
+
+      if (!userId) {
+        throw new ValidationError(`Unauthenticated user request`);
+      }
+      if (!game) {
+        throw new ValidationError(`GameID not found`);
+      }
+
+      if (!game.started) {
+        throw new ValidationError(`Game not yet started`);
+      }
+
+      if (game.finished) {
+        throw new ValidationError(`Cannot update a finished game`);
+      }
+
+      const index = game.users.indexOf(userId);
+      const userIdMatches = game.users[index] === userId;
+
+      if (!userIdMatches) {
+        throw new ValidationError(`Unauthenticated user request`);
+      }
+
+      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: true } });
+
+      const gameUpdated = await dataSources.gameService.undoMove(gameId);
+      gameUpdated.log.sort().reverse();
+
+      pubsub.publish(GAME_UPDATED, { gameUpdated });
+      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: false } });
+
+      return gameUpdated;
+    },
+
+    async redeemPlayer(parent: any, args: any, context: any) {
+      const { input } = args;
+      const { gameId = required('Game Id'), player = required('Player') } = input;
+      const userId = get(context, 'userData.data.username');
+      const game = await dataSources.gameService.getGame(gameId);
+
+      let userData;
+
+      try {
+        userData = await dataSources.userService.getUser(userId);
+      } catch (err) {
+        throw new AuthenticationError(`Unauthenticated user request`);
+      }
+
+      if (!userData) {
+        throw new ValidationError(`Unauthenticated user request`);
+      }
+      if (!game) {
+        throw new ValidationError(`GameID not found`);
+      }
+      if (!game.started) {
+        throw new ValidationError(`Game not yet started`);
+      }
+      if (game.finished) {
+        throw new ValidationError(`Cannot update a finished game`);
+      }
+
+      const index = game.users.indexOf(userData.id);
+      const userIdMatches = game.users[index] === userData.id;
+
+      if (!userIdMatches) {
+        throw new ValidationError(`Unauthenticated user request`);
+      }
+
+      const playerIndex = game.players.findIndex(currPlayer => currPlayer.color === player);
+
+      if (!userIdMatches) {
+        throw new Error(`Cannot find the selected user in the database`);
+      }
+      if (game.players[playerIndex].userId) {
+        throw new Error(`Player already assigned to another user`);
+      }
+
+      const newPlayer: IPlayer = (game.players[playerIndex] = {
+        ...game.players[playerIndex],
+        userId: userData.id,
+        picture: userData.picture,
+      });
+
+      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: true } });
+
+      const gameUpdated = await dataSources.gameService.updatePlayer(
+        gameId,
+        newPlayer,
+        playerIndex
+      );
 
       pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: false } });
       pubsub.publish(GAME_UPDATED, { gameUpdated });

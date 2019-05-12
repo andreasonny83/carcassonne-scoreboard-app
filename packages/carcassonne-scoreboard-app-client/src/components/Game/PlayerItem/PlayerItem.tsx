@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { ListItem, ListItemText, ListItemIcon } from '@material-ui/core';
+import { ListItem, ListItemText, ListItemIcon, Button } from '@material-ui/core';
 
 import { Meeple, mapColor } from '../../Icons';
 import { PlayerItemStylesProps } from './PlayerItemWithStyles';
@@ -9,14 +9,25 @@ import { Avatar } from 'react-avataaars';
 type PlayerItemProps = PlayerItemStylesProps & {
   player: Player;
   playerSelected?: Player;
-  disabled: boolean;
-  finished: boolean;
-  handleListItemClick(player: Player): (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  showRedeem?: boolean;
+  disabled?: boolean;
+  finished?: boolean;
+  handleListItemClick?(player: Player): (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  onRedeem?(player: Player): (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
 
 export class PlayerItem extends PureComponent<PlayerItemProps> {
   public render() {
-    const { classes, player, handleListItemClick, playerSelected, disabled, finished } = this.props;
+    const {
+      classes,
+      player,
+      disabled,
+      finished,
+      showRedeem,
+      playerSelected,
+      handleListItemClick,
+      onRedeem,
+    } = this.props;
 
     return (
       <ListItem
@@ -25,7 +36,7 @@ export class PlayerItem extends PureComponent<PlayerItemProps> {
         alignItems="center"
         classes={{ selected: classes.listItemSelected }}
         selected={!finished && playerSelected && playerSelected.color === player.color}
-        onClick={handleListItemClick(player)}
+        onClick={handleListItemClick && handleListItemClick(player)}
         divider
         button
       >
@@ -47,6 +58,11 @@ export class PlayerItem extends PureComponent<PlayerItemProps> {
           primary={player.name}
           secondary={`${player.score || 0}pt`}
         />
+        {showRedeem && (
+          <Button color="primary" variant="outlined" onClick={onRedeem && onRedeem(player)}>
+            Redeem
+          </Button>
+        )}
       </ListItem>
     );
   }

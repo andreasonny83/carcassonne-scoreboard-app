@@ -25,18 +25,20 @@ export default `
   type Log {
     id: ID!
     userId: String!
+    color: Color!
     score: String!
-    timestamp: Int!
+    points: String!
   }
 
   type Game {
     id: ID!
     name: String!
+    date: String!
     players: [PlayerInfo!]!
     users: [String!]!
     started: Boolean!
     finished: Boolean!
-    log: [String]!
+    log: [Log]!
   }
 
   type GameUpdating {
@@ -66,12 +68,23 @@ export default `
     score: Int
   }
 
+  input RedeemPlayerInput {
+    gameId: String
+    player: Color
+  }
+
+  input UndoLastMoveInput {
+    gameId: String
+  }
+
   type Mutation {
     newGame(input: NewGameInput!): Game
     endGame(input: EndGameInput!): Game
     startGame(input: StartGameInput!): Game
     joinGame(input: JoinGameInput!): Game
     updateGame(input: UpdateGameInput!): Game
+    redeemPlayer(input: RedeemPlayerInput!): Game
+    undoLastMove(input: UndoLastMoveInput!): Game
   }
 
   type Query {

@@ -24,15 +24,17 @@ interface NewGameMutationInput {
     newGameInput: {
       name: string;
       players: string;
-    }
-  }
-};
-
-type NewGameProps = NewGameStylesProps & ChildPropsData & {
-  newGame(props: NewGameMutationInput): Promise<any>;
-  showNotification(message: string): void;
-  joinGame(gameId: string): void;
+    };
+  };
 }
+
+type NewGameProps = NewGameStylesProps &
+  ChildPropsData & {
+    newGame(props: NewGameMutationInput): Promise<any>;
+    showNotification(message: string): void;
+    joinGame(gameId: string): void;
+    go(path: string): void;
+  };
 
 interface NewGameState {
   busy: boolean;
@@ -69,7 +71,7 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
       return (
         <Paper elevation={1} className={classes.root}>
           <Grid direction="column" alignContent="center" container>
-            <CircularProgress  />
+            <CircularProgress />
           </Grid>
         </Paper>
       );
@@ -78,6 +80,12 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
     return (
       <form onSubmit={this.handleSubmit}>
         <Paper elevation={1} className={classes.root}>
+          <Grid container className={classes.goBack}>
+            <Button variant="outlined" color="secondary" onClick={this.goBack}>
+              Go Back
+            </Button>
+          </Grid>
+
           <Grid container>
             <Grid item xs={12}>
               <Typography component="h2" variant="h5" color="inherit" align="center" gutterBottom>
@@ -107,10 +115,9 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
                 className={classes.gameName}
                 onChange={this.handleChange}
                 labelWidth={110}
-                autoFocus
               />
               <FormHelperText hidden={pristine} className={classes.gameNameDescription}>
-                Enter a valid game name. Only letters, numbers and underscore allowed.
+                Enter a valid game name (7 letters minimum).
               </FormHelperText>
             </FormControl>
 
@@ -140,7 +147,6 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
                   key={player.key}
                   player={player}
                   busy={busy}
-                  autoFocus={true}
                   placeholder="Player name"
                   labelWidth={120}
                   onRemovePlayer={this.removePlayer}
@@ -174,6 +180,12 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
         </Paper>
       </form>
     );
+  }
+
+  private goBack = () => {
+    const { go } = this.props;
+
+    go('/app');
   }
 
   private handleChange = (

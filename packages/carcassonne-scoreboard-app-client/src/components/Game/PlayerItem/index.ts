@@ -1,1 +1,1 @@
-export * from './PlayerItem.container';
+export * from './PlayerItems';

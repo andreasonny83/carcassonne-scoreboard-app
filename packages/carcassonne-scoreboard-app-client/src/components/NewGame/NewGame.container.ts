@@ -1,11 +1,11 @@
 import gql from 'graphql-tag';
 import { connect } from 'react-redux';
 import { graphql, ChildDataProps } from 'react-apollo';
+import { push } from 'connected-react-router';
 
-import { showNotification, joinGame } from '../../actions';
+import { showNotification, joinGame  } from '../../actions';
 import { NewGameWithStyles } from './NewGameWithStyles';
 import { Player } from '../Game';
-import { type } from 'os';
 
 export type NewGamePlayer = Player & {
   key: string;
@@ -28,6 +28,7 @@ export type ChildPropsData = ChildDataProps<any>;
 const mapDispatchToProps = {
   showNotification,
   joinGame,
+  go: push,
 };
 
 export const NewGame = withNewGame(

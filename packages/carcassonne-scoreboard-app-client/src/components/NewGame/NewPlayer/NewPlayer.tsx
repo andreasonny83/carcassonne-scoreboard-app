@@ -19,7 +19,6 @@ type NewPlayerProps = NewPlayerStylesProps & {
   placeholder: string;
   labelWidth: number;
   busy: boolean;
-  autoFocus?: boolean;
   hideDelete?: boolean;
   onRemovePlayer(event: any, player: NewGamePlayer): void;
   onChange(event: any, player: NewGamePlayer, field: string): void;
@@ -31,7 +30,6 @@ export class NewPlayer extends PureComponent<NewPlayerProps> {
       classes,
       player,
       busy,
-      autoFocus,
       hideDelete,
       placeholder,
       labelWidth,
@@ -76,7 +74,6 @@ export class NewPlayer extends PureComponent<NewPlayerProps> {
               type="string"
               placeholder="Player Name"
               labelWidth={labelWidth}
-              autoFocus={autoFocus}
             />
           </FormControl>
 

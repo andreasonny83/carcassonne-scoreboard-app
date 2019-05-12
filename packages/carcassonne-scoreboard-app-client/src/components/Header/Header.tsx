@@ -54,11 +54,13 @@ export class Header extends PureComponent<HeaderProps, HeaderState> {
                   onClick={this.handleMenuOpen}
                 >
                   <div className={classes.avatarWrapper}>
-                    <Avatar
-                      size={isWidthUp('sm', width) ? '50px' : '40px'}
-                      hash={user.picture}
-                      className={classes.avatar}
-                    />
+                    {user.picture && (
+                      <Avatar
+                        size={isWidthUp('sm', width) ? '50px' : '40px'}
+                        hash={user.picture}
+                        className={classes.avatar}
+                      />
+                    )}
                   </div>
                 </StyledIconButton>
                 <Menu
@@ -69,6 +71,11 @@ export class Header extends PureComponent<HeaderProps, HeaderState> {
                   open={Boolean(anchorEl)}
                   onClose={this.handleMenuClose}
                 >
+                  <MenuItem disableGutters onClick={this.handleMenuClose}>
+                    <StyledRouterLink className={classes.menuItem} to={`/app/user/games`}>
+                      My Games
+                    </StyledRouterLink>
+                  </MenuItem>
                   <MenuItem disableGutters onClick={this.handleMenuClose}>
                     <StyledRouterLink className={classes.menuItem} to={`/app/user/profile`}>
                       Profile

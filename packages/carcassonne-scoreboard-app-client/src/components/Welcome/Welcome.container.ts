@@ -15,7 +15,9 @@ const playerQuery = gql`
   query PlayerQuery($userId: String!) {
     user(userId: $userId) {
       id
-      games
+      games {
+        gameId
+      }
       victories
       defeats
     }
