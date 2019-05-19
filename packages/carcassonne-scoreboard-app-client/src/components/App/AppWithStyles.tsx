@@ -7,7 +7,10 @@ const styles = ({ breakpoints, spacing, palette }: Theme) => ({
   layout: {
     width: 'auto',
     margin: 0,
-    backgroundColor: palette.grey[400],
+    backgroundColor: palette.background.paper,
+    [breakpoints.up('sm')]: {
+      backgroundColor: palette.grey[400],
+    },
   },
   grid: {
     minHeight: '100vh',

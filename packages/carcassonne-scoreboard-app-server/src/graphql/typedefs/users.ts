@@ -22,6 +22,7 @@ export default `
 
   type Query {
     user(userId: String!): User
+    users: Int!
   }
 
   type Mutation {

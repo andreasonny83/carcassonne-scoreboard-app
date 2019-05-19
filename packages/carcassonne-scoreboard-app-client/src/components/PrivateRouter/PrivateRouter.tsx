@@ -39,7 +39,12 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
 
     if (loading || !Object.keys(user).length) {
       return (
-        <Paper elevation={isMobile ? 0 : 1} square={isMobile} className="paper" style={{ padding: '4em' }}>
+        <Paper
+          elevation={isMobile ? 0 : 1}
+          square={isMobile}
+          className="paper"
+          style={{ padding: '4em' }}
+        >
           <Grid direction="column" alignItems="center" container>
             <CircularProgress style={{ marginBottom: '2em' }} />
             <Typography>Authenticating user...</Typography>
@@ -51,7 +56,9 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
     return (
       <Route
         {...rest}
-        render={props => this.renderRoute(target, isSignedIn, redirectTo, location, user, props)}
+        render={props =>
+          this.renderRoute(target, isSignedIn, redirectTo, location, user, width, props)
+        }
       />
     );
   }
@@ -62,10 +69,11 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
     redirectTo: string,
     location: any,
     user: any,
+    width: Breakpoint,
     props: any
   ): JSX.Element {
     return isSignedIn ? (
-      <PrivateRouterContainer target={target} user={user} props={props} />
+      <PrivateRouterContainer target={target} user={user} width={width} props={props} />
     ) : (
       <Redirect
         to={{

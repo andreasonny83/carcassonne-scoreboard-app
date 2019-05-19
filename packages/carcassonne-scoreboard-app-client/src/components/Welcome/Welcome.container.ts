@@ -21,6 +21,9 @@ const playerQuery = gql`
       victories
       defeats
     }
+
+    users
+    games
   }
 `;
 

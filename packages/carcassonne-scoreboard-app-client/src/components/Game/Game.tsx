@@ -138,7 +138,6 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                 userIsAPlayer &&
                 `Press Start Game when you're ready!`}
               {game.started && !game.finished && !userIsAPlayer && `The game is in progress.`}
-              {game.started && !game.finished && userIsAPlayer && `Game started. Good luck!`}
               {game.finished && `This Game is Ended`}
             </Typography>
           </Grid>

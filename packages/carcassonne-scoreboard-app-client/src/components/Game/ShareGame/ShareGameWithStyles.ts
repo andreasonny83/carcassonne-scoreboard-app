@@ -16,6 +16,7 @@ const styles = ({ spacing, breakpoints }: Theme) =>
       maxWidth: '18em',
     },
     copyIcon: {
+      cursor: 'pointer',
       textAlign: 'right',
       [breakpoints.up('sm')]: {
         textAlign: 'left',

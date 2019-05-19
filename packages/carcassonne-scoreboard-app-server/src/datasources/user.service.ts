@@ -1,6 +1,6 @@
 import AWS, { AWSError } from 'aws-sdk';
 import { DataSource } from 'apollo-datasource';
-import { AttributeMap, GetItemOutput } from 'aws-sdk/clients/dynamodb';
+import { AttributeMap, GetItemOutput, ScanOutput } from 'aws-sdk/clients/dynamodb';
 import { PromiseResult } from 'aws-sdk/lib/request';
 
 import { User, UserAttributes, UserGame } from './user.data';
@@ -55,6 +55,17 @@ export class UserService extends DataSource {
     }
 
     return user.Item as IUser;
+  }
+
+  public async getUsers(): Promise<number> {
+    const params: AWS.DynamoDB.DocumentClient.ScanInput = {
+      TableName: AWS_CONFIG.usersTableName,
+      Select: 'COUNT',
+    };
+
+    const users: PromiseResult<ScanOutput, AWSError> = await this.dynamoDb.scan(params).promise();
+
+    return users.Count || 0;
   }
 
   public async joinGame(userId: string = required('User Id'), game: Game = required('Game')) {
@@ -144,10 +155,7 @@ export class UserService extends DataSource {
     };
   }
 
-  private async endUserGame(
-    userId: string = required('User Id'),
-    game: Game = required('Game'),
-  ) {
+  private async endUserGame(userId: string = required('User Id'), game: Game = required('Game')) {
     const user = await this.getUser(userId);
 
     if (!user) {

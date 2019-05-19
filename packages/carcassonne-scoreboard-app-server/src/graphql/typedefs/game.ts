@@ -84,8 +84,8 @@ export default `
   }
 
   type Query {
-    games: [Game]
     game(gameId: String!): Game
+    games: Int!
   }
 
   type Subscription {

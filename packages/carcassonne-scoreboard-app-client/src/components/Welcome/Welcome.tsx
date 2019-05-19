@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { QueryResult } from 'react-apollo';
+import get from 'lodash/get';
 
 import { Button, TextField, Paper, FormControl, CircularProgress } from '@material-ui/core';
 import { Grid, Typography } from '@material-ui/core';
@@ -12,6 +13,8 @@ import { WelcomeStylesProps } from './WelcomeWithStyles';
 
 interface UserQueryResult {
   user: WelcomeUserData;
+  users: number;
+  games: number;
 }
 
 export interface WelcomeProps extends WelcomeStylesProps {
@@ -40,9 +43,9 @@ export class WelcomeComponent extends PureComponent<WelcomeProps, WelcomeState> 
 
   public render(): JSX.Element | null {
     const { joinGameId, busy, joinGameFieldError, joinGameFieldPristine } = this.state;
-    const { width, classes } = this.props;
-    const { loading, error, user } = this.props.data;
-    const userGames = (user && user.games && user.games.length) || 0;
+    const { width, data, classes } = this.props;
+    const { loading, error, user, users, games } = data;
+    const userGames = get(user, 'games', []).length;
     const isMobile = !isWidthUp('sm', width);
 
     return (
@@ -83,7 +86,7 @@ export class WelcomeComponent extends PureComponent<WelcomeProps, WelcomeState> 
                       Welcome back
                     </Typography>
 
-                    <Typography align="center" gutterBottom>
+                    <Typography align="center">
                       You have played {userGames} {userGames === 1 ? 'game' : 'games'} so far
                     </Typography>
                     <Typography align="center" gutterBottom>
@@ -91,6 +94,10 @@ export class WelcomeComponent extends PureComponent<WelcomeProps, WelcomeState> 
                         ? `You won ${user.victories} time${user.victories > 1 ? 's' : ''}`
                         : `You haven't won any game yet`}
                     </Typography>
+                    <Typography align="center">
+                      There are {users} registered players and {games} games completed!
+                    </Typography>
+
                   </Grid>
 
                   <Grid item xs={12}>

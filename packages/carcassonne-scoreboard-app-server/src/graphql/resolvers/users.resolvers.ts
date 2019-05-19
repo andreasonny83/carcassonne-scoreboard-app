@@ -23,6 +23,16 @@ export default {
 
       return userRes;
     },
+
+    async users(parent: any, args: any, context: any): Promise<number> {
+      const user = get(context, 'userData.data.username');
+
+      if (!user) {
+        throw new AuthenticationError(`Unauthenticated user request`);
+      }
+
+      return dataSources.userService.getUsers();
+    }
   },
 
   Mutation: {

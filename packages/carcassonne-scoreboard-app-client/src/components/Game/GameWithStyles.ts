@@ -24,7 +24,8 @@ const styles = ({ spacing, typography, palette, breakpoints }: Theme) => ({
     lineHeight: '1.2em',
     display: '-webkit-box',
     maxHeight: '2.4em',
-    marginBottom: spacing(2),
+    marginTop: spacing(2),
+    marginBottom: 0,
   },
   logTitle: {
     marginTop: spacing(4),

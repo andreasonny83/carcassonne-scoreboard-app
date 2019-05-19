@@ -1,7 +1,7 @@
 import AWS, { AWSError } from 'aws-sdk';
 import { DataSource } from 'apollo-datasource';
 import { PromiseResult } from 'aws-sdk/lib/request';
-import { GetItemOutput, AttributeMap } from 'aws-sdk/clients/dynamodb';
+import { GetItemOutput, AttributeMap, ScanOutput } from 'aws-sdk/clients/dynamodb';
 
 import { Game, PlayerInput, IPlayer } from './game.data';
 import { config } from '../config';
@@ -64,6 +64,17 @@ export class GameService extends DataSource {
     }
 
     return game.Item as IGame;
+  }
+
+  public async getGames(): Promise<number> {
+    const params: AWS.DynamoDB.DocumentClient.ScanInput = {
+      TableName: AWS_CONFIG.gamesTableName,
+      Select: 'COUNT',
+    };
+
+    const users: PromiseResult<ScanOutput, AWSError> = await this.dynamoDb.scan(params).promise();
+
+    return users.Count || 0;
   }
 
   public async joinGame(
@@ -269,9 +280,5 @@ export class GameService extends DataSource {
       ...game,
       finished: true,
     };
-  }
-
-  public getGames() {
-    // return this.games;
   }
 }

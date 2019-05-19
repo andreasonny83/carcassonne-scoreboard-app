@@ -10,8 +10,6 @@ type ShareGameProps = ShareGameStylesProps & {
 };
 
 export class ShareGame extends PureComponent<ShareGameProps> {
-  private gameIdRef: any;
-
   public render() {
     const { classes, gameId } = this.props;
 
@@ -21,12 +19,9 @@ export class ShareGame extends PureComponent<ShareGameProps> {
           <TextField
             fullWidth
             helperText="Share this id with the other players"
-            label="Game ID"
             value={gameId}
             id="game-id"
-            inputRef={node => (this.gameIdRef = node)}
-            onSelect={this.gameIdOnFocus}
-            onFocus={this.focusGameId}
+            contentEditable={false}
           />
         </Grid>
         <Grid item xs={2} className={classes.copyIcon}>
@@ -36,14 +31,14 @@ export class ShareGame extends PureComponent<ShareGameProps> {
     );
   }
 
-  private focusGameId = () => {
-    this.gameIdRef.select();
-  };
-
-  private gameIdOnFocus = (event: React.SyntheticEvent<HTMLDivElement>) => {
-    const { showNotification } = this.props;
-    this.gameIdRef.select();
-    document.execCommand('copy');
+  private focusGameId = async () => {
+    const { showNotification, gameId } = this.props;
+    try {
+      await navigator.clipboard.writeText(gameId);
+    } catch (err) {
+      showNotification('Ops! cannot copy the link. Please, do it manually');
+      return;
+    }
 
     showNotification('Game Id copied to clipboard');
   };

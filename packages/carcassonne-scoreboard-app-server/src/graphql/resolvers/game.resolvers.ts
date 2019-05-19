@@ -77,6 +77,16 @@ export default {
 
       throw new ValidationError(`Game ID not found`);
     },
+
+    async games(parent: any, args: any, context: any): Promise<number> {
+      const user = get(context, 'userData.data.username');
+
+      if (!user) {
+        throw new AuthenticationError(`Unauthenticated user request`);
+      }
+
+      return dataSources.gameService.getGames();
+    },
   },
 
   Subscription: {
