@@ -19,6 +19,14 @@ export type IPlayer = {
   picture?: string;
 };
 
+export type ILog = {
+  id: number;
+  score: number;
+  points: number;
+  color: MeepleColor;
+  userId: string;
+};
+
 class Player {
   public name: string;
   public color: MeepleColor;
@@ -50,7 +58,7 @@ export class Game {
   public date: string;
   public players: IPlayer[];
   public users: string[];
-  public log: any[];
+  public log: ILog[];
 
   constructor(name: string, players: PlayerInput[], users: string[]) {
     this.id = uniqueNamesGenerator('_');

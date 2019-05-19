@@ -109,7 +109,7 @@ export class UserService extends DataSource {
     }
 
     for (const user of users) {
-      await this.endUserGame(user, game.id);
+      await this.endUserGame(user, game);
     }
 
     return;
@@ -146,7 +146,7 @@ export class UserService extends DataSource {
 
   private async endUserGame(
     userId: string = required('User Id'),
-    gameId: string = required('Game Id')
+    game: Game = required('Game'),
   ) {
     const user = await this.getUser(userId);
 
@@ -154,18 +154,25 @@ export class UserService extends DataSource {
       throw new Error(`Cannot find user ${userId}`);
     }
 
-    const index = user.games.findIndex(currGame => gameId === currGame.gameId);
+    const gameIndex = user.games.findIndex(currGame => game.id === currGame.gameId);
+    const PlayersSorted = game.players.sort((a, b) => b.score - a.score);
 
-    if (index < 0) {
+    if (!Boolean(~gameIndex)) {
       return;
     }
+
+    const victories = PlayersSorted[0].userId === userId ? user.victories + 1 : user.victories;
 
     const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
       TableName: AWS_CONFIG.usersTableName,
       Key: { id: userId },
-      UpdateExpression: `SET games[${index}].finished = :gameUpdated`,
+      UpdateExpression: `SET games[${gameIndex}].finished = :gameUpdated, #victories = :victories`,
+      ExpressionAttributeNames: {
+        '#victories': 'victories',
+      },
       ExpressionAttributeValues: {
         ':gameUpdated': true,
+        ':victories': victories,
       },
     };
 

@@ -151,20 +151,39 @@ export class GameService extends DataSource {
       return game;
     }
 
-    console.log('before', game.log);
-    game.log.pop();
-    console.log('after', game.log);
+    let playerIndex: number | undefined;
+    const lastMoveLog = game.log.pop();
+
+    if (!lastMoveLog) {
+      return game;
+    }
+
+    const targetPlayerData = game.players.find((player: IPlayer, index: number) => {
+      if (player.id === lastMoveLog.userId) {
+        playerIndex = index;
+        return true;
+      }
+
+      return false;
+    });
+
+    if (!targetPlayerData || typeof playerIndex === 'undefined') {
+      throw new Error('Invalid log information');
+    }
+
+    targetPlayerData.score -= lastMoveLog.points;
 
     if (game) {
       const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
         TableName: AWS_CONFIG.gamesTableName,
         Key: { id: gameId },
-        UpdateExpression: `SET #log = :log`,
+        UpdateExpression: `SET #log = :log, players[${playerIndex}] = :targetPlayerData`,
         ExpressionAttributeNames: {
           '#log': 'log',
         },
         ExpressionAttributeValues: {
           ':log': game.log,
+          ':targetPlayerData': targetPlayerData,
         },
       };
 

@@ -5,8 +5,8 @@ import {
   PubSub,
   ApolloError,
   AuthenticationError,
+  withFilter,
 } from 'apollo-server';
-
 import { dataSources } from '../../datasources';
 import { MeepleColor, PlayerInput, Game, IPlayer } from '../../datasources/game.data';
 import { NewGameInput } from '../../datasources/game.service';
@@ -64,15 +64,6 @@ const sanitizePlayers = (players: PlayerInput[]): PlayerInput[] => {
 };
 
 const GAME_UPDATED = 'GAME_UPDATED';
-const GAME_UPDATING = 'GAME_UPDATING';
-
-interface GameUpdatingStatus {
-  [key: string]: {
-    loading: boolean;
-  };
-}
-
-const GAME_UPDATING_STATUS: GameUpdatingStatus = {};
 
 export default {
   Query: {
@@ -86,26 +77,14 @@ export default {
 
       throw new ValidationError(`Game ID not found`);
     },
-
-    async gameUpdating(parent: any, args: any, context: any) {
-      const { gameId } = args;
-      const game = GAME_UPDATING_STATUS[gameId];
-
-      return {
-        loading: game && game.loading,
-      };
-    },
   },
 
   Subscription: {
     gameUpdated: {
-      subscribe: (root: any, args: any, context: any) => {
-        return pubsub.asyncIterator(GAME_UPDATED);
-      },
-    },
-
-    gameUpdating: {
-      subscribe: (root: any, args: any, context: any) => pubsub.asyncIterator(GAME_UPDATING),
+      subscribe: withFilter(
+        () => pubsub.asyncIterator(GAME_UPDATED),
+        (payload, args) => Boolean(args.gameId === payload.gameUpdated.id)
+      ),
     },
   },
 
@@ -321,22 +300,18 @@ export default {
 
       const newScore = game.players[playerIndex].score + score;
 
-      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: true } });
 
       const gameUpdated = await dataSources.gameService.updateScore(gameId, newScore, playerIndex);
       gameUpdated.log.sort().reverse();
 
       pubsub.publish(GAME_UPDATED, { gameUpdated });
-      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: false } });
 
       return gameUpdated;
     },
 
     async undoLastMove(parent: any, args: any, context: any) {
       const { input } = args;
-      const {
-        gameId = required('Game Id'),
-      } = input;
+      const { gameId = required('Game Id') } = input;
       const userId = context.userData && context.userData.data && context.userData.data.username;
       const game = await dataSources.gameService.getGame(gameId);
 
@@ -362,13 +337,10 @@ export default {
         throw new ValidationError(`Unauthenticated user request`);
       }
 
-      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: true } });
-
       const gameUpdated = await dataSources.gameService.undoMove(gameId);
       gameUpdated.log.sort().reverse();
 
       pubsub.publish(GAME_UPDATED, { gameUpdated });
-      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: false } });
 
       return gameUpdated;
     },
@@ -422,15 +394,12 @@ export default {
         picture: userData.picture,
       });
 
-      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: true } });
-
       const gameUpdated = await dataSources.gameService.updatePlayer(
         gameId,
         newPlayer,
         playerIndex
       );
 
-      pubsub.publish(GAME_UPDATING, { gameUpdating: { loading: false } });
       pubsub.publish(GAME_UPDATED, { gameUpdated });
 
       return gameUpdated;

@@ -41,10 +41,6 @@ export default `
     log: [Log]!
   }
 
-  type GameUpdating {
-    loading: Boolean
-  }
-
   input NewGameInput {
     name: String!
     players: [PlayerInfoInput!]!
@@ -90,12 +86,9 @@ export default `
   type Query {
     games: [Game]
     game(gameId: String!): Game
-    gameUpdating(gameId: String!): GameUpdating
   }
 
   type Subscription {
-    gameCreated: Game
-    gameUpdated: Game
-    gameUpdating: GameUpdating
+    gameUpdated(gameId: String!): Game
   }
 `;
