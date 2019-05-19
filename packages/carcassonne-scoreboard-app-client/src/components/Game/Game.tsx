@@ -29,7 +29,6 @@ type GameComponentProps = GameStylesProps &
 interface GameState {
   updateScoreOpened: boolean;
   selectedPlayer?: Player;
-  updatingScores?: boolean;
   disableButtons?: boolean;
 }
 
@@ -43,9 +42,9 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
 
   public componentDidMount() {
     const { data, match } = this.props;
-    const gameId = match && match.params && match.params.gameId;
+    const gameId = get(match, 'params.gameId');
 
-    if (!gameId) {
+    if (!(gameId && data)) {
       return;
     }
 
@@ -64,10 +63,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     const currLog = get(prev, 'data.game.log', []).length;
 
     if (disableButtons && newLog !== currLog) {
-      this.setState({
-        disableButtons: false,
-        updatingScores: false,
-      });
+      this.setState({ disableButtons: false });
 
       showNotification('Game updated');
     }
@@ -75,7 +71,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
 
   public render() {
     const { data, width, match, user, classes } = this.props;
-    const { updateScoreOpened, selectedPlayer, updatingScores, disableButtons } = this.state;
+    const { updateScoreOpened, selectedPlayer, disableButtons } = this.state;
     const gameId = get(match, 'params.gameId');
     const isMobile = !isWidthUp('sm', width);
 
@@ -204,7 +200,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                     className={classes.buttons}
                     color="primary"
                     variant="outlined"
-                    disabled={!selectedPlayer || updatingScores || disableButtons || !game.started}
+                    disabled={!selectedPlayer || disableButtons || !game.started}
                     onClick={this.handleShowUpdateScore}
                   >
                     Add points
@@ -215,7 +211,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                     className={classes.buttons}
                     color="secondary"
                     variant="outlined"
-                    disabled={updatingScores || disableButtons || !game.log.length}
+                    disabled={disableButtons || !game.log.length}
                     onClick={this.undoMove}
                   >
                     Undo
@@ -232,25 +228,19 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
           />
         </Grid>
 
-        {(updatingScores && (
-          <Grid direction="column" alignContent="center" container>
-            <CircularProgress className={classes.loading} />
+        <Grid direction="column" container>
+          <Grid item xs={12}>
+            <PlayerItems
+              disabled={!game.started}
+              finished={game.finished}
+              items={game.players}
+              showRedeem={userIsAPlayer && !userHasAMeeple}
+              itemSelected={selectedPlayer}
+              handleListItemClick={this.handleSelectPlayer}
+              onRedeem={this.redeemPlayer}
+            />
           </Grid>
-        )) || (
-          <Grid direction="column" container>
-            <Grid item xs={12}>
-              <PlayerItems
-                disabled={!game.started}
-                finished={game.finished}
-                items={game.players}
-                showRedeem={userIsAPlayer && !userHasAMeeple}
-                itemSelected={selectedPlayer}
-                handleListItemClick={this.handleSelectPlayer}
-                onRedeem={this.redeemPlayer}
-              />
-            </Grid>
-          </Grid>
-        )}
+        </Grid>
 
         {game.log.length ? (
           <Grid direction="column" container>
@@ -281,7 +271,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                 color="secondary"
                 variant="outlined"
                 onClick={this.endGame}
-                disabled={updatingScores || disableButtons}
+                disabled={disableButtons}
               >
                 End Game
               </Button>

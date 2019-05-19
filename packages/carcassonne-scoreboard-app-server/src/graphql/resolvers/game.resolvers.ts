@@ -83,7 +83,12 @@ export default {
     gameUpdated: {
       subscribe: withFilter(
         () => pubsub.asyncIterator(GAME_UPDATED),
-        (payload, args) => Boolean(args.gameId === payload.gameUpdated.id)
+        (payload, args) => {
+          const gameId = get(args, 'gameId');
+          const gameUpdatedId = get(payload, 'gameUpdated.id');
+
+          return Boolean(gameId === gameUpdatedId);
+        }
       ),
     },
   },
@@ -299,7 +304,6 @@ export default {
       }
 
       const newScore = game.players[playerIndex].score + score;
-
 
       const gameUpdated = await dataSources.gameService.updateScore(gameId, newScore, playerIndex);
       gameUpdated.log.sort().reverse();

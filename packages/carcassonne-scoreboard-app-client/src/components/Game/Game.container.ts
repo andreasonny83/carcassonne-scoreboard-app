@@ -1,3 +1,4 @@
+import get from 'lodash/get';
 import gql from 'graphql-tag';
 import { graphql, ChildDataProps, compose } from 'react-apollo';
 import { connect } from 'react-redux';
@@ -209,7 +210,14 @@ const withGame = compose(
   graphql(UPDATE_GAME, { name: 'updateGame' }),
   graphql(REDEEM_PLAYER, { name: 'redeemPlayer' }),
   graphql(UNDO_MOVE, { name: 'undoMove' }),
-  graphql(GAME_UPDATED, { name: 'gameUpdated' }),
+  graphql(GAME_UPDATED, {
+    name: 'gameUpdated',
+    options: ({ match }: any) => ({
+      variables: {
+        gameId: get(match, 'params.gameId'),
+      },
+    }),
+  })
 );
 
 const mapStateToProps = (state: any) => ({
