@@ -3,8 +3,10 @@ import { QueryResult } from 'react-apollo';
 
 import { Button, TextField, Paper, FormControl, CircularProgress } from '@material-ui/core';
 import { Grid, Typography } from '@material-ui/core';
-import { Twemoji } from '../twemoji';
+import { isWidthUp } from '@material-ui/core/withWidth';
+import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 
+import { Twemoji } from '../twemoji';
 import { WelcomeUserData } from './Welcome.container';
 import { WelcomeStylesProps } from './WelcomeWithStyles';
 
@@ -14,6 +16,7 @@ interface UserQueryResult {
 
 export interface WelcomeProps extends WelcomeStylesProps {
   data: QueryResult & UserQueryResult;
+  width: Breakpoint;
   newGame(): void;
   joinGame(gameId: string): void;
 }
@@ -37,12 +40,13 @@ export class WelcomeComponent extends PureComponent<WelcomeProps, WelcomeState> 
 
   public render(): JSX.Element | null {
     const { joinGameId, busy, joinGameFieldError, joinGameFieldPristine } = this.state;
-    const { classes } = this.props;
+    const { width, classes } = this.props;
     const { loading, error, user } = this.props.data;
     const userGames = (user && user.games && user.games.length) || 0;
+    const isMobile = !isWidthUp('sm', width);
 
     return (
-      <Paper className={classes.mainFeaturedPost} elevation={1}>
+      <Paper className={classes.mainFeaturedPost} elevation={isMobile ? 0 : 1} square={isMobile}>
         <Grid container>
           <Grid item xs={12}>
             <div className={classes.mainFeaturedPostContent}>

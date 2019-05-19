@@ -6,7 +6,8 @@ const styles = ({ palette, spacing, breakpoints }: Theme) =>
   createStyles({
     footer: {
       backgroundColor: palette.background.paper,
-      marginTop: spacing(14),
+      marginTop: 0,
+      borderTop: `1px solid ${palette.secondary.light}`,
       [breakpoints.up('sm')]: {
         marginTop: spacing(10),
       },

@@ -32,7 +32,7 @@ const styles = ({ palette, spacing, breakpoints }: Theme) =>
   createStyles({
     root: {
       borderBottom: `1px solid ${palette.grey[400]}`,
-      marginBottom: spacing(2),
+      marginBottom: 0,
       [breakpoints.up('sm')]: {
         marginBottom: spacing(4),
       },

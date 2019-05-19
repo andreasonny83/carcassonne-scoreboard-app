@@ -10,6 +10,8 @@ import {
   Button,
   CircularProgress,
 } from '@material-ui/core';
+import { isWidthUp } from '@material-ui/core/withWidth';
+import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 import { v4 } from 'uuid';
 import get from 'lodash/get';
 
@@ -30,6 +32,7 @@ interface NewGameMutationInput {
 
 type NewGameProps = NewGameStylesProps &
   ChildPropsData & {
+    width: Breakpoint;
     newGame(props: NewGameMutationInput): Promise<any>;
     showNotification(message: string): void;
     joinGame(gameId: string): void;
@@ -64,12 +67,13 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
   public readonly state = initialState;
 
   public render() {
-    const { classes } = this.props;
+    const { width, classes } = this.props;
     const { gameName, pristine, gameNameValid, players, busy } = this.state;
+    const isMobile = !isWidthUp('sm', width);
 
     if (busy) {
       return (
-        <Paper elevation={1} className={classes.root}>
+        <Paper elevation={isMobile ? 0 : 1} square={isMobile} className={classes.root}>
           <Grid direction="column" alignContent="center" container>
             <CircularProgress />
           </Grid>
@@ -79,7 +83,7 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
 
     return (
       <form onSubmit={this.handleSubmit}>
-        <Paper elevation={1} className={classes.root}>
+        <Paper elevation={isMobile ? 0 : 1} square={isMobile} className={classes.root}>
           <Grid container className={classes.goBack}>
             <Button variant="outlined" color="secondary" onClick={this.goBack}>
               Go Back
@@ -186,7 +190,7 @@ export class NewGame extends PureComponent<NewGameProps, NewGameState> {
     const { go } = this.props;
 
     go('/app');
-  }
+  };
 
   private handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,

@@ -1,11 +1,15 @@
 import { withStyles, WithStyles } from '@material-ui/core';
 import { Theme } from '@material-ui/core';
+import withWidth from '@material-ui/core/withWidth';
 
 import { WelcomeComponent } from './Welcome';
 
-const styles = ({ spacing }: Theme) => ({
+const styles = ({ spacing, breakpoints }: Theme) => ({
   mainFeaturedPost: {
-    marginBottom: spacing(4),
+    marginBottom: 0,
+    [breakpoints.up('sm')]: {
+      marginBottom: spacing(4),
+    }
   },
   mainFeaturedPostContent: {
     padding: spacing(6),
@@ -25,4 +29,4 @@ const styles = ({ spacing }: Theme) => ({
 
 export type WelcomeStylesProps = WithStyles<typeof styles>;
 
-export const WelcomeWithStyles = withStyles(styles)(WelcomeComponent);
+export const WelcomeWithStyles = withStyles(styles)(withWidth()(WelcomeComponent));

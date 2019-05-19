@@ -1,13 +1,20 @@
 import { withStyles, WithStyles, Theme } from '@material-ui/core';
+import withWidth from '@material-ui/core/withWidth';
 
 import { GameComponent } from './Game';
 
-const styles = ({ spacing, typography, palette }: Theme) => ({
+const styles = ({ spacing, typography, palette, breakpoints }: Theme) => ({
   root: {
-    padding: spacing(3),
+    padding: spacing(1, 2, 3, 2),
+    [breakpoints.up('sm')]: {
+      padding: spacing(3),
+    },
   },
   loading: {
     margin: '3em 0',
+  },
+  gameCreated: {
+    fontSize: '0.8rem',
   },
   title: {
     '-webkit-line-clamp': 2,
@@ -60,4 +67,4 @@ const styles = ({ spacing, typography, palette }: Theme) => ({
 
 export type GameStylesProps = WithStyles<typeof styles>;
 
-export const GameWithStyles = withStyles(styles)(GameComponent);
+export const GameWithStyles = withStyles(styles)(withWidth()(GameComponent));

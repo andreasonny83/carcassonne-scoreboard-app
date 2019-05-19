@@ -1,11 +1,14 @@
 import React, { PureComponent } from 'react';
 import { RouteProps, Route, Redirect } from 'react-router';
 import { Grid, CircularProgress, Paper, Typography } from '@material-ui/core';
+import { isWidthUp } from '@material-ui/core/withWidth';
+import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 
 import { IUser } from '../../user';
 import { PrivateRouterContainer } from './RouteContainer.container';
 
 interface PrivateRouterProps extends RouteProps {
+  width: Breakpoint;
   target: React.ComponentClass;
   redirectTo: string;
   isSignedIn: boolean;
@@ -31,11 +34,12 @@ export class PrivateRouterComponent extends PureComponent<PrivateRouterProps> {
   }
 
   public render(): JSX.Element {
-    const { target, redirectTo, location, loading, isSignedIn, user, ...rest } = this.props;
+    const { target, redirectTo, location, width, loading, isSignedIn, user, ...rest } = this.props;
+    const isMobile = !isWidthUp('sm', width);
 
     if (loading || !Object.keys(user).length) {
       return (
-        <Paper className="paper" style={{ padding: '4em' }}>
+        <Paper elevation={isMobile ? 0 : 1} square={isMobile} className="paper" style={{ padding: '4em' }}>
           <Grid direction="column" alignItems="center" container>
             <CircularProgress style={{ marginBottom: '2em' }} />
             <Typography>Authenticating user...</Typography>

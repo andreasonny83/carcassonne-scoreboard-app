@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
+import withWidth from '@material-ui/core/withWidth';
 
 import { signedOut, toggleLoading, userSignedIn, getUserData } from '../../actions';
 import { PrivateRouterComponent } from './PrivateRouter';
@@ -21,4 +22,4 @@ const mapStateToProps = (state: any) => ({
 export const PrivateRouter = connect(
   mapStateToProps,
   mapDispactToProps
-)(PrivateRouterComponent);
+)(withWidth()(PrivateRouterComponent));

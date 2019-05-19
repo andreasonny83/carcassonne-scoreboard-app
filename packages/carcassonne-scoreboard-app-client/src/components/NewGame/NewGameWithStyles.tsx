@@ -2,6 +2,7 @@ import React from 'react';
 import { styled } from '@material-ui/styles';
 import { Link } from 'react-router-dom';
 import { Button, withStyles, WithStyles, Theme } from '@material-ui/core';
+import withWidth from '@material-ui/core/withWidth';
 
 import { NewGame } from './NewGame';
 
@@ -15,10 +16,13 @@ export const ButtonLink = (props: any) => (
   </Button>
 );
 
-const styles = ({ spacing }: Theme) => ({
+const styles = ({ spacing, breakpoints }: Theme) => ({
   root: {
     padding: spacing(2, 1),
-    marginBottom: spacing(2),
+    marginBottom: 0,
+    [breakpoints.up('sm')]: {
+      marginBottom: spacing(2),
+    },
   },
   container: {
     maxWidth: '500px',
@@ -42,4 +46,4 @@ const styles = ({ spacing }: Theme) => ({
 
 export type NewGameStylesProps = WithStyles<typeof styles>;
 
-export const NewGameWithStyles = withStyles(styles)(NewGame);
+export const NewGameWithStyles = withStyles(styles)(withWidth()(NewGame));

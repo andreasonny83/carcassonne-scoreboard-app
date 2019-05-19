@@ -1,15 +1,17 @@
 import get from 'lodash/get';
 import React, { PureComponent } from 'react';
 import { Paper, Grid, Typography, Button, CircularProgress } from '@material-ui/core';
+import { isWidthUp } from '@material-ui/core/withWidth';
+import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 
 import { GamesStylesProps } from './GamesWithStyles';
 import { Twemoji } from '../twemoji';
 import { ChildPropsData } from './Games.container';
 import { GameItems } from './GameItems';
-import { formatErrorAndLog } from '../../utils/formatErrors';
 
 type GamesProps = GamesStylesProps &
   ChildPropsData & {
+    width: Breakpoint;
     updateUser(data: any): any;
     updateUserData(data: any): any;
     go(path: string): void;
@@ -18,12 +20,18 @@ type GamesProps = GamesStylesProps &
 
 export class Games extends PureComponent<GamesProps> {
   public render(): JSX.Element {
-    const { classes, data } = this.props;
+    const { classes, width, data } = this.props;
     const { loading, error, user } = data;
+    const isMobile = !isWidthUp('sm', width);
 
     if (loading) {
       return (
-        <Paper className="paper" style={{ padding: '4em' }}>
+        <Paper
+          elevation={isMobile ? 0 : 1}
+          square={isMobile}
+          className="paper"
+          style={{ padding: '4em' }}
+        >
           <Grid direction="column" alignItems="center" container>
             <CircularProgress style={{ marginBottom: '2em' }} />
             <Typography>Preparing games screen...</Typography>
@@ -40,7 +48,7 @@ export class Games extends PureComponent<GamesProps> {
       );
 
       return (
-        <Paper elevation={1} className={classes.root}>
+        <Paper elevation={isMobile ? 0 : 1} square={isMobile} className={classes.root}>
           <Grid direction="column" container>
             <Typography component="h2" variant="h4" align="center" gutterBottom>
               Error
@@ -57,7 +65,7 @@ export class Games extends PureComponent<GamesProps> {
     const gamesInProgress = user.games.filter(game => !game.finished);
 
     return (
-      <Paper elevation={1} className={classes.root}>
+      <Paper elevation={isMobile ? 0 : 1} square={isMobile} className={classes.root}>
         <Grid container className={classes.goBack}>
           <Button variant="outlined" color="secondary" onClick={this.goBack}>
             Go Back

@@ -30,10 +30,6 @@ const GAME_QUERY = gql`
         userId
       }
     }
-
-    gameUpdating(gameId: $gameId) {
-      loading
-    }
   }
 `;
 
@@ -127,8 +123,8 @@ const UNDO_MOVE = gql`
 `;
 
 const GAME_UPDATED = gql`
-  subscription GameUpdated {
-    gameUpdated {
+  subscription GameUpdated($gameId: String!) {
+    gameUpdated(gameId: $gameId) {
       users
       started
       finished
@@ -146,14 +142,6 @@ const GAME_UPDATED = gql`
         userId
         color
       }
-    }
-  }
-`;
-
-const GAME_UPDATING = gql`
-  subscription GameUpdating {
-    gameUpdating {
-      loading
     }
   }
 `;
@@ -187,9 +175,6 @@ export interface Game {
 
 interface Response {
   game: Game;
-  gameUpdating: {
-    loading: boolean;
-  };
 }
 
 interface Variables {
@@ -225,7 +210,6 @@ const withGame = compose(
   graphql(REDEEM_PLAYER, { name: 'redeemPlayer' }),
   graphql(UNDO_MOVE, { name: 'undoMove' }),
   graphql(GAME_UPDATED, { name: 'gameUpdated' }),
-  graphql(GAME_UPDATING, { name: 'gameUpdating' })
 );
 
 const mapStateToProps = (state: any) => ({
@@ -239,9 +223,11 @@ export const Game = connect(
   mapDispatchToProps
 )(withGame(GameWithStyles));
 
-export function onGameUpdated(subscribeToMore: any) {
+export function onGameUpdated(subscribeToMore: any, gameId: string) {
   return subscribeToMore({
     document: GAME_UPDATED,
+
+    variables: { gameId },
 
     updateQuery: (prev: any, { subscriptionData }: any) => {
       const { data } = subscriptionData;
@@ -259,28 +245,6 @@ export function onGameUpdated(subscribeToMore: any) {
           started: data.gameUpdated.started,
           finished: data.gameUpdated.finished,
           log: data.gameUpdated.log,
-        },
-      };
-    },
-  });
-}
-
-export function onGameUpdating(subscribeToMore: any) {
-  return subscribeToMore({
-    document: GAME_UPDATING,
-
-    updateQuery: (prev: any, { subscriptionData }: any) => {
-      const { data } = subscriptionData;
-
-      if (!data) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        gameUpdating: {
-          ...prev.gameUpdating,
-          loading: Boolean(data.gameUpdating.loading),
         },
       };
     },

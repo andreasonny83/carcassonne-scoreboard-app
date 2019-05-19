@@ -4,7 +4,7 @@ import { Switch, Route, Redirect, RouteComponentProps } from 'react-router';
 import { Welcome } from '../Welcome';
 import { NewGame } from '../NewGame';
 import { Game } from '../Game';
-import { UserProfile } from '../User';
+import { UserProfile } from '../Profile';
 import { Games } from '../Games';
 
 type MainComponentProps = RouteComponentProps;;

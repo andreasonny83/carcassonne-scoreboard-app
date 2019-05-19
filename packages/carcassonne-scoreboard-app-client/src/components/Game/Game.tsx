@@ -1,9 +1,11 @@
 import React, { PureComponent } from 'react';
 import get from 'lodash/get';
 import { Paper, Typography, Grid, CircularProgress, Button } from '@material-ui/core';
+import { isWidthUp } from '@material-ui/core/withWidth';
+import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 
 import { GameStylesProps } from './GameWithStyles';
-import { ChildPropsData, Player, onGameUpdated, onGameUpdating } from './Game.container';
+import { ChildPropsData, Player, onGameUpdated } from './Game.container';
 import { PlayerItems } from './PlayerItem';
 import { LogItemsWithStyles as LogItems } from './LogItem';
 import { UpdateScore } from './UpdateScore';
@@ -14,6 +16,7 @@ import { UserState } from '../../reducers/user';
 type GameComponentProps = GameStylesProps &
   ChildPropsData & {
     user: UserState;
+    width: Breakpoint;
     showNotification(message: string): void;
     joinGame(options: any): any;
     startGame(options: any): any;
@@ -37,49 +40,53 @@ const initialState: GameState = {
 export class GameComponent extends PureComponent<GameComponentProps, GameState> {
   public readonly state: GameState = initialState;
   private unsubscribeGameUpdated: any;
-  private unsubscribeGameUpdating: any;
 
   public componentDidMount() {
-    const { data } = this.props;
+    const { data, match } = this.props;
+    const gameId = match && match.params && match.params.gameId;
 
-    this.unsubscribeGameUpdated = onGameUpdated(data.subscribeToMore);
-    this.unsubscribeGameUpdating = onGameUpdating(data.subscribeToMore);
+    if (!gameId) {
+      return;
+    }
+
+    this.unsubscribeGameUpdated = onGameUpdated(data.subscribeToMore, gameId);
   }
 
   public componentWillUnmount() {
     this.unsubscribeGameUpdated();
-    this.unsubscribeGameUpdating();
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prev: GameComponentProps) {
     const { data, showNotification } = this.props;
-    const { updatingScores } = this.state;
-    const currentScoresUpdatingStatus = Boolean(data.gameUpdating && data.gameUpdating.loading);
+    const { disableButtons } = this.state;
 
-    if (!currentScoresUpdatingStatus && updatingScores) {
+    const newLog = get(data, 'game.log', []).length;
+    const currLog = get(prev, 'data.game.log', []).length;
+
+    if (disableButtons && newLog !== currLog) {
       this.setState({
         disableButtons: false,
-        updatingScores: currentScoresUpdatingStatus,
+        updatingScores: false,
       });
 
       showNotification('Game updated');
-      return;
     }
-
-    this.setState({
-      updatingScores: currentScoresUpdatingStatus,
-    });
   }
 
   public render() {
-    const { data, user, classes } = this.props;
+    const { data, width, match, user, classes } = this.props;
     const { updateScoreOpened, selectedPlayer, updatingScores, disableButtons } = this.state;
-
-    const gameId = this.props.match && this.props.match.params && this.props.match.params.gameId;
+    const gameId = get(match, 'params.gameId');
+    const isMobile = !isWidthUp('sm', width);
 
     if (data.loading) {
       return (
-        <Paper className="paper" style={{ padding: '4em' }}>
+        <Paper
+          elevation={isMobile ? 0 : 1}
+          square={isMobile}
+          className="paper"
+          style={{ padding: '4em' }}
+        >
           <Grid direction="column" alignItems="center" container>
             <CircularProgress style={{ marginBottom: '2em' }} />
             <Typography>Searching for a game named {gameId}...</Typography>
@@ -96,7 +103,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
       );
 
       return (
-        <Paper elevation={1} className={classes.root}>
+        <Paper elevation={isMobile ? 0 : 1} square={isMobile} className={classes.root}>
           <Grid direction="column" container>
             <Typography component="h2" variant="h4" align="center" gutterBottom>
               Error
@@ -117,8 +124,8 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
     const userHasAMeeple = Boolean(game.players.find(player => player.userId === user.username));
 
     return (
-      <Paper elevation={1} className={classes.root}>
-        <Typography>Game created: {game.date}</Typography>
+      <Paper elevation={isMobile ? 0 : 1} square={isMobile} className={classes.root}>
+        <Typography className={classes.gameCreated}>Game created: {game.date}</Typography>
 
         <Grid container direction="column">
           <Grid item xs={12}>
@@ -208,7 +215,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                     className={classes.buttons}
                     color="secondary"
                     variant="outlined"
-                    disabled={updatingScores || disableButtons}
+                    disabled={updatingScores || disableButtons || !game.log.length}
                     onClick={this.undoMove}
                   >
                     Undo
@@ -236,7 +243,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
                 disabled={!game.started}
                 finished={game.finished}
                 items={game.players}
-                showRedeem={!userHasAMeeple}
+                showRedeem={userIsAPlayer && !userHasAMeeple}
                 itemSelected={selectedPlayer}
                 handleListItemClick={this.handleSelectPlayer}
                 onRedeem={this.redeemPlayer}
@@ -287,7 +294,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
 
   private startGame = async () => {
     const { data, startGame, showNotification } = this.props;
-    const gameId = data && data.game && data.game.id;
+    const gameId = get(data, 'game.id');
 
     if (!gameId) {
       showNotification('Ops! Something went wrong 🤷‍');
@@ -315,7 +322,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
 
   private joinGame = async () => {
     const { data, joinGame, showNotification } = this.props;
-    const gameId = data && data.game && data.game.id;
+    const gameId = get(data, 'game.id');
 
     if (!gameId) {
       showNotification('Ops! Something went wrong 🤷‍');
@@ -396,7 +403,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
   private handleHideUpdateScore = async (newScore: number) => {
     const { data, updateGame, showNotification } = this.props;
     const { selectedPlayer } = this.state;
-    const game = data && data.game;
+    const game = get(data, 'game');
 
     if (!selectedPlayer || !game || !newScore) {
       this.setState({
@@ -431,7 +438,9 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
 
   private handleSelectPlayer = (playerSelected: Player) => () => {
     const { data } = this.props;
-    if (!(data && data.game)) {
+    const game = get(data, 'game');
+
+    if (!game) {
       return;
     }
 
@@ -442,12 +451,11 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
 
   private redeemPlayer = (playerSelected: Player) => async () => {
     const { showNotification, redeemPlayer, data } = this.props;
+    const game = get(data, 'game');
 
-    if (!(data && data.game)) {
+    if (!game) {
       return;
     }
-
-    const game = data && data.game;
 
     try {
       await redeemPlayer({

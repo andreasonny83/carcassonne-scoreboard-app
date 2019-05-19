@@ -12,6 +12,8 @@ import {
   OutlinedInput,
   CircularProgress,
 } from '@material-ui/core';
+import { isWidthUp } from '@material-ui/core/withWidth';
+import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 
 import { ProfileStylesProps } from './ProfileWithStyles';
 import { Twemoji } from '../twemoji';
@@ -20,6 +22,7 @@ import { formatErrorAndLog } from '../../utils/formatErrors';
 
 type ProfileProps = ProfileStylesProps &
   ChildPropsData & {
+    width: Breakpoint;
     avatarHash?: string;
     updateUser(data: any): any;
     updateUserData(data: any): any;
@@ -56,13 +59,19 @@ export class Profile extends PureComponent<ProfileProps, ProfileState> {
   }
 
   public render(): JSX.Element {
-    const { classes, data } = this.props;
+    const { classes, width, data } = this.props;
     const { userName, avatarHash, busy } = this.state;
     const { loading, error } = data;
+    const isMobile = !isWidthUp('sm', width);
 
     if (loading) {
       return (
-        <Paper className="paper" style={{ padding: '4em' }}>
+        <Paper
+          elevation={isMobile ? 0 : 1}
+          square={isMobile}
+          className="paper"
+          style={{ padding: '4em' }}
+        >
           <Grid direction="column" alignItems="center" container>
             <CircularProgress style={{ marginBottom: '2em' }} />
             <Typography>Preparing profile screen...</Typography>
@@ -79,7 +88,7 @@ export class Profile extends PureComponent<ProfileProps, ProfileState> {
       );
 
       return (
-        <Paper elevation={1} className={classes.root}>
+        <Paper elevation={isMobile ? 0 : 1} square={isMobile} className={classes.root}>
           <Grid direction="column" container>
             <Typography component="h2" variant="h4" align="center" gutterBottom>
               Error
@@ -93,7 +102,7 @@ export class Profile extends PureComponent<ProfileProps, ProfileState> {
     }
 
     return (
-      <Paper elevation={1} className={classes.root}>
+      <Paper elevation={isMobile ? 0 : 1} square={isMobile} className={classes.root}>
         <Typography
           component="h2"
           variant="h5"

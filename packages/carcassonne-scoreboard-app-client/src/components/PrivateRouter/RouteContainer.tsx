@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { RouteContainerPropsData } from './RouteContainer.container';
 import { Grid, CircularProgress, Paper, Typography } from '@material-ui/core';
+import { isWidthUp } from '@material-ui/core/withWidth';
+import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
 
 type RouteContainerProps = RouteContainerPropsData & {
+  width: Breakpoint;
   target: any;
   user: any;
   props: any;
@@ -21,11 +24,17 @@ export class RouteContainer extends Component<RouteContainerProps> {
   }
 
   public render(): JSX.Element {
-    const { target: Target, props, data } = this.props;
+    const { target: Target, props, width, data } = this.props;
+    const isMobile = !isWidthUp('sm', width);
 
     if (data.loading) {
       return (
-        <Paper className="paper" style={{ padding: '4em' }}>
+        <Paper
+          elevation={isMobile ? 0 : 1}
+          square={isMobile}
+          className="paper"
+          style={{ padding: '4em' }}
+        >
           <Grid direction="column" alignItems="center" container>
             <CircularProgress style={{ marginBottom: '2em' }} />
             <Typography>Fetching user information...</Typography>

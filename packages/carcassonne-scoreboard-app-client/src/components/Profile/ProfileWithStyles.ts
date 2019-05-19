@@ -1,11 +1,15 @@
 import { withStyles, WithStyles, Theme } from '@material-ui/core';
+import withWidth from '@material-ui/core/withWidth';
 
 import { Profile } from './Profile';
 
-const styles = ({ spacing, palette }: Theme) => ({
+const styles = ({ spacing, palette, breakpoints }: Theme) => ({
   root: {
     padding: spacing(2),
-    marginBottom: spacing(2),
+    marginBottom: 0,
+    [breakpoints.up('sm')]: {
+      marginBottom: spacing(2),
+    },
   },
   title: {
     marginBottom: spacing(4),
@@ -30,7 +34,7 @@ const styles = ({ spacing, palette }: Theme) => ({
 
     '& svg': {
       filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.3))',
-    }
+    },
   },
   action: {
     marginTop: spacing(2),
@@ -42,4 +46,4 @@ const styles = ({ spacing, palette }: Theme) => ({
 
 export type ProfileStylesProps = WithStyles<typeof styles>;
 
-export const ProfileWithStyles = withStyles(styles)(Profile);
+export const ProfileWithStyles = withStyles(styles)(withWidth()(Profile));

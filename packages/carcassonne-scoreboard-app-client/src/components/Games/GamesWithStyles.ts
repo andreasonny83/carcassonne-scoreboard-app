@@ -1,10 +1,15 @@
 import { withStyles, WithStyles, Theme } from '@material-ui/core';
+import withWidth from '@material-ui/core/withWidth';
+
 import { Games } from './Games';
 
-const styles = ({ spacing, palette }: Theme) => ({
+const styles = ({ spacing, palette, breakpoints }: Theme) => ({
   root: {
     padding: spacing(2),
-    marginBottom: spacing(2),
+    marginBottom: 0,
+    [breakpoints.up('sm')]: {
+      marginBottom: spacing(2),
+    },
   },
   title: {
     marginBottom: spacing(4),
@@ -28,4 +33,4 @@ const styles = ({ spacing, palette }: Theme) => ({
 
 export type GamesStylesProps = WithStyles<typeof styles>;
 
-export const GamesWithStyles = withStyles(styles)(Games);
+export const GamesWithStyles = withStyles(styles)(withWidth()(Games));
