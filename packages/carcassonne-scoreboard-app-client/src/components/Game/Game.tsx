@@ -233,6 +233,7 @@ export class GameComponent extends PureComponent<GameComponentProps, GameState> 
               disabled={!game.started}
               finished={game.finished}
               items={game.players}
+              user={user}
               showRedeem={userIsAPlayer && !userHasAMeeple}
               itemSelected={selectedPlayer}
               handleListItemClick={this.handleSelectPlayer}

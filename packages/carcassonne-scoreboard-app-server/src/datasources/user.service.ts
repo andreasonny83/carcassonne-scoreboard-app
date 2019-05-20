@@ -155,7 +155,10 @@ export class UserService extends DataSource {
     };
   }
 
-  private async endUserGame(userId: string = required('User Id'), game: Game = required('Game')) {
+  private async endUserGame(
+    userId: string = required('User Id'),
+    game: Game = required('Game'),
+  ) {
     const user = await this.getUser(userId);
 
     if (!user) {

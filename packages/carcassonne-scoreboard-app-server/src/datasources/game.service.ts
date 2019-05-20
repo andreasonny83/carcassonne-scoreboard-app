@@ -69,6 +69,10 @@ export class GameService extends DataSource {
   public async getGames(): Promise<number> {
     const params: AWS.DynamoDB.DocumentClient.ScanInput = {
       TableName: AWS_CONFIG.gamesTableName,
+      FilterExpression: 'finished = :finished',
+      ExpressionAttributeValues: {
+        ':finished': true,
+      },
       Select: 'COUNT',
     };
 

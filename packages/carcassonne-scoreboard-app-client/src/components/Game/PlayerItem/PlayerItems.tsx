@@ -4,16 +4,18 @@ import { v1 } from 'uuid';
 
 import { Player } from '..';
 import { PlayerItemWithStyles as PlayerItem } from './PlayerItemWithStyles';
+import { UserState } from '../../../reducers/user';
 
 interface PlayerItemsProps {
   items: any[];
+  user: UserState;
+  finished: boolean;
   itemSelected?: Player;
   showRedeem?: boolean;
   disabled?: boolean;
-  finished?: boolean;
   handleListItemClick?(player: Player): (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   onRedeem?(player: Player): (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
-};
+}
 
 export class PlayerItems extends PureComponent<PlayerItemsProps> {
   public render() {
@@ -25,6 +27,7 @@ export class PlayerItems extends PureComponent<PlayerItemsProps> {
       finished,
       handleListItemClick,
       onRedeem,
+      user,
     } = this.props;
 
     return (
@@ -33,6 +36,8 @@ export class PlayerItems extends PureComponent<PlayerItemsProps> {
           <PlayerItem
             key={`PlayerItem-${v1()}`}
             player={item}
+            isMe={item.userId === user.username}
+            user={user}
             playerSelected={itemSelected}
             showRedeem={showRedeem}
             disabled={disabled}
